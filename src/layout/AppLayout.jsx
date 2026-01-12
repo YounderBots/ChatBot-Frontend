@@ -197,7 +197,7 @@ const AppLayout = () => {
           </div>
           :
           // Desktop Layout
-          <div className="app-shell overallBg gap-5">
+          <div className="app-shell  gap-5">
             <div className="sidebar-wrapper">
               <aside className={`sidebar-container  ${!isExpanded ? 'minimized' : ''}`}>
                 <BigScreenSideBar isExpanded={isExpanded} setIsExpanded={setIsExpanded} activeMenu={activeMenu} setActiveMenu={setActiveMenu} className='position-relative' />
