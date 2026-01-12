@@ -1,0 +1,71 @@
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  font-family: 'Urbanist', sans-serif;
+  box-sizing: border-box;
+}
+
+:root {
+  /* Brand blues */
+  --cvq-blue-900: #0b2a4a;
+  --cvq-blue-800: #0d3357;
+  --cvq-blue-700: #0f3d6e;
+  --cvq-blue-600: #165d9c;
+  --cvq-blue-500: #1e7bd9;
+  --cvq-blue-400: #4fa3ff;
+  --cvq-blue-100: #e7f1ff;
+
+  /* Neutrals */
+  --cvq-bg: #e0eeff;
+  --cvq-white: #ffffff;
+  --cvq-gray-50: #f8fafc;
+  --cvq-gray-100: #eef2f7;
+  --cvq-gray-200: #e2e8f0;
+  --cvq-gray-300: #cbd5e1;
+  --cvq-gray-400: #94a3b8;
+  --cvq-gray-600: #475569;
+  --cvq-gray-700: #334155;
+  --cvq-text: #0f172a;
+
+  /* Effects */
+  --cvq-shadow-sm: 0 1px 3px rgba(15, 30, 60, 0.06);
+  --cvq-shadow: 0 4px 16px rgba(15, 30, 60, 0.08);
+  --cvq-shadow-lg: 0 12px 32px rgba(15, 30, 60, 0.12);
+}
+
+.bgLogoLightColor {
+  background: linear-gradient(135deg, #e7f1ff 0%, #bde4fe 100%);
+}
+
+
+
+.cursorPointer {
+  cursor: pointer;
+  /* user-select: none; */
+}
+
+/* Smooth scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--cvq-gray-100);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--cvq-gray-300);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cvq-gray-400);
+}
