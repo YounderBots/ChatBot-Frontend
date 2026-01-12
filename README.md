@@ -29,7 +29,7 @@ const Dashboard = () => {
       {
         'tabTitle':'All Owners',
         'tabKey':'allOwners',
-        'tabContent':<>Your Component Here</>
+        'tabContent':<>Your Component Goes Here</>
       },
       {
         'tabTitle':'All Properties',
