@@ -1,0 +1,71 @@
+/* ================= KPI CARDS ================= */
+.dashboard-card {
+  min-height: 170px;
+}
+
+.dashboard-card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.dashboard-icon {
+  font-size: 2rem;
+}
+
+/* ================= Resolution Card ================= */
+.resolution-circle {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 6px solid #1e7bd9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin: 0 auto;
+}
+
+/* ================= Charts ================= */
+.trend-chart {
+  height: 320px;
+}
+
+/* ================= Intent Distribution ================= */
+.intent-chart {
+  height: 300px;
+}
+
+/* ================= Heatmap ================= */
+.heatmap-container {
+  height: 320px;
+}
+
+.heatmap-cell {
+  rx: 3;
+}
+
+/* ================= Recent Activity ================= */
+.activity-message {
+  max-width: 380px;
+}
+
+.confidence-bar {
+  width: 120px;
+}
+
+.activity-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #dee2e6;
+}
+
+/* ================= Modal ================= */
+.modal-message {
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+}
