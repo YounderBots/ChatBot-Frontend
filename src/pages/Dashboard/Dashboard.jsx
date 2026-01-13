@@ -448,13 +448,13 @@ const DashboardContent = () => {
 
         </Card.Body>
       </Card>
-
-      <Card className="rounded-4 shadow-sm mb-4">
+      {/* ======Old version of heat map======= */}
+      {/*<Card className="rounded-4 shadow-sm mb-4">
         <Card.Body>
           <h6 className="fw-semibold mb-3">Peak Hours Heatmap</h6>
           <div id="trend-chart" style={{ width: "100%", height: 300 }}>
-            {/* ================= Old Version of heat map ================= */}
-            {/* <ResponsiveContainer width="100%" height={320}>
+
+             <ResponsiveContainer width="100%" height={320}>
               <ScatterChart
                 margin={{ top: 20, right: 20, bottom: 40, left: 60 }}
               >
@@ -526,28 +526,38 @@ const DashboardContent = () => {
 
 
               </ScatterChart>
-            </ResponsiveContainer> */}
-            {/* ================= New Version of heat map (Swapped Axes) ================= */}
-            <ResponsiveContainer width="100%" height={320}>
+            </ResponsiveContainer> 
+
+            
+          </div>
+
+        </Card.Body>
+      </Card>*/}
+
+
+      {/* ======New version of heat map======= */}
+      <Card className="rounded-4 shadow-sm mb-4">
+        <Card.Body>
+          <h6 className="fw-semibold mb-3">Peak Hours Heatmap</h6>
+          <div
+            id="heatmap-container"           // Important! Match in the Scatter shape code
+            style={{ width: "100%", height: 600, border: "1px solid #dee2e6", borderRadius: "12px", padding: "10px" }}
+          >
+            <ResponsiveContainer width="100%" height="100%">
               <ScatterChart
-                margin={{ top: 40, right: 20, bottom: 20, left: 60 }} 
+                margin={{ top: 40, right: 20, bottom: 40, left: 60 }}
               >
-                {/* X Axis: Days on Top */}
                 <XAxis
                   type="number"
                   dataKey="dayIndex"
                   domain={[0.5, 7.5]}
                   ticks={[1, 2, 3, 4, 5, 6, 7]}
-                  tickFormatter={(v) =>
-                    ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][v - 1]
-                  }
+                  tickFormatter={(v) => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][v - 1]}
                   orientation="top"
                   axisLine={{ stroke: "#ced4da" }}
                   tickLine={false}
                   label={{ value: "Day", position: "top", offset: 20 }}
                 />
-
-                {/* Y Axis: Hours */}
                 <YAxis
                   type="number"
                   dataKey="hour"
@@ -557,7 +567,6 @@ const DashboardContent = () => {
                   tickLine={false}
                   label={{ value: "Hour", angle: -90, position: "insideLeft" }}
                 />
-
                 <Tooltip
                   cursor={{ strokeDasharray: "3 3" }}
                   formatter={(value, name, props) => [
@@ -565,41 +574,31 @@ const DashboardContent = () => {
                     `Day ${props.payload.day}, Hour ${props.payload.hour}`,
                   ]}
                 />
-
                 <Scatter
                   data={scatterData}
                   shape={({ cx, cy, payload }) => {
                     const count = payload.count;
 
-                    const size = 18; // square size
-                    const gap = 2;   // gap between squares
+                    // Fixed box size
+                    const boxWidth = 40; // width of each day/hour block
+                    const boxHeight = 20; // height of each hour block
 
-                    if (count === 0) {
-                      return (
-                        <rect
-                          x={cx - size / 2 + gap / 2}
-                          y={cy - size / 2 + gap / 2}
-                          width={size - gap}
-                          height={size - gap}
-                          rx={3}
-                          fill="#dee2e6"
-                        />
-                      );
-                    }
-
-                    const minOpacity = 0.35;
-                    const maxCount = 50;
-                    const opacity =
-                      minOpacity + Math.min(count / maxCount, 1) * (1 - minOpacity);
+                    // Optional: add spacing
+                    const spacingX = 5;
+                    const spacingY = 3;
 
                     return (
                       <rect
-                        x={cx - size / 2 + gap / 2}
-                        y={cy - size / 2 + gap / 2}
-                        width={size - gap}
-                        height={size - gap}
-                        rx={3}
-                        fill={`rgba(30,123,217, ${opacity})`}
+                        x={cx - boxWidth / 2 + spacingX / 2}
+                        y={cy - boxHeight / 2 + spacingY / 2}
+                        width={boxWidth - spacingX}
+                        height={boxHeight - spacingY}
+                        rx={5} // rounded corners
+                        fill={count === 0
+                          ? "#dee2e6"
+                          : `rgba(30,123,217, ${0.35 + Math.min(count / 50, 1) * 0.65})`}
+                        stroke="#fff"
+                        strokeWidth={1}
                       />
                     );
                   }}
@@ -607,9 +606,7 @@ const DashboardContent = () => {
 
               </ScatterChart>
             </ResponsiveContainer>
-
           </div>
-
         </Card.Body>
       </Card>
 
