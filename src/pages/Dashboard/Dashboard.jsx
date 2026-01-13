@@ -6,7 +6,7 @@ import { ComposedChart, ScatterChart, Scatter, LineChart, Line, XAxis, YAxis, To
 import "./Dashboard.css";
 import html2canvas from "html2canvas";
 import { MessageSquare, Users, Timer, CheckCircle } from "lucide-react";
-
+import { useNavigate } from 'react-router-dom';
 
 // ================= API PLACEHOLDERS =================
 // Later: replace body with real API calls
@@ -20,15 +20,28 @@ const apiGetKpiMetrics = async () => {
   };
 };
 
-const apiGetConversationTrends = async () => ([
-  { date: "Mon", total: 120, resolved: 90, escalated: 30 },
-  { date: "Tue", total: 180, resolved: 140, escalated: 40 },
-  { date: "Wed", total: 220, resolved: 170, escalated: 50 },
-  { date: "Thu", total: 200, resolved: 160, escalated: 40 },
-  { date: "Fri", total: 260, resolved: 210, escalated: 50 },
-  { date: "Sat", total: 190, resolved: 150, escalated: 40 },
-  { date: "Sun", total: 230, resolved: 180, escalated: 50 },
-]);
+const apiGetConversationTrends = async (range) => {
+  if (range === "30") {
+    return Array.from({ length: 30 }, (_, i) => ({
+      date: `Day ${i + 1}`,
+      total: Math.floor(Math.random() * 300) + 100,
+      resolved: Math.floor(Math.random() * 250) + 80,
+      escalated: Math.floor(Math.random() * 60) + 20,
+    }));
+  }
+
+  // Default: last 7 days
+  return [
+    { date: "Mon", total: 120, resolved: 90, escalated: 30 },
+    { date: "Tue", total: 180, resolved: 140, escalated: 40 },
+    { date: "Wed", total: 220, resolved: 170, escalated: 50 },
+    { date: "Thu", total: 200, resolved: 160, escalated: 40 },
+    { date: "Fri", total: 260, resolved: 210, escalated: 50 },
+    { date: "Sat", total: 190, resolved: 150, escalated: 40 },
+    { date: "Sun", total: 230, resolved: 180, escalated: 50 },
+  ];
+};
+
 
 const apiGetIntentDistribution = async () => ([
   { name: "Booking", value: 320 },
@@ -181,6 +194,9 @@ const DashboardContent = () => {
   const [recentConversations, setRecentConversations] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedConversation, setSelectedConversation] = useState(null);
+  const navigate = useNavigate();
+  const [trendRange, setTrendRange] = useState("7");
+
 
   const handleView = (conversation) => {
     setSelectedConversation(conversation);
@@ -199,7 +215,7 @@ const DashboardContent = () => {
       setAvgResponseTime(kpi.avgResponseTime);
       setResolutionRate(kpi.resolutionRate);
 
-      setTrendsData(await apiGetConversationTrends());
+      setTrendsData(await apiGetConversationTrends(trendRange));
       setIntentData(await apiGetIntentDistribution());
 
       const heatmap = await apiGetPeakHours();
@@ -215,7 +231,17 @@ const DashboardContent = () => {
     };
 
     loadDashboard();
+
+
   }, []);
+  useEffect(() => {
+    const loadTrends = async () => {
+      const data = await apiGetConversationTrends(trendRange);
+      setTrendsData(data);
+    };
+
+    loadTrends();
+  }, [trendRange]);
 
   useEffect(() => {
     // Update only Active Users every 5 seconds
@@ -251,7 +277,7 @@ const DashboardContent = () => {
           <div
             style={{ cursor: "pointer" }}
             onClick={() => {
-              window.location.href = "/conversations";
+              navigate("/conversations");
             }}
           >
             <DashboardCard
@@ -261,12 +287,17 @@ const DashboardContent = () => {
               icon={<MessageSquare size={26} />}
 
               extra={
-                <Form.Select size="sm">
+                <Form.Select
+                  size="sm"
+                  onClick={(e) => e.stopPropagation()}
+                  onChange={(e) => e.stopPropagation()}
+                >
                   <option>Today</option>
                   <option>Week</option>
                   <option>Month</option>
                 </Form.Select>
               }
+
             />
           </div>
         </div>
@@ -296,25 +327,39 @@ const DashboardContent = () => {
 
         {/* Card 4: Resolution Rate */}
         <div className="col-12 col-md-6 col-lg-3">
-          <Card
-            className="rounded-4 shadow-sm d-flex align-items-center justify-content-center"
-            style={{ minHeight: 170, cursor: "default" }}
-          >
-            <Card.Body className="text-center">
-              <div className="resolution-circle">
-                <CheckCircle size={22} />
-                <span>{resolutionRate}%</span>
+          <Card className="rounded-4 shadow-sm text-center resolution-card">
+            <Card.Body>
+
+              {/* Circular Progress */}
+              <div
+                className="resolution-progress"
+                style={{
+                  background: `conic-gradient(
+            #198754 ${resolutionRate * 3.6}deg,
+            #e9ecef 0deg
+          )`,
+                }}
+              >
+                <div className="resolution-inner">
+                  <CheckCircle size={20} className="text mb-1" />
+                  <div className="resolution-value">
+                    {resolutionRate}%
+                  </div>
+                </div>
               </div>
 
-              <div className="mt-2 text-muted small">
+              <div className="mt-3 fw-medium">
                 Resolution Rate
               </div>
+
               <div className="text-muted small">
                 Target: 90%
               </div>
+
             </Card.Body>
           </Card>
         </div>
+
       </div>
 
 
@@ -326,11 +371,16 @@ const DashboardContent = () => {
             <h6 className="fw-semibold">Conversation Trends</h6>
 
             <div className="d-flex gap-2">
-              <Form.Select size="sm">
-                <option>Last 7 days</option>
-                <option>Last 30 days</option>
-                <option>Custom</option>
+              <Form.Select
+                size="sm"
+                value={trendRange}
+                onChange={(e) => setTrendRange(e.target.value)}
+              >
+                <option value="7">Last 7 days</option>
+                <option value="30">Last 30 days</option>
+                <option value="custom">Custom</option>
               </Form.Select>
+
 
               <Button size="sm" variant="outline-primary" onClick={downloadChart}>
                 Download

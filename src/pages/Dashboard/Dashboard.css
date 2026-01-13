@@ -14,6 +14,36 @@
 }
 
 /* ================= Resolution Card ================= */
+.resolution-card {
+  min-height: 170px;
+}
+
+.resolution-progress {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.resolution-inner {
+  width: 80px;
+  height: 80px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.resolution-value {
+  font-size: 22px;
+  font-weight: 700;
+}
+
 .resolution-circle {
   width: 90px;
   height: 90px;
