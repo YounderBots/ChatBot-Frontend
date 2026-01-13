@@ -11,12 +11,13 @@ import IntentManager from './pages/IntentManager/IntentManager'
 import KnowledgeBaseManager from './pages/KnowledgeBaseManager/KnowledgeBaseManager'
 import Settings from './pages/Settings/Settings'
 import UserMgmt from './pages/UserManagement/UserMgmt'
-
+// import ChatbotWidget from './components/ChatBotWidgetBS'
 
 
 const App = () => {
   return (
     <Router>
+      {/* <ChatbotWidget /> */}
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route element={<AppLayout />}>
@@ -25,8 +26,8 @@ const App = () => {
           <Route path="/Conversations" element={<ConversationManager />} />
           <Route path="/Intents" element={<IntentManager />} />
           <Route path="/Knowledge-Base" element={<KnowledgeBaseManager />} />
-          <Route path="/Settings" element={<Settings />} />
           <Route path="/User-Management" element={<UserMgmt />} />
+          <Route path="/Settings" element={<Settings />} />
         </Route>
       </Routes>
     </Router>
