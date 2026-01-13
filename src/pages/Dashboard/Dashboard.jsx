@@ -5,6 +5,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { ComposedChart, ScatterChart, Scatter, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Area, PieChart, Pie, Legend, Cell } from "recharts";
 import "./Dashboard.css";
 import html2canvas from "html2canvas";
+import { MessageSquare, Users, Timer, CheckCircle } from "lucide-react";
+
 
 // ================= API PLACEHOLDERS =================
 // Later: replace body with real API calls
@@ -124,15 +126,20 @@ const ResolutionCard = ({ value }) => (
 );
 
 const downloadChart = async () => {
-  const chart = document.getElementById("trend-chart");
+  const chart = document.getElementById("conversation-trends-chart");
   if (!chart) return;
 
-  const canvas = await html2canvas(chart);
+  const canvas = await html2canvas(chart, {
+    backgroundColor: "#ffffff", // ensures white background
+    scale: 2, // higher quality
+  });
+
   const link = document.createElement("a");
   link.download = "conversation-trends.png";
   link.href = canvas.toDataURL("image/png");
   link.click();
 };
+
 const INTENT_COLORS = [
   "#0d6efd", // blue
   "#198754", // green
@@ -199,7 +206,7 @@ const DashboardContent = () => {
       const scatter = [];
       heatmap.forEach(d => {
         d.hours.forEach((count, hour) => {
-          scatter.push({ day: d.day, dayIndex: d.dayIndex, hour, count });
+          scatter.push({ day: d.day, dayIndex: d.dayIndex + 1, hour: hour + 1, count });
         });
       });
       setScatterData(scatter);
@@ -208,23 +215,23 @@ const DashboardContent = () => {
     };
 
     loadDashboard();
-}, []);
+  }, []);
 
   useEffect(() => {
-  // Update only Active Users every 5 seconds
-  let isMounted = true;
-  const fetchActiveUsers = async () => {
-    const kpi = await apiGetKpiMetrics();
-    if (isMounted) setActiveUsers(kpi.activeUsers);
-  };
+    // Update only Active Users every 5 seconds
+    let isMounted = true;
+    const fetchActiveUsers = async () => {
+      const kpi = await apiGetKpiMetrics();
+      if (isMounted) setActiveUsers(kpi.activeUsers);
+    };
 
-  const interval = setInterval(fetchActiveUsers, 5000);
+    const interval = setInterval(fetchActiveUsers, 5000);
 
-  return () => {
-    isMounted = false;
-    clearInterval(interval);
-  };
-}, []);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   const getResponseColor = (time) => {
     if (time < 1) return 'success';
@@ -251,7 +258,8 @@ const DashboardContent = () => {
               title="Total Conversations"
               value={totalConversations}
               subtitle="↑ 12% vs yesterday"
-              icon="💬"
+              icon={<MessageSquare size={26} />}
+
               extra={
                 <Form.Select size="sm">
                   <option>Today</option>
@@ -269,7 +277,8 @@ const DashboardContent = () => {
             title="Active Users"
             value={activeUsers}
             subtitle="Right now"
-            icon="👥"
+            icon={<Users size={26} />}
+
           />
         </div>
 
@@ -278,7 +287,8 @@ const DashboardContent = () => {
           <DashboardCard
             title="Avg Response Time"
             value={`${avgResponseTime}s`}
-            icon="⏱️"
+            icon={<Timer size={26} />}
+
             progress={Math.min(avgResponseTime * 20, 100)}
             progressVariant={getResponseColor(avgResponseTime)}
           />
@@ -292,7 +302,8 @@ const DashboardContent = () => {
           >
             <Card.Body className="text-center">
               <div className="resolution-circle">
-                ✓ {resolutionRate}%
+                <CheckCircle size={22} />
+                <span>{resolutionRate}%</span>
               </div>
 
               <div className="mt-2 text-muted small">
@@ -327,7 +338,8 @@ const DashboardContent = () => {
             </div>
           </div>
 
-          <div id="trend-chart" className='trend-chart'>
+          <div id="conversation-trends-chart" className="trend-chart">
+
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={trendsData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -398,19 +410,20 @@ const DashboardContent = () => {
                 <XAxis
                   type="number"
                   dataKey="hour"
-                  domain={[0, 23]}
-                  ticks={[0, 3, 6, 9, 12, 15, 18, 21, 23]}
-                  label={{ value: "Hour", position: "insideBottom", offset: -10 }}
+                  domain={[0.5, 24.5]}
+                  ticks={[1, 4, 8, 12, 16, 20, 24]}
+                  label={{ value: "Hour", position: "insideBottom", offset: -5 }}
                 />
 
                 <YAxis
                   type="number"
                   dataKey="dayIndex"
-                  domain={[0, 6]}
-                  ticks={[0, 1, 2, 3, 4, 5, 6]}
+                  domain={[0.5, 7.5]}
+                  ticks={[1, 2, 3, 4, 5, 6, 7]}
                   tickFormatter={(v) =>
-                    ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][v]
+                    ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][v - 1]
                   }
+                  tickMargin={10}
                   label={{ value: "Day", angle: -90, position: "insideLeft" }}
                 />
 
