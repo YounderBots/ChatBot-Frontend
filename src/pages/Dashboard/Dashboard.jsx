@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import NormalLayout from '../../components/NormalLayout';
-import { Button, Card, ProgressBar, Form, Modal } from 'react-bootstrap';
+import { Button, Card, ProgressBar, Form, Modal, Row, Col, Container } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { ComposedChart, ScatterChart, Scatter, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Area, PieChart, Pie, Legend, Cell } from "recharts";
 import "./Dashboard.css";
 import html2canvas from "html2canvas";
 import { MessageSquare, Users, Timer, CheckCircle } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
+import PeakHoursHeatmap from './components/PeakHoursHeatmap';
+import { heatmapData } from './components/heatmapData';
 
 // ================= API PLACEHOLDERS =================
 // Later: replace body with real API calls
@@ -118,25 +120,7 @@ const DashboardCard = ({
     </Card.Body>
   </Card>
 );
-const ResolutionCard = ({ value }) => (
-  <Card
-    className="rounded-4 shadow-sm d-flex align-items-center justify-content-center"
-    style={{ minHeight: 170 }}
-  >
-    <Card.Body className="text-center">
-      <div className="resolution-circle">
-        {value}%
-      </div>
 
-      <div className="mt-2 text-muted small">
-        Resolution Rate
-      </div>
-      <div className="text-muted small">
-        Target: 90%
-      </div>
-    </Card.Body>
-  </Card>
-);
 
 const downloadChart = async () => {
   const chart = document.getElementById("conversation-trends-chart");
@@ -270,7 +254,7 @@ const DashboardContent = () => {
 
 
       {/* ================= KPI CARDS ================= */}
-      <div className="row g-3 mb-4">
+      <div className="row g-3 mb-4 ">
 
         {/* Card 1: Total Conversations */}
         <div className="col-12 col-md-6 col-lg-3">
@@ -365,12 +349,12 @@ const DashboardContent = () => {
 
 
       {/* ================= CHART SECTION ================= */}
-      <Card className="rounded-4 shadow-sm mb-4">
-        <Card.Body>
+      <Card className="rounded-4 shadow-sm mb-4 ">
+        <Card.Body className='chart-body'>
           <div className="d-flex justify-content-between align-items-center mb-3">
             <h6 className="fw-semibold">Conversation Trends</h6>
 
-            <div className="d-flex gap-2">
+            <div className="d-flex  gap-2">
               <Form.Select
                 size="sm"
                 value={trendRange}
@@ -388,7 +372,7 @@ const DashboardContent = () => {
             </div>
           </div>
 
-          <div id="conversation-trends-chart" className="trend-chart">
+          <div id="conversation-trends-chart" className="trend-chart flex-grow-1">
 
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={trendsData}>
@@ -419,252 +403,10 @@ const DashboardContent = () => {
           </div>
         </Card.Body>
       </Card>
-      <Card className="rounded-4 shadow-sm mb-4">
-        <Card.Body>
-          <h6 className="fw-semibold mb-3">Intent Distribution</h6>
-          <div id="trend-chart" style={{ width: "100%", height: 300 }}>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={intentData}
-                  dataKey="value"
-                  nameKey="name"
-                  innerRadius={70}
-                  outerRadius={110}
-                  label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
-                >
-                  {intentData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={INTENT_COLORS[index % INTENT_COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-
-        </Card.Body>
-      </Card>
-      {/* ======Old version of heat map======= */}
-      {/*<Card className="rounded-4 shadow-sm mb-4">
-        <Card.Body>
-          <h6 className="fw-semibold mb-3">Peak Hours Heatmap</h6>
-          <div id="trend-chart" style={{ width: "100%", height: 300 }}>
-
-             <ResponsiveContainer width="100%" height={320}>
-              <ScatterChart
-                margin={{ top: 20, right: 20, bottom: 40, left: 60 }}
-              >
-                <XAxis
-                  type="number"
-                  dataKey="hour"
-                  domain={[0.5, 24.5]}
-                  ticks={[1, 4, 8, 12, 16, 20, 24]}
-                  label={{ value: "Hour", position: "insideBottom", offset: -5 }}
-                />
-
-                <YAxis
-                  type="number"
-                  dataKey="dayIndex"
-                  domain={[0.5, 7.5]}
-                  ticks={[1, 2, 3, 4, 5, 6, 7]}
-                  tickFormatter={(v) =>
-                    ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][v - 1]
-                  }
-                  tickMargin={10}
-                  label={{ value: "Day", angle: -90, position: "insideLeft" }}
-                />
-
-                <Tooltip
-                  cursor={{ strokeDasharray: "3 3" }}
-                  formatter={(value, name, props) => [
-                    `${props.payload.count} conversations`,
-                    `Hour ${props.payload.hour}`,
-                  ]}
-                />
-
-                <Scatter
-                  data={scatterData}
-                  shape={({ cx, cy, payload }) => {
-                    const count = payload.count;
-
-                    // 1️⃣ Handle no data
-                    if (count === 0) {
-                      return (
-                        <rect
-                          x={cx - 10}
-                          y={cy - 10}
-                          width={20}
-                          height={20}
-                          rx={3}
-                          fill="#dee2e6" // grey for empty
-                        />
-                      );
-                    }
-
-                    // 2️⃣ Enhanced color scaling
-                    const minOpacity = 0.35; // ensures 2–3 are visible
-                    const maxCount = 50;    // expected peak
-                    const opacity =
-                      minOpacity + Math.min(count / maxCount, 1) * (1 - minOpacity);
-
-                    return (
-                      <rect
-                        x={cx - 10}
-                        y={cy - 10}
-                        width={20}
-                        height={20}
-                        rx={3}
-                        fill={`rgba(30,123,217, ${opacity})`}
-                      />
-                    );
-                  }}
-                />
 
 
-              </ScatterChart>
-            </ResponsiveContainer> 
-
-            
-          </div>
-
-        </Card.Body>
-      </Card>*/}
 
 
-      {/* ======New version of heat map======= */}
-      <Card className="rounded-4 shadow-sm mb-4">
-        <Card.Body>
-          <h6 className="fw-semibold mb-3">Peak Hours Heatmap</h6>
-          <div
-            id="heatmap-container"           // Important! Match in the Scatter shape code
-            style={{ width: "100%", height: 600, border: "1px solid #dee2e6", borderRadius: "12px", padding: "10px" }}
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <ScatterChart
-                margin={{ top: 40, right: 20, bottom: 40, left: 60 }}
-              >
-                <XAxis
-                  type="number"
-                  dataKey="dayIndex"
-                  domain={[0.5, 7.5]}
-                  ticks={[1, 2, 3, 4, 5, 6, 7]}
-                  tickFormatter={(v) => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][v - 1]}
-                  orientation="top"
-                  axisLine={{ stroke: "#ced4da" }}
-                  tickLine={false}
-                  label={{ value: "Day", position: "top", offset: 20 }}
-                />
-                <YAxis
-                  type="number"
-                  dataKey="hour"
-                  domain={[0.5, 24.5]}
-                  ticks={[1, 4, 8, 12, 16, 20, 24]}
-                  axisLine={{ stroke: "#ced4da" }}
-                  tickLine={false}
-                  label={{ value: "Hour", angle: -90, position: "insideLeft" }}
-                />
-                <Tooltip
-                  cursor={{ strokeDasharray: "3 3" }}
-                  formatter={(value, name, props) => [
-                    `${props.payload.count} conversations`,
-                    `Day ${props.payload.day}, Hour ${props.payload.hour}`,
-                  ]}
-                />
-                <Scatter
-                  data={scatterData}
-                  shape={({ cx, cy, payload }) => {
-                    const count = payload.count;
-
-                    // Fixed box size
-                    const boxWidth = 40; // width of each day/hour block
-                    const boxHeight = 20; // height of each hour block
-
-                    // Optional: add spacing
-                    const spacingX = 5;
-                    const spacingY = 3;
-
-                    return (
-                      <rect
-                        x={cx - boxWidth / 2 + spacingX / 2}
-                        y={cy - boxHeight / 2 + spacingY / 2}
-                        width={boxWidth - spacingX}
-                        height={boxHeight - spacingY}
-                        rx={5} // rounded corners
-                        fill={count === 0
-                          ? "#dee2e6"
-                          : `rgba(30,123,217, ${0.35 + Math.min(count / 50, 1) * 0.65})`}
-                        stroke="#fff"
-                        strokeWidth={1}
-                      />
-                    );
-                  }}
-                />
-
-              </ScatterChart>
-            </ResponsiveContainer>
-          </div>
-        </Card.Body>
-      </Card>
-
-      <Card className="rounded-4 shadow-sm mb-4">
-        <Card.Body>
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <h6 className="fw-semibold mb-0">Recent Activity</h6>
-            <Button variant="link" size="sm" className="p-0">
-              View all
-            </Button>
-          </div>
-
-          {recentConversations.slice(0, 10).map((item) => (
-            <div
-              key={item.id}
-              className="d-flex align-items-center justify-content-between py-2 border-bottom"
-            >
-              {/* Left */}
-              <div className="flex-grow-1 me-3">
-                <div className="small text-muted">{item.timeAgo}</div>
-                <div className="fw-medium text-truncate activity-message">
-                  {item.message}
-                </div>
-
-                <div className="d-flex align-items-center gap-2 mt-1">
-                  <span
-                    className={`badge bg-${intentVariant(item.intent)}`}
-                  >
-                    {item.intent}
-                  </span>
-
-                  <div className="confidence-bar">
-                    <ProgressBar
-                      now={item.confidence}
-                      variant="success"
-                      style={{ height: 6 }}
-                    />
-                  </div>
-
-                  <small className="text-muted">
-                    {item.confidence}%
-                  </small>
-                </div>
-              </div>
-
-              {/* Right */}
-              <Button
-                size="sm"
-                variant="outline-primary"
-                onClick={() => handleView(item)}
-              >
-                View
-              </Button>
-
-            </div>
-          ))}
-        </Card.Body>
-      </Card>
       {selectedConversation && (
         <Modal show={showModal} onHide={handleClose} centered>
           <Modal.Header closeButton>
@@ -716,6 +458,132 @@ const DashboardContent = () => {
           </Modal.Footer>
         </Modal>
       )}
+
+
+      <Card className="rounded-4 shadow-sm mb-4">
+        <Card.Body className='chart-body'>
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <h6 className="fw-semibold mb-0">Recent Activity</h6>
+            <Button variant="link" size="sm" className="p-0">
+              View all
+            </Button>
+          </div>
+
+         {recentConversations.slice(0, 10).map((item) => (
+  <div key={item.id} className="activity-item">
+
+    {/* Left content */}
+    <div className="activity-left">
+      <div className="activity-meta">
+        <span className="activity-time">{item.timeAgo}</span>
+        <span className={`badge bg-${intentVariant(item.intent)}`}>
+          {item.intent}
+        </span>
+      </div>
+
+      <div className="activity-message">
+        {item.message}
+      </div>
+
+      <div className="activity-confidence">
+        <ProgressBar
+          now={item.confidence}
+          variant="success"
+          style={{ height: 6 }}
+        />
+        <span>{item.confidence}%</span>
+      </div>
+    </div>
+
+    {/* Right button */}
+    <Button
+      size="sm"
+      variant="outline-primary"
+      className="activity-view-btn"
+      onClick={() => handleView(item)}
+    >
+      View
+    </Button>
+
+  </div>
+))}
+
+        </Card.Body>
+      </Card>
+
+
+
+
+
+      <Row className="g-4 justify-content-between " >
+        {/* Intent Distribution */}
+        <Col>
+          <Card className="rounded-4 shadow-sm h-100 chart-card">
+            <Card.Body>
+              <h6 className="fw-semibold mb-3">Intent Distribution</h6>
+              <div className="intent-chart-container">
+
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={intentData}
+                      dataKey="value"
+                      nameKey="name"
+                      innerRadius={70}
+                      outerRadius={110}
+                      label={({ percent }) =>
+                        `${(percent * 100).toFixed(0)}%`
+                      }
+                    >
+                      {intentData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={
+                            INTENT_COLORS[
+                            index % INTENT_COLORS.length
+                            ]
+                          }
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+
+
+
+
+      <Row className="g-4 justify-content-between my-2" >
+      
+
+        {/* Peak Hours Heatmap */}
+        <Col >
+          <Card className="rounded-4 shadow-sm h-100 chart-card">
+            <Card.Body>
+              <PeakHoursHeatmap data={heatmapData} />
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+
+
+
+
+
+
+
+
+
+
+
     </div>
   );
 };
