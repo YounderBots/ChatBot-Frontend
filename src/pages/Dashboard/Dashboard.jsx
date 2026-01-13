@@ -453,7 +453,8 @@ const DashboardContent = () => {
         <Card.Body>
           <h6 className="fw-semibold mb-3">Peak Hours Heatmap</h6>
           <div id="trend-chart" style={{ width: "100%", height: 300 }}>
-            <ResponsiveContainer width="100%" height={320}>
+            {/* ================= Old Version of heat map ================= */}
+            {/* <ResponsiveContainer width="100%" height={320}>
               <ScatterChart
                 margin={{ top: 20, right: 20, bottom: 40, left: 60 }}
               >
@@ -487,19 +488,126 @@ const DashboardContent = () => {
 
                 <Scatter
                   data={scatterData}
-                  shape={({ cx, cy, payload }) => (
-                    <rect
-                      x={cx - 10}
-                      y={cy - 10}
-                      width={20}
-                      height={20}
-                      rx={3}
-                      fill={`rgba(30,123,217, ${payload.count / 50})`}
-                    />
-                  )}
+                  shape={({ cx, cy, payload }) => {
+                    const count = payload.count;
+
+                    // 1️⃣ Handle no data
+                    if (count === 0) {
+                      return (
+                        <rect
+                          x={cx - 10}
+                          y={cy - 10}
+                          width={20}
+                          height={20}
+                          rx={3}
+                          fill="#dee2e6" // grey for empty
+                        />
+                      );
+                    }
+
+                    // 2️⃣ Enhanced color scaling
+                    const minOpacity = 0.35; // ensures 2–3 are visible
+                    const maxCount = 50;    // expected peak
+                    const opacity =
+                      minOpacity + Math.min(count / maxCount, 1) * (1 - minOpacity);
+
+                    return (
+                      <rect
+                        x={cx - 10}
+                        y={cy - 10}
+                        width={20}
+                        height={20}
+                        rx={3}
+                        fill={`rgba(30,123,217, ${opacity})`}
+                      />
+                    );
+                  }}
                 />
+
+
+              </ScatterChart>
+            </ResponsiveContainer> */}
+            {/* ================= New Version of heat map (Swapped Axes) ================= */}
+            <ResponsiveContainer width="100%" height={320}>
+              <ScatterChart
+                margin={{ top: 40, right: 20, bottom: 20, left: 60 }} 
+              >
+                {/* X Axis: Days on Top */}
+                <XAxis
+                  type="number"
+                  dataKey="dayIndex"
+                  domain={[0.5, 7.5]}
+                  ticks={[1, 2, 3, 4, 5, 6, 7]}
+                  tickFormatter={(v) =>
+                    ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][v - 1]
+                  }
+                  orientation="top"
+                  axisLine={{ stroke: "#ced4da" }}
+                  tickLine={false}
+                  label={{ value: "Day", position: "top", offset: 20 }}
+                />
+
+                {/* Y Axis: Hours */}
+                <YAxis
+                  type="number"
+                  dataKey="hour"
+                  domain={[0.5, 24.5]}
+                  ticks={[1, 4, 8, 12, 16, 20, 24]}
+                  axisLine={{ stroke: "#ced4da" }}
+                  tickLine={false}
+                  label={{ value: "Hour", angle: -90, position: "insideLeft" }}
+                />
+
+                <Tooltip
+                  cursor={{ strokeDasharray: "3 3" }}
+                  formatter={(value, name, props) => [
+                    `${props.payload.count} conversations`,
+                    `Day ${props.payload.day}, Hour ${props.payload.hour}`,
+                  ]}
+                />
+
+                <Scatter
+                  data={scatterData}
+                  shape={({ cx, cy, payload }) => {
+                    const count = payload.count;
+
+                    const size = 18; // square size
+                    const gap = 2;   // gap between squares
+
+                    if (count === 0) {
+                      return (
+                        <rect
+                          x={cx - size / 2 + gap / 2}
+                          y={cy - size / 2 + gap / 2}
+                          width={size - gap}
+                          height={size - gap}
+                          rx={3}
+                          fill="#dee2e6"
+                        />
+                      );
+                    }
+
+                    const minOpacity = 0.35;
+                    const maxCount = 50;
+                    const opacity =
+                      minOpacity + Math.min(count / maxCount, 1) * (1 - minOpacity);
+
+                    return (
+                      <rect
+                        x={cx - size / 2 + gap / 2}
+                        y={cy - size / 2 + gap / 2}
+                        width={size - gap}
+                        height={size - gap}
+                        rx={3}
+                        fill={`rgba(30,123,217, ${opacity})`}
+                      />
+                    );
+                  }}
+                />
+
               </ScatterChart>
             </ResponsiveContainer>
+
           </div>
 
         </Card.Body>
