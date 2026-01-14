@@ -1,0 +1,156 @@
+.bg-cvq-bg {
+    background-color: var(--cvq-bg) !important;
+}
+
+.bg-cvq-white {
+    background-color: var(--cvq-white) !important;
+}
+
+.text-cvq-blue-900 {
+    color: var(--cvq-blue-900) !important;
+}
+
+.text-cvq-text {
+    color: var(--cvq-text) !important;
+}
+
+.text-cvq-gray-600 {
+    color: var(--cvq-gray-600) !important;
+}
+
+.text-cvq-gray-400 {
+    color: var(--cvq-gray-400) !important;
+}
+
+/* Button Overrides */
+.btn-primary {
+    background-color: var(--cvq-blue-600);
+    border-color: var(--cvq-blue-600);
+    color: var(--cvq-white);
+    box-shadow: var(--cvq-shadow);
+    font-weight: 600;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background-color: var(--cvq-blue-700) !important;
+    border-color: var(--cvq-blue-700) !important;
+    box-shadow: var(--cvq-shadow);
+}
+
+.btn-secondary {
+    background-color: var(--cvq-white);
+    border-color: var(--cvq-gray-200);
+    color: var(--cvq-gray-700);
+    font-weight: 600;
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus {
+    background-color: var(--cvq-gray-50) !important;
+    border-color: var(--cvq-gray-300) !important;
+    color: var(--cvq-gray-700) !important;
+}
+
+.btn-danger {
+    background-color: #fee2e2;
+    border-color: #fee2e2;
+    color: #ef4444;
+    font-weight: 600;
+}
+
+.btn-danger:hover {
+    background-color: #fecaca !important;
+    border-color: #fecaca !important;
+    color: #ef4444 !important;
+}
+
+/* Form Controls */
+.form-control {
+    border-color: var(--cvq-gray-200);
+    color: var(--cvq-text);
+}
+
+.form-control:focus {
+    border-color: var(--cvq-blue-500);
+    box-shadow: 0 0 0 3px var(--cvq-blue-100);
+}
+
+.form-select {
+    border-color: var(--cvq-gray-200);
+    color: var(--cvq-text);
+}
+
+.form-select:focus {
+    border-color: var(--cvq-blue-500);
+    box-shadow: 0 0 0 3px var(--cvq-blue-100);
+}
+
+/* Shadows */
+.shadow-sm {
+    box-shadow: var(--cvq-shadow-sm) !important;
+}
+
+.shadow {
+    box-shadow: var(--cvq-shadow) !important;
+}
+
+.shadow-lg {
+    box-shadow: var(--cvq-shadow-lg) !important;
+}
+
+.table th {
+    background-color: var(--cvq-gray-50) !important;
+    color: var(--cvq-gray-600) !important;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: none !important;
+    padding: 16px !important;
+}
+
+.table td {
+    border-bottom: 1px solid var(--cvq-gray-100) !important;
+    color: var(--cvq-text);
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    padding: 16px !important;
+    vertical-align: middle;
+    
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--cvq-blue-100) !important;
+    --bs-table-accent-bg: var(--cvq-blue-100) !important;
+}
+
+.badge-active {
+    background-color: #dcfce7 !important;
+    color: #166534 !important;
+}
+
+.badge-inactive {
+    background-color: #f1f5f9 !important;
+    color: #64748b !important;
+}
+
+.badge-category {
+    background-color: var(--cvq-blue-100) !important;
+    color: var(--cvq-blue-700) !important;
+}
+
+.rounded-16 {
+    border-radius: 16px !important;
+}
+
+/* Custom transitions previously in IntentGrid.css */
+.transition-hover {
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.transition-hover:hover {
+    transform: translateY(-4px);
+    border-color: var(--cvq-blue-500) !important;
+}

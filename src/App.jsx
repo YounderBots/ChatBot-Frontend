@@ -2,6 +2,7 @@ import React from 'react'
 import AppLayout from './layout/AppLayout'
 import './App.css'
 
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Login from './BasePages/Login'
 import Dashboard from './pages/Dashboard/Dashboard'
