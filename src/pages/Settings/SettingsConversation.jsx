@@ -275,7 +275,7 @@ const removeKeyword = (index) => {
                     <Col md={2}>
                       <Button
                         size="sm"
-                        variant="outline-danger"
+                        variant="danger"
                         onClick={() => removeKeyword(index)}
                       >
                         Remove

@@ -308,6 +308,7 @@ const copyToAllDays = (sourceIndex) => {
         <h6 className="text-primary mb-2">Outside Business Hours</h6>
 
         <Form.Check
+          className="mb-2"
           type="radio"
           label="Show Offline Message"
           name="outside"
@@ -317,6 +318,7 @@ const copyToAllDays = (sourceIndex) => {
           }
         />
         <Form.Check
+          className="mb-2"
           type="radio"
           label="Continue with Bot"
           name="outside"
@@ -326,6 +328,7 @@ const copyToAllDays = (sourceIndex) => {
           }
         />
         <Form.Check
+          className="mb-2"
           type="radio"
           label="Show Contact Form"
           name="outside"

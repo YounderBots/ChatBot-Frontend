@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Card, Row, Col, Form, Button, Table,Modal } from "react-bootstrap";
 import Select from "react-select";
+import {FaEdit,FaTrash} from "react-icons/fa";
 
 const SettingsIntegrations = () => {
   const [showApiKey, setShowApiKey] = useState(false);
@@ -175,7 +176,7 @@ const triggerWebhook = (index) => {
           <Col md={6} className="d-flex align-items-end gap-2">
             <Button
               size="sm"
-              variant="outline-primary"
+              variant="primary"
               onClick={() => setShowApiKey(!showApiKey)}
             >
               {showApiKey ? "Hide" : "Show"}
@@ -183,7 +184,7 @@ const triggerWebhook = (index) => {
 
             <Button
               size="sm"
-              variant="outline-secondary"
+              variant="primary"
               onClick={() => {
                 navigator.clipboard.writeText(settings.apiKey);
                 alert("API Key copied");
@@ -194,7 +195,7 @@ const triggerWebhook = (index) => {
 
             <Button
               size="sm"
-              variant="outline-danger"
+              variant="danger"
               onClick={regenerateApiKey}
             >
               Regenerate
@@ -270,22 +271,22 @@ const triggerWebhook = (index) => {
                 <td>
                  <Button
                     size="sm"
-                    variant="outline-primary"
+                    variant="primary"
                     className="me-2"
                     onClick={() => openEditModal(index)}
                  >
-                    Edit
+                    <FaEdit />
                  </Button>
                   <Button
                     size="sm"
-                    variant="outline-danger"
+                    variant="danger"
                     onClick={() => {
                       const updated = [...settings.webhooks];
                       updated.splice(index, 1);
                       setSettings({ ...settings, webhooks: updated });
                     }}
                   >
-                    Remove
+                    <FaTrash/>
                   </Button>
                 </td>
               </tr>
@@ -426,14 +427,13 @@ const triggerWebhook = (index) => {
           onChange={(e) =>
             setSmtp({ ...smtp, fromEmail: e.target.value })
           }
-          placeholder="no-reply@yourdomain.com"
         />
       </Col>
     </Row>
 
     <Button
       size="sm"
-      variant="outline-primary"
+      variant="primary"
       onClick={() => alert("SMTP connection successful")}
     >
       Test Connection
@@ -477,7 +477,7 @@ const triggerWebhook = (index) => {
         <Col md={6} className="d-flex align-items-center gap-2">
           <Button
             size="sm"
-            variant="outline-primary"
+            variant="primary"
           >
             Sync settings
           </Button>

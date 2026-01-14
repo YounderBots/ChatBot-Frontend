@@ -2,22 +2,33 @@ import React, { useState } from "react";
 import { Card, Row, Col, Form, Button } from "react-bootstrap";
 
 const SettingsAppearance = () => {
-  const [settings, setSettings] = useState({
-    primaryColor: "#0d6efd",
-    headerColor: "#0d6efd",
-    secondaryColor: "#f1f3f5",
-    fontFamily: "Sans-serif",
+ 
+  const defaultSettings = {
+  primaryColor: "#0d6efd",
+  headerColor: "#0d6efd",
+  secondaryColor: "#f1f3f5",
+  fontFamily: "Sans-serif",
 
-    widgetPosition: "bottom-right",
-    widgetSize: "medium",
-    chatBubbleText: "Chat with us",
+  widgetPosition: "bottom-right",
+  widgetSize: "medium",
+  chatBubbleText: "Chat with us",
 
-    autoOpen: false,
-    autoOpenDelay: 5,
-    showOnMobile: true,
-    showOnScroll: false,
-    scrollPercent: 50,
-  });
+  autoOpen: false,
+  autoOpenDelay: 5,
+  showOnMobile: true,
+
+  greetingDelay: 0,
+
+  showOnScroll: false,
+  scrollPercent: 50,
+};
+const [settings, setSettings] = useState(defaultSettings);
+
+const handleReset = () => {
+  setSettings(defaultSettings);
+};
+
+
 
   return (
     <Card className="border-0">
@@ -97,6 +108,7 @@ const SettingsAppearance = () => {
           <Col md={6}>
             <Form.Label>Widget Position</Form.Label>
             <Form.Check
+              className="mb-3"
               type="radio"
               name="position"
               label="Bottom Right"
@@ -260,7 +272,7 @@ const SettingsAppearance = () => {
         </div>
 
         <div className="mt-3">
-          <Button size="sm" variant="outline-secondary">
+          <Button size="sm" variant="danger"  onClick={handleReset}>
             Reset to Default
           </Button>
         </div>

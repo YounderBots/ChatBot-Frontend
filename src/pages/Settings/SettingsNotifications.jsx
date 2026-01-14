@@ -103,36 +103,43 @@ const SettingsNotifications = () => {
             <Form.Label>Notification Events</Form.Label>
 
             <Form.Check
+              className="mb-3"
               label="New Conversation"
               checked={settings.emailEvents.newConversation}
               onChange={() => toggleEmailEvent("newConversation")}
             />
             <Form.Check
+              className="mb-3"
               label="Escalated Conversation"
               checked={settings.emailEvents.escalatedConversation}
               onChange={() => toggleEmailEvent("escalatedConversation")}
             />
             <Form.Check
+              className="mb-3"
               label="Low Confidence Warning"
               checked={settings.emailEvents.lowConfidence}
               onChange={() => toggleEmailEvent("lowConfidence")}
             />
             <Form.Check
+              className="mb-3"
               label="Failed Conversation"
               checked={settings.emailEvents.failedConversation}
               onChange={() => toggleEmailEvent("failedConversation")}
             />
             <Form.Check
+              className="mb-3"
               label="Negative Feedback"
               checked={settings.emailEvents.negativeFeedback}
               onChange={() => toggleEmailEvent("negativeFeedback")}
             />
             <Form.Check
+              className="mb-3"
               label="Daily Summary"
               checked={settings.emailEvents.dailySummary}
               onChange={() => toggleEmailEvent("dailySummary")}
             />
             <Form.Check
+              className="mb-3"
               label="Weekly Report"
               checked={settings.emailEvents.weeklyReport}
               onChange={() => toggleEmailEvent("weeklyReport")}
@@ -145,6 +152,7 @@ const SettingsNotifications = () => {
             <Form.Label>Frequency</Form.Label>
 
             <Form.Check
+              className="mb-2"
               type="radio"
               name="emailFrequency"
               label="Real-time"
@@ -154,6 +162,7 @@ const SettingsNotifications = () => {
               }
             />
             <Form.Check
+              className="mb-2"
               type="radio"
               name="emailFrequency"
               label="Hourly Digest"
@@ -192,42 +201,49 @@ const SettingsNotifications = () => {
             <Form.Label>Events</Form.Label>
 
             <Form.Check
+            className="mb-3"
             label="New Conversation"
             checked={settings.pushEvents.newConversation}
             onChange={() => togglePushEvent("newConversation")}
             />
 
             <Form.Check
+            className="mb-3"
             label="Escalated Conversation"
             checked={settings.pushEvents.escalatedConversation}
             onChange={() => togglePushEvent("escalatedConversation")}
             />
 
             <Form.Check
+            className="mb-3"
             label="Low Confidence Warning"
             checked={settings.pushEvents.lowConfidence}
             onChange={() => togglePushEvent("lowConfidence")}
             />
 
             <Form.Check
+            className="mb-3"
             label="Failed Conversation"
             checked={settings.pushEvents.failedConversation}
             onChange={() => togglePushEvent("failedConversation")}
             />
 
             <Form.Check
+            className="mb-3"
             label="Negative Feedback"
             checked={settings.pushEvents.negativeFeedback}
             onChange={() => togglePushEvent("negativeFeedback")}
             />
 
             <Form.Check
+            className="mb-3"
             label="Daily Summary"
             checked={settings.pushEvents.dailySummary}
             onChange={() => togglePushEvent("dailySummary")}
             />
 
             <Form.Check
+            className="mb-3"
             label="Weekly Report"
             checked={settings.pushEvents.weeklyReport}
             onChange={() => togglePushEvent("weeklyReport")}
@@ -265,7 +281,7 @@ const SettingsNotifications = () => {
 
             <Button
               size="sm"
-              variant="outline-primary"
+              variant="primary"
               className="mt-2"
               onClick={() => alert("Sound test")}
             >
