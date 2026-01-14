@@ -12,14 +12,21 @@
   "dependencies": {
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.8",
+<<<<<<< HEAD
     "bootstrap-icons": "^1.13.1",
+=======
+    "framer-motion": "^12.26.1",
+>>>>>>> c3e00436a9029976ba142af39404f4d7524cbfa8
     "html2canvas": "^1.4.1",
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-bootstrap": "^2.10.10",
+    "react-circular-progressbar": "^2.2.0",
     "react-dom": "^19.2.0",
+    "react-heatmap-grid": "^0.9.1",
     "react-router-dom": "^7.12.0",
-    "recharts": "^3.6.0"
+    "recharts": "^3.6.0",
+    "socket.io-client": "^4.8.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
