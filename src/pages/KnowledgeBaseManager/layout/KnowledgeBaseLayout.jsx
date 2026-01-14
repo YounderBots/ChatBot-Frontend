@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ArticlesPanel from "./ArticlesPanel";
+import ArticlesPanel from "../articles/ArticlesPanel";
+
 import "./kb-layout.css";
 
 const categories = [

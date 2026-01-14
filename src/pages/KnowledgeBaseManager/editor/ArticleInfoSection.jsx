@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 const MAX_TITLE = 200;
 const MAX_TAGS = 10;
 
-const slugify = (text) =>
+const slugify = (text = "") =>
   text
     .toLowerCase()
     .trim()
@@ -13,23 +13,27 @@ const slugify = (text) =>
 const ArticleInfoSection = ({
   form,
   setForm,
-  errors,
-  categories,
-  setCategories,
-  allTags,
+  errors = {},
+  categories = [],
+  setCategories = () => {},
+  allTags = [],
 }) => {
   const [tagInput, setTagInput] = useState("");
   const [showCatInput, setShowCatInput] = useState(false);
   const [newCategory, setNewCategory] = useState("");
 
-  /* Auto slug */
+  /* ---------------- AUTO SLUG ---------------- */
   useEffect(() => {
-    if (form.title && !form.slugTouched) {
-      setForm((p) => ({ ...p, slug: slugify(p.title) }));
+    if (form?.title && !form.slugTouched) {
+      setForm((prev) => ({
+        ...prev,
+        slug: slugify(prev.title),
+      }));
     }
-  }, [form.title]);
+  }, [form?.title, form?.slugTouched, setForm]);
 
-  /* Add tag */
+  /* ---------------- TAGS ---------------- */
+
   const addTag = (tag) => {
     if (
       !tag ||
@@ -38,28 +42,42 @@ const ArticleInfoSection = ({
     )
       return;
 
-    setForm((p) => ({ ...p, tags: [...p.tags, tag] }));
+    setForm((prev) => ({
+      ...prev,
+      tags: [...prev.tags, tag],
+    }));
     setTagInput("");
   };
 
-  /* Remove tag */
-  const removeTag = (tag) =>
-    setForm((p) => ({
-      ...p,
-      tags: p.tags.filter((t) => t !== tag),
+  const removeTag = (tag) => {
+    setForm((prev) => ({
+      ...prev,
+      tags: prev.tags.filter((t) => t !== tag),
     }));
+  };
 
-  /* Create category */
+  /* ---------------- CATEGORY ---------------- */
+
   const createCategory = () => {
     if (!newCategory.trim()) return;
-    setCategories((c) => [...c, newCategory]);
-    setForm((p) => ({ ...p, category: newCategory }));
+
+    if (!categories.includes(newCategory)) {
+      setCategories((prev) => [...prev, newCategory]);
+    }
+
+    setForm((prev) => ({
+      ...prev,
+      category: newCategory,
+    }));
+
     setNewCategory("");
     setShowCatInput(false);
   };
 
+  /* ---------------- RENDER ---------------- */
+
   return (
-    <section>
+    <section className="article-info-section">
       <h4>Article Info</h4>
 
       <div className="article-info-grid">
@@ -74,7 +92,9 @@ const ArticleInfoSection = ({
             }
           />
           <div className="field-meta">
-            <small>{form.title.length}/{MAX_TITLE}</small>
+            <small>
+              {form.title.length}/{MAX_TITLE}
+            </small>
             {errors.title && (
               <small className="error">{errors.title}</small>
             )}
@@ -95,7 +115,8 @@ const ArticleInfoSection = ({
             }
           />
           <small className="slug-preview">
-            Preview: yoursite.com/help/{form.slug || "your-slug"}
+            Preview: yoursite.com/help/
+            {form.slug || "your-slug"}
           </small>
           {errors.slug && (
             <small className="error">{errors.slug}</small>
@@ -114,7 +135,9 @@ const ArticleInfoSection = ({
           >
             <option value="">Select category</option>
             {categories.map((c) => (
-              <option key={c}>{c}</option>
+              <option key={c} value={c}>
+                {c}
+              </option>
             ))}
             <option value="__new__">+ Create new category</option>
           </select>
@@ -126,7 +149,16 @@ const ArticleInfoSection = ({
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}
               />
-              <button onClick={createCategory}>Add</button>
+              <button type="button" onClick={createCategory}>
+                Add
+              </button>
+              <button
+                type="button"
+                className="link-btn"
+                onClick={() => setShowCatInput(false)}
+              >
+                Cancel
+              </button>
             </div>
           )}
         </div>
@@ -137,7 +169,9 @@ const ArticleInfoSection = ({
             {form.tags.map((t) => (
               <span key={t} className="tag-chip">
                 {t}
-                <button onClick={() => removeTag(t)}>×</button>
+                <button type="button" onClick={() => removeTag(t)}>
+                  ×
+                </button>
               </span>
             ))}
 
@@ -159,9 +193,10 @@ const ArticleInfoSection = ({
               {allTags
                 .filter(
                   (t) =>
-                    t.includes(tagInput) &&
+                    t.toLowerCase().includes(tagInput.toLowerCase()) &&
                     !form.tags.includes(t)
                 )
+                .slice(0, 5)
                 .map((t) => (
                   <div key={t} onClick={() => addTag(t)}>
                     {t}

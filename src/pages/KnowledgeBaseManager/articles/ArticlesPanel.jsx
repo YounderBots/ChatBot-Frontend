@@ -1,83 +1,81 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { Edit, Copy, Trash2 } from "lucide-react";
+import NewArticleDialog from "../dialog/NewArticleDialog";
 
-const MOCK_ARTICLES = [
-  {
-    id: 1,
-    title: "Getting Started with API",
-    category: "Getting Started",
-    status: "Published",
-    views: 120,
-    helpful: 32,
-    updatedAt: "2026-01-10",
-    author: "Admin",
-  },
-  {
-    id: 2,
-    title: "Billing FAQ",
-    category: "Account & Billing",
-    status: "Draft",
-    views: 45,
-    helpful: 10,
-    updatedAt: "2026-01-08",
-    author: "Support",
-  },
-  {
-    id: 3,
-    title: "Password Reset Issues",
-    category: "Technical Support",
-    status: "Archived",
-    views: 300,
-    helpful: 85,
-    updatedAt: "2025-12-29",
-    author: "Admin",
-  },
-];
+/* ================= MOCK DATA ================= */
+const MOCK_ARTICLES = Array.from({ length: 18 }).map((_, i) => ({
+  id: i + 1,
+  title: `Sample Article ${i + 1}`,
+  category:
+    i % 3 === 0
+      ? "Getting Started"
+      : i % 3 === 1
+      ? "Account & Billing"
+      : "Technical Support",
+  status:
+    i % 3 === 0 ? "Published" : i % 3 === 1 ? "Draft" : "Archived",
+  views: Math.floor(Math.random() * 500),
+  helpful: Math.floor(Math.random() * 100),
+  updatedAt: `2026-01-${(i % 28) + 1}`,
+  author: i % 2 === 0 ? "Admin" : "Support",
+}));
 
-const ArticlesPanel = ({
-  activeCategory,
-  onNewArticle,
-  onEdit,
-}) => {
+/* ================= CONFIG ================= */
+const PAGE_SIZE = 5;
+
+const ArticlesPanel = ({ activeCategory = "All" }) => {
   const [articles, setArticles] = useState(MOCK_ARTICLES);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [sort, setSort] = useState("updated");
   const [selected, setSelected] = useState([]);
 
-  let filtered = articles.filter((a) => {
-    const matchSearch =
-      a.title.toLowerCase().includes(search.toLowerCase());
+  /* dialog */
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingArticle, setEditingArticle] = useState(null);
 
-    const matchStatus =
-      statusFilter === "All" || a.status === statusFilter;
+  /* pagination */
+  const [page, setPage] = useState(1);
 
-    const matchCategory =
-      activeCategory === "All" ||
-      a.category === activeCategory;
+  /* ================= FILTER + SORT ================= */
+  const filtered = useMemo(() => {
+    let data = articles.filter((a) => {
+      const matchSearch = a.title
+        .toLowerCase()
+        .includes(search.toLowerCase());
 
-    return matchSearch && matchStatus && matchCategory;
-  });
+      const matchStatus =
+        statusFilter === "All" || a.status === statusFilter;
 
-  if (sort === "title") {
-    filtered.sort((a, b) => a.title.localeCompare(b.title));
-  }
-  if (sort === "updated") {
-    filtered.sort(
-      (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
-    );
-  }
-  if (sort === "views") {
-    filtered.sort((a, b) => b.views - a.views);
-  }
-  if (sort === "helpful") {
-    filtered.sort((a, b) => b.helpful - a.helpful);
-  }
+      const matchCategory =
+        activeCategory === "All" || a.category === activeCategory;
 
+      return matchSearch && matchStatus && matchCategory;
+    });
+
+    if (sort === "title")
+      data.sort((a, b) => a.title.localeCompare(b.title));
+    if (sort === "updated")
+      data.sort(
+        (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+      );
+    if (sort === "views") data.sort((a, b) => b.views - a.views);
+    if (sort === "usage") data.sort((a, b) => b.helpful - a.helpful);
+
+    return data;
+  }, [articles, search, statusFilter, sort, activeCategory]);
+
+  /* ================= PAGINATION ================= */
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const paginated = filtered.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE
+  );
+
+  /* ================= ACTIONS ================= */
   const toggleSelect = (id) => {
     setSelected((prev) =>
-      prev.includes(id)
-        ? prev.filter((x) => x !== id)
-        : [...prev, id]
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
   };
 
@@ -99,118 +97,183 @@ const ArticlesPanel = ({
     setArticles((prev) => prev.filter((a) => a.id !== id));
   };
 
+  /* ================= RENDER ================= */
   return (
-    <section className="articles-panel">
-      <div className="articles-header">
-        <input
-          placeholder="Search articles..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+    <>
+      <section className="articles-panel">
+        {/* HEADER */}
+        <div className="articles-header">
+          <input
+            placeholder="Search articles..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+          />
 
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-        >
-          <option>All</option>
-          <option>Published</option>
-          <option>Draft</option>
-          <option>Archived</option>
-        </select>
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(1);
+            }}
+          >
+            <option>All</option>
+            <option>Published</option>
+            <option>Draft</option>
+            <option>Archived</option>
+          </select>
 
-        <select
-          value={sort}
-          onChange={(e) => setSort(e.target.value)}
-        >
-          <option value="title">Title A-Z</option>
-          <option value="updated">Recently Updated</option>
-          <option value="views">Most Viewed</option>
-          <option value="helpful">Most Helpful</option>
-        </select>
+          <select
+            value={sort}
+            onChange={(e) => {
+              setSort(e.target.value);
+              setPage(1);
+            }}
+          >
+            <option value="updated">Recently Updated</option>
+            <option value="title">Title A–Z</option>
+            <option value="views">Most Viewed</option>
+            <option value="usage">Most Used</option>
+          </select>
 
-        <button className="btn primary" onClick={onNewArticle}>
-          New Article
-        </button>
-      </div>
+          <button
+            className="btn primary"
+            onClick={() => {
+              setEditingArticle(null);
+              setDialogOpen(true);
+            }}
+          >
+            New Article
+          </button>
+        </div>
 
-      <table className="articles-table">
-        <thead>
-          <tr>
-            <th>
-              <input type="checkbox" />
-            </th>
-            <th>Title</th>
-            <th>Category</th>
-            <th>Status</th>
-            <th>Views</th>
-            <th>👍 Helpful</th>
-            <th>Last Updated</th>
-            <th>Author</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {filtered.map((a) => (
-            <tr key={a.id}>
-              <td>
-                <input
-                  type="checkbox"
-                  checked={selected.includes(a.id)}
-                  onChange={() => toggleSelect(a.id)}
-                />
-              </td>
-
-              <td>
-                <button
-                  className="link-btn"
-                  onClick={() => onEdit(a)}
-                >
-                  {a.title}
-                </button>
-              </td>
-
-              <td>
-                <span className="category-badge">
-                  {a.category}
-                </span>
-              </td>
-
-              <td>
-                <span
-                  className={`status ${a.status.toLowerCase()}`}
-                >
-                  {a.status}
-                </span>
-              </td>
-
-              <td>{a.views}</td>
-              <td>{a.helpful}</td>
-              <td>{a.updatedAt}</td>
-              <td>{a.author}</td>
-
-              <td className="actions">
-                <button onClick={() => onEdit(a)}>Edit</button>
-                <button onClick={() => duplicateArticle(a)}>
-                  Duplicate
-                </button>
-                <button onClick={() => deleteArticle(a.id)}>
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-
-          {filtered.length === 0 && (
+        {/* TABLE */}
+        <table className="articles-table">
+          <thead>
             <tr>
-              <td colSpan={9} style={{ textAlign: "center" }}>
-                No articles found
-              </td>
+              <th>
+                <input type="checkbox" />
+              </th>
+              <th>Title</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>Views</th>
+              <th>Usage</th>
+              <th>Last Updated</th>
+              <th>Author</th>
+              <th>Actions</th>
             </tr>
-          )}
-        </tbody>
-      </table>
-    </section>
+          </thead>
+
+          <tbody>
+            {paginated.map((a) => (
+              <tr key={a.id}>
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={selected.includes(a.id)}
+                    onChange={() => toggleSelect(a.id)}
+                  />
+                </td>
+
+                <td>
+                  <button
+                    className="link-btn"
+                    onClick={() => {
+                      setEditingArticle(a);
+                      setDialogOpen(true);
+                    }}
+                  >
+                    {a.title}
+                  </button>
+                </td>
+
+                <td>
+                  <span className="category-badge">{a.category}</span>
+                </td>
+
+                <td>
+                  <span className={`status ${a.status.toLowerCase()}`}>
+                    {a.status}
+                  </span>
+                </td>
+
+                <td>{a.views}</td>
+                <td>{a.helpful}</td>
+                <td>{a.updatedAt}</td>
+                <td>{a.author}</td>
+
+                {/* ICON ACTIONS */}
+                <td className="actions">
+                  <button
+                    className="icon-btn"
+                    title="Edit"
+                    onClick={() => {
+                      setEditingArticle(a);
+                      setDialogOpen(true);
+                    }}
+                  >
+                    <Edit size={16} />
+                  </button>
+
+                  <button
+                    className="icon-btn"
+                    title="Duplicate"
+                    onClick={() => duplicateArticle(a)}
+                  >
+                    <Copy size={16} />
+                  </button>
+
+                  <button
+                    className="icon-btn danger"
+                    title="Delete"
+                    onClick={() => deleteArticle(a.id)}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+
+            {paginated.length === 0 && (
+              <tr>
+                <td colSpan={9} style={{ textAlign: "center" }}>
+                  No articles found
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+
+        {/* PAGINATION */}
+        {totalPages > 1 && (
+          <div className="pagination">
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <button
+                key={i}
+                className={page === i + 1 ? "active" : ""}
+                onClick={() => setPage(i + 1)}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* MODAL */}
+      {dialogOpen && (
+        <NewArticleDialog
+          article={editingArticle}
+          onClose={() => {
+            setDialogOpen(false);
+            setEditingArticle(null);
+          }}
+        />
+      )}
+    </>
   );
 };
 

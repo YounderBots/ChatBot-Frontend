@@ -1,40 +1,32 @@
 import { useState } from "react";
-
-import ArticlesHeader from "./articles/ArticlesHeader";
-import ArticlesTable from "./articles/ArticlesTable";
-import ArticleEditor from "./editor/ArticleEditor";
+import KnowledgeBaseLayout from "./layout/KnowledgeBaseLayout.jsx";
+import ArticlesPanel from "./articles/ArticlesPanel.jsx";
+import NewArticleDialog from "./dialog/NewArticleDialog.jsx";
 
 const KnowledgeBaseManager = () => {
-  const [category, setCategory] = useState("All Articles");
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("All");
-  const [sort, setSort] = useState("updated");
-
-  const [isEditing, setIsEditing] = useState(false);
+  const [openEditor, setOpenEditor] = useState(false);
+  const [editArticle, setEditArticle] = useState(null);
 
   return (
     <>
-      {isEditing ? (
-        <ArticleEditor onClose={() => setIsEditing(false)} />
-      ) : (
-        <>
-          <ArticlesHeader
-            search={search}
-            setSearch={setSearch}
-            status={status}
-            setStatus={setStatus}
-            sort={sort}
-            setSort={setSort}
-            onNewArticle={() => setIsEditing(true)}
-          />
+      <KnowledgeBaseLayout>
+        <ArticlesPanel
+          onNewArticle={() => {
+            setEditArticle(null);
+            setOpenEditor(true);
+          }}
+          onEdit={(article) => {
+            setEditArticle(article);
+            setOpenEditor(true);
+          }}
+        />
+      </KnowledgeBaseLayout>
 
-          <ArticlesTable
-            category={category}
-            status={status}
-            search={search}
-            sort={sort}
-          />
-        </>
+      {openEditor && (
+        <NewArticleDialog
+          article={editArticle}
+          onClose={() => setOpenEditor(false)}
+        />
       )}
     </>
   );
