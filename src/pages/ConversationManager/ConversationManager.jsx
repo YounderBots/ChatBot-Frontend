@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Row, Col, Form, Button, InputGroup } from "react-bootstrap";
 import { Search, X } from "lucide-react";
+import Select from "react-select";
 import TabComponent from "../../components/TabComponent";
 
 const ConversationManager = () => {
@@ -198,55 +199,38 @@ const ConversationManager = () => {
             <Form.Label className="mt-3 text-primary">Status</Form.Label>
 
             <Row className="mt-2">
-              {[" Resolved", " Pending", " Escalated", " Failed"].map((status) => (
-                <Col
-                  key={status}
-                  md={6}
 
-                  className="mb-2"
-                >
-                  <Form.Check
-                    type="checkbox"
-                    label={status}
-                    checked={statusFilter.includes(status)}
-                    onChange={() =>
-                      setStatusFilter((prev) =>
-                        prev.includes(status)
-                          ? prev.filter((s) => s !== status)
-                          : [...prev, status]
-                      )
-                    }
-                  />
-                </Col>
-              ))}
+              <Select
+                isMulti
+                options={[
+                  { value: 'Resolved', label: 'Resolved' },
+                  { value: 'Pending', label: 'Pending' },
+                  { value: 'Escalated', label: 'Escalated' },
+                  { value: 'Failed', label: 'Failed' },
+                ]}
+                value={statusFilter}
+                onChange={(selectedOptions) => setStatusFilter(selectedOptions)}
+              ></Select>
+
+
             </Row>
 
             <Row className="mt-2">
               <Form.Label className="mt-3 text-primary">Sentiment</Form.Label>
-              {[
-                { label: "All", value: "All" },
-                { label: "Positive 😊", value: "Positive" },
-                { label: "Neutral 😐", value: "Neutral" },
-                { label: "Negative ☹️", value: "Negative" },
-              ].map((item) => (
-
-                <Col
-                  key={item.value}
-                  md={6}
-
-                  className="mb-2"
-                >
-                  <Form.Check
-                    key={item.value}
-                    type="radio"
-                    name="sentiment"
-                    label={item.label}
-                    checked={sentiment === item.value}
-                    onChange={() => setSentiment(item.value)}
-                    style={{ accentColor: "#1e7bd9" }}
-                  />
-                </Col>
-              ))}
+              
+               
+              <Select
+              isMulti
+                options={[
+                  { value: "All", label: "All" },
+                { value: "Positive", label: "Positive" },
+                { value: "Neutral", label: "Neutral" },
+                { value: "Negative", label: "Negative" },
+                ]}
+              ></Select>
+                   
+               
+             
             </Row>
 
 
@@ -268,7 +252,7 @@ const ConversationManager = () => {
                       key={conv.id}
                       className={`d-flex flex-column flex-md-row align-items-start align-items-md-center p-2 mb-2 border rounded
           ${selectedConversation?.id === conv.id ? "bg-light" : ""} `}
-                      style={{ cursor: "pointer",overflowY: "auto" }}
+                      style={{ cursor: "pointer", overflowY: "auto" }}
                       onClick={() => setSelectedConversation(conv)}
                     >
 
