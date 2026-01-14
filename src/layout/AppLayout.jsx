@@ -1,13 +1,6 @@
 import { ChevronLeft, ChevronRight, ChevronRightIcon, ChevronsLeft, User } from 'lucide-react'
-<<<<<<< HEAD
-import favIconChatViq from './assets/favIconChatViq.png'
-import ChatViq from './assets/chatviq.png'
-import dpPlaceholder from './assets/dpPlaceholder.png'
-import { Outlet, useNavigate } from "react-router-dom";
-=======
 import { useEffect, useRef, useState } from 'react'
 import { Outlet, useNavigate } from "react-router-dom"
->>>>>>> f45e9a58537da8effc4470b7b20a3a3356e6a7c2
 import './AppLayout.css'
 import ChatViq from './assets/chatviq.png'
 import dpPlaceholder from './assets/dpPlaceholder.png'
