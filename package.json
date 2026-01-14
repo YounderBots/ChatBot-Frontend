@@ -12,11 +12,8 @@
   "dependencies": {
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.8",
-<<<<<<< HEAD
     "bootstrap-icons": "^1.13.1",
-=======
     "framer-motion": "^12.26.1",
->>>>>>> c3e00436a9029976ba142af39404f4d7524cbfa8
     "html2canvas": "^1.4.1",
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",

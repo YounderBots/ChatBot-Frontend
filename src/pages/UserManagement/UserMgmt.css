@@ -1,0 +1,66 @@
+/* Make header controls compact */
+.searchForm {
+  width: 180px;
+}
+
+.searchForm input {
+  height: 32px;
+  font-size: 13px;
+}
+
+/* Properly align search icon inside input */
+.searchIcon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--cvq-gray-400);
+}
+
+/* Shrink filter dropdown */
+.form-select-sm {
+  height: 32px;
+  font-size: 13px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+/* Shrink add user button */
+.primaryBtn {
+  height: 32px;
+  font-size: 13px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Section 2: Role & Permissions styling */
+.roleSelection {
+  display: flex;
+  flex-direction: column;
+}
+
+.permissionTree {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.permissionTree .card {
+  background-color: #f8f9fa; /* light gray for distinction */
+}
+
+.permissionTree .card strong {
+  font-size: 0.95rem;
+  color: var(--cvq-blue-900);
+}
+
+.permissionTree .form-check-label {
+  font-size: 0.85rem;
+  color: var(--cvq-text);
+}
+
+.permissionTree .form-check-input {
+  cursor: pointer;
+}
