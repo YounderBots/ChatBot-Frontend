@@ -1,176 +1,189 @@
-import { ChevronLeft, ChevronRight, ChevronRightIcon, ChevronsLeft, User } from 'lucide-react'
-<<<<<<< HEAD
-import favIconChatViq from './assets/favIconChatViq.png'
-import ChatViq from './assets/chatviq.png'
-import dpPlaceholder from './assets/dpPlaceholder.png'
+import { ChevronLeft, ChevronRight, ChevronRightIcon, ChevronsLeft, User } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-=======
-import { useEffect, useRef, useState } from 'react'
-import { Outlet, useNavigate } from "react-router-dom"
->>>>>>> f45e9a58537da8effc4470b7b20a3a3356e6a7c2
-import './AppLayout.css'
-import ChatViq from './assets/chatviq.png'
-import dpPlaceholder from './assets/dpPlaceholder.png'
-import favIconChatViq from './assets/favIconChatViq.png'
-import menuList from './menulist'
 
+import favIconChatViq from "./assets/favIconChatViq.png";
+import ChatViq from "./assets/chatviq.png";
+import dpPlaceholder from "./assets/dpPlaceholder.png";
 
+import menuList from "./menulist";
+import "./AppLayout.css";
 
-
-
-
+/* -------------------- Render Menu -------------------- */
 const RenderMenu = ({ isExpanded, isMobile, activeMenu, setActiveMenu }) => {
   const navigate = useNavigate();
+
   return (
-    <div className={`d-flex w-100 flex-column ${isMobile ? '' : 'h-75'} justify-content-around gap-2 py-2 ${(!isMobile && !isExpanded) ? 'align-items-center' : ''}`} >
-      {
-        menuList.map(menu => {
-          const Icon = menu.icon
-          return (
-            <div className={`d-flex align-items-center cursorPointer sidebar-item ${activeMenu === menu.name ? 'active' : ''}`} onClick={() => {
+    <div
+      className={`d-flex w-100 flex-column ${
+        isMobile ? "" : "h-75"
+      } justify-content-around gap-2 py-2 ${
+        !isMobile && !isExpanded ? "align-items-center" : ""
+      }`}
+    >
+      {menuList.map((menu) => {
+        const Icon = menu.icon;
+        return (
+          <div
+            key={menu.name}
+            className={`d-flex align-items-center cursorPointer sidebar-item ${
+              activeMenu === menu.name ? "active" : ""
+            }`}
+            onClick={() => {
               navigate(menu.path);
               setActiveMenu(menu.name);
-            }}>
-              <Icon size={24} />
-              {(isMobile || isExpanded) && <>
-                <div className='px-1'>{menu.name}</div>
-                <div className='ms-auto'> <ChevronRight /> </div>
-              </>}
-            </div>
-          )
-        })
-      }
+            }}
+          >
+            <Icon size={24} />
+            {(isMobile || isExpanded) && (
+              <>
+                <div className="px-1">{menu.name}</div>
+                <div className="ms-auto">
+                  <ChevronRight />
+                </div>
+              </>
+            )}
+          </div>
+        );
+      })}
     </div>
-  )
-}
+  );
+};
 
+/* -------------------- Top Bar -------------------- */
 const TopBar = ({ isMobile, toggleSidebar, activeMenu, setActiveMenu }) => {
-
-  const [dpImage, setDpImage] = useState();
+  const [dpImage, setDpImage] = useState(null);
   const navigate = useNavigate();
+
   useEffect(() => {
-    setDpImage(dpPlaceholder)
-  }, [])
+    setDpImage(dpPlaceholder);
+  }, []);
 
   return (
-    <div>
-
-      <nav className={`d-flex   justify-content-between ${isMobile ? 'bgLogoLightColor' : ''}`} >
-        {isMobile &&
-          <div className='d-flex'>
-            <div onClick={toggleSidebar}><ChevronsLeft /></div>
-          </div>
-        }
-        <div>{isMobile ? <img src={ChatViq} alt="ChatViq" className='topBarLogo' onClick={() => { navigate('/'); setActiveMenu('Dashboard') }} /> : <h3 className='activeMenuHeading'>{activeMenu}</h3>}</div>
-        <div className='userIcon'>{dpImage ? <img src={dpImage} alt="" /> : <User />}</div>
-      </nav>
-      {
-        isMobile && <div className='activeMenuHeading'>
-          {activeMenu}
+    <nav className={`d-flex justify-content-between ${isMobile ? "bgLogoLightColor" : ""}`}>
+      {isMobile && (
+        <div className="d-flex" onClick={toggleSidebar}>
+          <ChevronsLeft />
         </div>
-      }
+      )}
 
-    </div>
-  )
-}
+      <div>
+        {isMobile ? (
+          <img
+            src={ChatViq}
+            alt="ChatViq"
+            className="topBarLogo"
+            onClick={() => {
+              navigate("/");
+              setActiveMenu("Dashboard");
+            }}
+          />
+        ) : (
+          <h3 className="activeMenuHeading">{activeMenu}</h3>
+        )}
+      </div>
 
+      <div className="userIcon">
+        {dpImage ? <img src={dpImage} alt="User" /> : <User />}
+      </div>
+    </nav>
+  );
+};
+
+/* -------------------- Small Screen Sidebar -------------------- */
 const SmallScreenSideBar = ({ isMobile, setSideBarOpen, activeMenu, setActiveMenu }) => {
   const navigate = useNavigate();
+
   return (
-    <div className="offcanvas show offcanvas-start" tabIndex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+    <div className="offcanvas show offcanvas-start">
       <div className="offcanvas-header">
-        {/* <h5 className="offcanvas-title" id="offcanvasExampleLabel">Logo</h5> */}
-        <img src={ChatViq} alt="ChatViq" onClick={() => { navigate('/'); setActiveMenu('Dashboard') }} />
-        <button type="button" className="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close" onClick={() => { setSideBarOpen(false) }}></button>
+        <img
+          src={ChatViq}
+          alt="ChatViq"
+          onClick={() => {
+            navigate("/");
+            setActiveMenu("Dashboard");
+          }}
+        />
+        <button
+          type="button"
+          className="btn-close"
+          onClick={() => setSideBarOpen(false)}
+        />
       </div>
+
       <div className="offcanvas-body">
         <RenderMenu isMobile={isMobile} activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
       </div>
-      <div className='offcanvas-footer'>
-        SiebarFooter
-      </div>
+
+      <div className="offcanvas-footer">Sidebar Footer</div>
     </div>
-  )
-}
+  );
+};
 
+/* -------------------- Big Screen Sidebar -------------------- */
 const BigScreenSideBar = ({ isExpanded, setIsExpanded, activeMenu, setActiveMenu }) => {
-
   const sideBarRef = useRef(null);
-  const navigage = useNavigate();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const sidebar = sideBarRef.current;
     if (!sidebar) return;
-    sidebar.addEventListener("mouseenter", () => { setIsExpanded(true) })
 
+    const expand = () => setIsExpanded(true);
+    sidebar.addEventListener("mouseenter", expand);
 
-    return sidebar.removeEventListener("mouseenter", () => { setIsExpanded(true) })
-  }, [isExpanded])
-
-
-
-
-
+    return () => sidebar.removeEventListener("mouseenter", expand);
+  }, [setIsExpanded]);
 
   return (
-    <>
-
-      <div className='sidebar-containerActual d-flex h-100 justify-content-between flex-column' onClick={() => { setIsExpanded(true) }} >
-        <div className={`sidebarHeader ${!isExpanded ? 'sidebar-collapsed' : ''}`}>
-          <div className="logo-wrapper" onClick={() => { navigage('/'); setActiveMenu('Dashboard') }}>
-            <img src={ChatViq} className="logo logo-big" />
-            <img src={favIconChatViq} className="logo logo-small" />
-          </div>
+    <div className="sidebar-containerActual d-flex h-100 justify-content-between flex-column">
+      <div className={`sidebarHeader ${!isExpanded ? "sidebar-collapsed" : ""}`}>
+        <div
+          className="logo-wrapper"
+          onClick={() => {
+            navigate("/");
+            setActiveMenu("Dashboard");
+          }}
+        >
+          <img src={ChatViq} className="logo logo-big" />
+          <img src={favIconChatViq} className="logo logo-small" />
         </div>
-
-        <div className='my-3 d-flex   flex-column justify-content-start flex-grow-1  gap-1' ref={sideBarRef} >
-
-          <RenderMenu isExpanded={isExpanded} activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
-
-        </div>
-        {
-          isExpanded && <div  >Footer Space</div>
-        }
-
-
-
       </div>
 
+      <div
+        className="my-3 d-flex flex-column flex-grow-1 gap-1"
+        ref={sideBarRef}
+      >
+        <RenderMenu
+          isExpanded={isExpanded}
+          activeMenu={activeMenu}
+          setActiveMenu={setActiveMenu}
+        />
+      </div>
 
-    </>
-  )
-}
+      {isExpanded && <div>Footer Space</div>}
+    </div>
+  );
+};
 
+/* -------------------- Content Area -------------------- */
+const ContentArea = () => <Outlet />;
 
-const ContentArea = () => {
-  return (
-    <Outlet />
-  )
-}
+/* -------------------- Footer -------------------- */
+const FooterNote = () => <>Footer Content</>;
 
-
-const FooterNote = () => {
-  return (
-    <>
-      Footer Content
-    </>
-  )
-}
-
+/* -------------------- App Layout -------------------- */
 const AppLayout = () => {
   const [isMobile, setIsMobile] = useState(true);
   const [sideBarOpen, setSideBarOpen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState('Dashboard');
+  const [activeMenu, setActiveMenu] = useState("Dashboard");
   const [isExpanded, setIsExpanded] = useState(true);
 
-  const toggleSidebar = () => {
-    setSideBarOpen(!sideBarOpen)
-  };
+  const toggleSidebar = () => setSideBarOpen((prev) => !prev);
 
   useEffect(() => {
-    const checkScreen = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
+    const checkScreen = () => setIsMobile(window.innerWidth < 768);
     checkScreen();
     window.addEventListener("resize", checkScreen);
     return () => window.removeEventListener("resize", checkScreen);
@@ -178,57 +191,76 @@ const AppLayout = () => {
 
   return (
     <div>
-      {
-        isMobile ?
-          // Mobile App Layout 
-          <div className='mobileMenu'>
-            {sideBarOpen ? <aside>
-              <SmallScreenSideBar isMobile={isMobile} setSideBarOpen={setSideBarOpen} activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
-
-            </aside> : <></>}
-            {/* Backdrop */}
-            {isMobile && sideBarOpen && (
-              <div
-                className="mobile-backdrop"
-                onClick={() => setSideBarOpen(false)}
+      {isMobile ? (
+        <div className="mobileMenu">
+          {sideBarOpen && (
+            <aside>
+              <SmallScreenSideBar
+                isMobile={isMobile}
+                setSideBarOpen={setSideBarOpen}
+                activeMenu={activeMenu}
+                setActiveMenu={setActiveMenu}
               />
-            )}
+            </aside>
+          )}
 
-            <header><TopBar toggleSidebar={toggleSidebar} isMobile={isMobile} activeMenu={activeMenu} setActiveMenu={setActiveMenu} /></header>
-            <section className='flex-grow-1'>
+          {sideBarOpen && <div className="mobile-backdrop" onClick={() => setSideBarOpen(false)} />}
+
+          <header>
+            <TopBar
+              toggleSidebar={toggleSidebar}
+              isMobile={isMobile}
+              activeMenu={activeMenu}
+              setActiveMenu={setActiveMenu}
+            />
+          </header>
+
+          <section className="flex-grow-1">
+            <ContentArea />
+          </section>
+
+          <footer>
+            <FooterNote />
+          </footer>
+        </div>
+      ) : (
+        <div className="app-shell gap-5">
+          <div className="sidebar-wrapper">
+            <aside className={`sidebar-container ${!isExpanded ? "minimized" : ""}`}>
+              <BigScreenSideBar
+                isExpanded={isExpanded}
+                setIsExpanded={setIsExpanded}
+                activeMenu={activeMenu}
+                setActiveMenu={setActiveMenu}
+              />
+            </aside>
+
+            <div className={`sidebar-expansionButton rounded ${isExpanded ? "sidebar-expansionButtonExpanded" : ""}`}>
+              {isExpanded ? (
+                <ChevronLeft onClick={() => setIsExpanded(false)} />
+              ) : (
+                <ChevronRightIcon onClick={() => setIsExpanded(true)} />
+              )}
+            </div>
+          </div>
+
+          <div className="main-area">
+            <header>
+              <TopBar toggleSidebar={toggleSidebar} activeMenu={activeMenu} />
+            </header>
+
+            <section className="content">
               <ContentArea />
             </section>
+
             <footer>
               <FooterNote />
             </footer>
           </div>
-          :
-          // Desktop Layout
-          <div className="app-shell  gap-5">
-            <div className="sidebar-wrapper">
-              <aside className={`sidebar-container  ${!isExpanded ? 'minimized' : ''}`}>
-                <BigScreenSideBar isExpanded={isExpanded} setIsExpanded={setIsExpanded} activeMenu={activeMenu} setActiveMenu={setActiveMenu} className='position-relative' />
-              </aside>
-              <div className={`sidebar-expansionButton rounded ${isExpanded ? 'sidebar-expansionButtonExpanded' : ''}`}>
-                {!isExpanded ? <ChevronRightIcon onClick={() => {
-                  setIsExpanded(true);
-                }} /> : <ChevronLeft onClick={() => {
-                  setIsExpanded(false);
-                }} />}
-              </div>
-
-            </div>
-            <div className="main-area">
-              <header><TopBar toggleSidebar={toggleSidebar} activeMenu={activeMenu} /></header>
-              <section className="content">
-                <ContentArea />
-              </section>
-              <footer ><FooterNote /></footer>
-            </div>
-          </div>
-      }
+        </div>
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default AppLayout
+export default AppLayout;

@@ -1,164 +1,161 @@
-/* =========================================================
-   BASE
-========================================================= */
-
-.editor-page {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 32px 24px 140px;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: #0f172a;
+/* ===============================
+   MODAL BASE
+================================ */
+.article-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
 }
 
-/* =========================================================
-   HEADER
-========================================================= */
+.article-dialog {
+  width: 90%;
+  max-width: 1100px;
+  max-height: 90vh;
+  background: #ffffff;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
 
-.editor-header {
+/* ===============================
+   HEADER
+================================ */
+.article-dialog-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  padding: 18px 24px;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.editor-header h2 {
-  margin: 0;
-  font-size: 26px;
+.article-dialog-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #0f172a;
 }
 
-.editor-subtitle {
-  font-size: 14px;
+.article-dialog-header button {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
   color: #64748b;
 }
 
-.status-pill {
-  padding: 6px 14px;
-  border-radius: 999px;
-  border: 1px solid #cbd5e1;
-  background: #f8fafc;
-  font-size: 14px;
+.article-dialog-header button:hover {
+  color: #0f172a;
 }
 
-/* =========================================================
+/* ===============================
    TABS
-========================================================= */
-
-.editor-tabs {
+================================ */
+.article-dialog-tabs {
   display: flex;
-  gap: 32px;
+  gap: 6px;
+  padding: 12px 24px;
   border-bottom: 1px solid #e5e7eb;
-  margin-bottom: 28px;
+  background: #f8fafc;
 }
 
-.editor-tabs button {
-  background: none;
-  border: none;
-  padding: 12px 0;
-  font-size: 15px;
+.article-dialog-tabs button {
+  padding: 8px 14px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
   color: #475569;
   cursor: pointer;
-  position: relative;
 }
 
-.editor-tabs button.active {
-  color: #1e7bd9;
+.article-dialog-tabs button.active {
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.article-dialog-tabs button:hover:not(.active) {
+  background: #e5e7eb;
+}
+
+/* ===============================
+   BODY
+================================ */
+.article-dialog-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.article-dialog-body h4 {
+  font-size: 16px;
   font-weight: 600;
+  margin-bottom: 16px;
+  color: #0f172a;
 }
 
-.editor-tabs button.active::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -1px;
-  width: 100%;
-  height: 2px;
-  background: #1e7bd9;
+/* ===============================
+   FORM GRID (ARTICLE INFO)
+================================ */
+.article-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
 }
 
-/* =========================================================
-   CARD
-========================================================= */
-
-.editor-card {
-  background: #ffffff;
-  padding: 28px;
-  border-radius: 14px;
-  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+.field {
+  display: flex;
+  flex-direction: column;
 }
 
-/* =========================================================
-   FORM ELEMENTS
-========================================================= */
-
-input,
-textarea,
-select {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid #cbd5e1;
+.field input,
+.field select,
+.field textarea {
+  height: 40px;
+  padding: 8px 12px;
   font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+}
+
+.field textarea {
+  height: auto;
+  resize: vertical;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
   outline: none;
-}
-
-input:focus,
-textarea:focus,
-select:focus {
-  border-color: #1e7bd9;
-  box-shadow: 0 0 0 2px rgba(30, 123, 217, 0.15);
-}
-
-/* =========================================================
-   ERRORS & HELPERS
-========================================================= */
-
-.error {
-  display: block;
-  margin-top: 4px;
-  font-size: 12px;
-  color: #ef4444;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
 }
 
 .field-meta {
   display: flex;
   justify-content: space-between;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #64748b;
 }
 
 .slug-preview {
   font-size: 12px;
   color: #64748b;
+  margin-top: 4px;
 }
 
-/* =========================================================
-   ARTICLE INFO – PROFESSIONAL GRID
-========================================================= */
-
-.article-info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.article-info-grid > div:nth-child(1),
-.article-info-grid > div:nth-child(2) {
-  grid-column: span 2; /* Title + Slug full width */
-}
-
-.field {
-  position: relative;
-}
-
-/* Category select height */
-.field select {
-  height: 42px;
-}
-
-/* =========================================================
-   TAGS (FIXED LAYOUT)
-========================================================= */
-
+/* ===============================
+   TAGS
+================================ */
 .tag-field {
-  position: relative;
+  grid-column: span 2;
 }
 
 .tag-input-wrapper {
@@ -166,267 +163,123 @@ select:focus {
   flex-wrap: wrap;
   gap: 6px;
   padding: 6px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #d1d5db;
   border-radius: 8px;
-  min-height: 42px;
-  align-items: center;
 }
 
 .tag-input-wrapper input {
   border: none;
+  outline: none;
   flex: 1;
   min-width: 120px;
 }
 
 .tag-chip {
-  background: #e7f1ff;
-  padding: 4px 10px;
+  background: #e0e7ff;
+  color: #3730a3;
+  padding: 4px 8px;
   border-radius: 999px;
   font-size: 12px;
   display: flex;
   align-items: center;
+  gap: 6px;
 }
 
 .tag-chip button {
   background: none;
   border: none;
-  margin-left: 6px;
   cursor: pointer;
+  font-size: 14px;
 }
 
-/* Autocomplete dropdown */
-.tag-suggestions {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  background: white;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  z-index: 20;
-  max-height: 160px;
-  overflow-y: auto;
-}
-
-.tag-suggestions div {
-  padding: 8px 12px;
-  cursor: pointer;
-}
-
-.tag-suggestions div:hover {
-  background: #f1f5f9;
-}
-
-/* =========================================================
+/* ===============================
    CONTENT SECTION
-========================================================= */
-
+================================ */
 .content-section {
-  margin-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .content-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
 }
 
 .content-toggle button {
   padding: 6px 12px;
-  border: 1px solid #cbd5e1;
-  background: #f8fafc;
+  font-size: 13px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
   cursor: pointer;
 }
 
-.content-toggle .active {
-  background: #1e7bd9;
+.content-toggle button.active {
+  background: #2563eb;
   color: #ffffff;
+  border-color: #2563eb;
 }
-
-/* Toolbar */
 
 .editor-toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 10px;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f8fafc;
 }
 
 .editor-toolbar button {
   padding: 6px 10px;
   font-size: 13px;
   border-radius: 6px;
-  border: 1px solid #cbd5e1;
-  background: #f8fafc;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
   cursor: pointer;
 }
 
-.editor-toolbar button.active {
-  background: #1e7bd9;
-  color: #ffffff;
+.editor-toolbar button:hover {
+  background: #e5e7eb;
 }
-
-/* TipTap editor */
 
 .tiptap-editor {
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
-  padding: 16px;
-  min-height: 300px;
-  background: #ffffff;
+  min-height: 260px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 12px;
 }
 
-.tiptap-editor:focus-within {
-  border-color: #1e7bd9;
-  box-shadow: 0 0 0 2px rgba(30, 123, 217, 0.15);
+.content-preview {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 16px;
+  background: #f8fafc;
 }
 
 .content-footer {
-  margin-top: 8px;
-  font-size: 13px;
+  text-align: right;
+  font-size: 12px;
   color: #64748b;
 }
 
-/* Preview */
-
-.content-preview {
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
-  padding: 16px;
-  min-height: 300px;
-  background: #ffffff;
-}
-
-.empty-preview {
-  color: #94a3b8;
-  font-style: italic;
-}
-
-/* =========================================================
-   RELATED QUESTIONS
-========================================================= */
-
-.related-questions {
-  margin-top: 32px;
-}
-
-.question-row {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.question-row input {
-  flex: 1;
-}
-
-.question-row button {
-  background: #fee2e2;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 10px;
-  cursor: pointer;
-}
-
-.add-question-btn {
-  margin-top: 10px;
-  padding: 8px 12px;
-  background: #e7f1ff;
-  border: 1px dashed #1e7bd9;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-/* =========================================================
-   CHECKBOX
-========================================================= */
-
-.checkbox {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-}
-
-/* =========================================================
-   ACTION BAR
-========================================================= */
-
-.editor-actions {
-  position: fixed;
-  bottom: 0;
-  left: 260px;
-  right: 0;
-  background: #ffffff;
-  border-top: 1px solid #e5e7eb;
-  padding: 14px 24px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  z-index: 30;
-}
-
-.btn {
-  padding: 10px 18px;
-  font-size: 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  border: none;
-}
-
-.btn.primary {
-  background: #1e7bd9;
-  color: white;
-}
-
-.btn.secondary {
-  background: #e7f1ff;
-  color: #1e7bd9;
-}
-
-.btn.ghost {
-  background: transparent;
-  color: #475569;
-}
-
-/* =========================================================
-   RESPONSIVE
-========================================================= */
-
-@media (max-width: 1024px) {
-  .editor-actions {
-    left: 0;
-  }
-
-  .article-info-grid {
-    grid-template-columns: 1fr;
-  }
-}
-/* =========================================================
-   SEO & SETTINGS – FINAL STRUCTURE FIX
-========================================================= */
-
+/* ===============================
+   SEO & SETTINGS
+================================ */
 .seo-section {
   display: flex;
   flex-direction: column;
-  gap: 28px;
-}
-
-/* Block separation */
-.seo-block {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  gap: 20px;
 }
 
 .seo-block label {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
-  color: #0f172a;
+  margin-bottom: 6px;
 }
 
-/* Meta counter row */
 .seo-meta {
   display: flex;
   justify-content: space-between;
@@ -434,69 +287,96 @@ select:focus {
   color: #64748b;
 }
 
-/* =========================
-   FEATURED IMAGE (FIX)
-========================= */
+.image-upload {
+  cursor: pointer;
+}
 
 .image-upload input {
   display: none;
 }
 
 .image-upload-box {
-  border: 2px dashed #cbd5e1;
-  border-radius: 12px;
-  padding: 20px;
-  text-align: center;
-  cursor: pointer;
+  height: 160px;
+  border: 2px dashed #cbd5f5;
+  border-radius: 10px;
   background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: #64748b;
 }
 
 .image-upload-box img {
+  max-height: 100%;
   max-width: 100%;
-  border-radius: 10px;
+  border-radius: 8px;
 }
-
-.image-upload-box span {
-  display: block;
-  font-size: 13px;
-  color: #64748b;
-  margin-top: 6px;
-}
-
-/* =========================
-   STATUS / FEATURED / DATE GRID
-========================= */
 
 .seo-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 16px;
+  gap: 20px;
 }
 
-.seo-grid small {
-  font-size: 12px;
-  color: #64748b;
-}
-
-.align-bottom {
+.checkbox {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.align-bottom {
   margin-top: 24px;
 }
 
-/* =========================
-   SEO ACTIONS (BOTTOM)
-========================= */
-
 .seo-actions {
   display: flex;
-  justify-content: space-between;
-  padding-top: 16px;
+  gap: 12px;
+}
+
+/* ===============================
+   FOOTER ACTIONS
+================================ */
+.article-dialog-footer {
+  padding: 16px 24px;
   border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+}
+
+.btn.primary {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.btn.secondary {
+  background: #e5e7eb;
+  color: #0f172a;
+}
+
+.btn.ghost {
+  background: transparent;
+  color: #475569;
 }
 
 .btn.danger {
-  background: #fee2e2;
-  color: #b91c1c;
+  background: #ef4444;
+  color: #ffffff;
+}
+
+/* ===============================
+   ERRORS
+================================ */
+.error {
+  font-size: 12px;
+  color: #dc2626;
 }

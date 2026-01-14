@@ -1,0 +1,870 @@
+/* ===============================
+   DIALOG OVERLAY
+================================ */
+.kb-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===============================
+   DIALOG CONTAINER
+================================ */
+.kb-dialog {
+  background: #ffffff;
+  width: 92%;
+  max-width: 1100px;
+  height: 90vh;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+/* ===============================
+   HEADER
+================================ */
+.kb-dialog-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kb-dialog-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* ===============================
+   BODY
+================================ */
+.kb-dialog-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+/* ===============================
+   TABS
+================================ */
+.editor-tabs {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 20px;
+}
+
+.editor-tabs button {
+  padding: 10px 16px;
+  font-size: 14px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #475569;
+  border-bottom: 2px solid transparent;
+}
+
+.editor-tabs button.active {
+  color: #2563eb;
+  font-weight: 600;
+  border-bottom-color: #2563eb;
+}
+
+/* ===============================
+   COMMON CARD
+================================ */
+.editor-card section {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+/* ===============================
+   ARTICLE INFO (UNCHANGED)
+================================ */
+.article-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field input,
+.field select {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.field-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* ===============================
+   TAGS
+================================ */
+.tag-input-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 6px;
+}
+
+.tag-chip {
+  background: #e0e7ff;
+  color: #1e3a8a;
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-size: 12px;
+}
+
+.tag-chip button {
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+/* ===============================
+   CONTENT SECTION
+================================ */
+.content-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Header */
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.content-header h4 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Toggle */
+.content-toggle {
+  display: flex;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.content-toggle button {
+  padding: 6px 14px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.content-toggle button.active {
+  background: #ffffff;
+  color: #2563eb;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+}
+
+/* Editor toolbar */
+.editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  background: #f8fafc;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.editor-toolbar button {
+  min-width: 36px;
+  height: 34px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.editor-toolbar button:hover {
+  background: #e0e7ff;
+}
+
+/* Editor */
+.tiptap-editor {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  min-height: 260px;
+  padding: 12px;
+}
+
+/* Preview */
+.content-preview {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 16px;
+  background: #f9fafb;
+}
+
+/* Footer */
+.content-footer {
+  text-align: right;
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* ===============================
+   ⭐ RELATED QUESTIONS (ENHANCED)
+================================ */
+.related-questions {
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #f9fafb;
+}
+
+.related-questions h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 6px;
+}
+
+.related-questions p {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 12px;
+}
+
+/* Question item */
+.related-question-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.related-question-item input {
+  flex: 1;
+  border: none;
+  font-size: 14px;
+}
+
+.related-question-item input:focus {
+  outline: none;
+}
+
+/* Add button */
+.add-question-btn {
+  margin-top: 10px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px dashed #2563eb;
+  background: #eef2ff;
+  color: #2563eb;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.add-question-btn:hover {
+  background: #e0e7ff;
+}
+
+/* ===============================
+   SEO SECTION
+================================ */
+.seo-section h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.seo-block {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  padding: 16px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.seo-block textarea,
+.seo-block select,
+.seo-block input {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+}
+
+.seo-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.seo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+.image-upload-box {
+  border: 2px dashed #c7d2fe;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  background: #f8fafc;
+}
+
+/* ===============================
+   ACTIONS
+================================ */
+.editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn.primary {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.btn.secondary {
+  background: #e5e7eb;
+}
+
+.btn.ghost {
+  background: transparent;
+  color: #475569;
+}
+/* ===============================
+   DIALOG OVERLAY
+================================ */
+.kb-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===============================
+   DIALOG CONTAINER
+================================ */
+.kb-dialog {
+  background: #ffffff;
+  width: 92%;
+  max-width: 1100px;
+  height: 90vh;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+/* ===============================
+   HEADER
+================================ */
+.kb-dialog-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kb-dialog-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* ===============================
+   BODY
+================================ */
+.kb-dialog-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+/* ===============================
+   TABS
+================================ */
+.editor-tabs {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 20px;
+}
+
+.editor-tabs button {
+  padding: 10px 16px;
+  font-size: 14px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #475569;
+  border-bottom: 2px solid transparent;
+}
+
+.editor-tabs button.active {
+  color: #2563eb;
+  font-weight: 600;
+  border-bottom-color: #2563eb;
+}
+
+/* ===============================
+   COMMON CARD
+================================ */
+.editor-card section {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+/* ===============================
+   ARTICLE INFO (UNCHANGED)
+================================ */
+.article-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field input,
+.field select {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.field-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* ===============================
+   TAGS
+================================ */
+.tag-input-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 6px;
+}
+
+.tag-chip {
+  background: #e0e7ff;
+  color: #1e3a8a;
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-size: 12px;
+}
+
+.tag-chip button {
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+/* ===============================
+   CONTENT SECTION
+================================ */
+.content-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Header */
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.content-header h4 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Toggle */
+.content-toggle {
+  display: flex;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.content-toggle button {
+  padding: 6px 14px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.content-toggle button.active {
+  background: #ffffff;
+  color: #2563eb;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+}
+
+/* Editor toolbar */
+.editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  background: #f8fafc;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.editor-toolbar button {
+  min-width: 36px;
+  height: 34px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.editor-toolbar button:hover {
+  background: #e0e7ff;
+}
+
+/* Editor */
+.tiptap-editor {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  min-height: 260px;
+  padding: 12px;
+}
+
+/* Preview */
+.content-preview {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 16px;
+  background: #f9fafb;
+}
+
+/* Footer */
+.content-footer {
+  text-align: right;
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* ===============================
+   ⭐ RELATED QUESTIONS (ENHANCED)
+================================ */
+.related-questions {
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #f9fafb;
+}
+
+.related-questions h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 6px;
+}
+
+.related-questions p {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 12px;
+}
+
+/* Question item */
+.related-question-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.related-question-item input {
+  flex: 1;
+  border: none;
+  font-size: 14px;
+}
+
+.related-question-item input:focus {
+  outline: none;
+}
+
+/* Add button */
+.add-question-btn {
+  margin-top: 10px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px dashed #2563eb;
+  background: #eef2ff;
+  color: #2563eb;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.add-question-btn:hover {
+  background: #e0e7ff;
+}
+
+/* ======================================================
+   ⭐ SEO & SETTINGS – FOOTER / STATUS AREA (ENHANCED)
+   Applies ONLY to SEO & Settings section
+====================================================== */
+
+/* Improve overall spacing */
+.seo-section {
+  gap: 24px;
+}
+
+/* ---- Status / Featured / Publish row ---- */
+.seo-grid {
+  grid-template-columns: 1.2fr 1fr 1.4fr;
+  align-items: center;
+}
+
+/* Individual control cards */
+.seo-grid > div {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+/* Labels */
+.seo-grid label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #334155;
+  margin-bottom: 4px;
+}
+
+/* Inputs refinement */
+.seo-grid select,
+.seo-grid input[type="date"] {
+  width: 100%;
+  height: 38px;
+  font-size: 14px;
+}
+
+/* Featured checkbox alignment */
+.checkbox {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 100%;
+}
+
+.checkbox span {
+  font-size: 14px;
+  color: #334155;
+}
+
+/* ======================================================
+   ✅ SEO & SETTINGS – FINAL BUTTON ALIGNMENT (FIXED)
+====================================================== */
+
+/* Footer bar */
+.editor-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* left + right */
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* LEFT: Preview + Delete */
+.editor-actions .seo-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Preview */
+.editor-actions .seo-actions button:first-child {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 14px;
+  color: #2563eb;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Delete */
+.editor-actions .seo-actions button:last-child {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 14px;
+  color: #dc2626;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* RIGHT: Cancel + Save */
+.editor-actions > div:last-child {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Cancel */
+.editor-actions .btn.ghost {
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #475569;
+}
+
+/* Save (Primary CTA) */
+.editor-actions .btn.primary {
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 10px;
+}
+/* ======================================================
+   ✅ SEO & SETTINGS – BUTTON ALIGNMENT (ACTUAL FIX)
+====================================================== */
+
+/* Target the SEO section footer area */
+.seo-section + .editor-actions,
+.seo-section ~ .editor-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 16px;
+  margin-top: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* LEFT SIDE: Preview + Delete (first two buttons) */
+.editor-actions button:nth-child(1),
+.editor-actions button:nth-child(2) {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Preview */
+.editor-actions button:nth-child(1) {
+  color: #2563eb;
+}
+
+/* Delete */
+.editor-actions button:nth-child(2) {
+  color: #dc2626;
+}
+
+/* RIGHT SIDE: Cancel + Save */
+.editor-actions button:nth-last-child(2),
+.editor-actions button:nth-last-child(1) {
+  margin-left: 12px;
+}
+
+/* Cancel */
+.editor-actions .btn.ghost {
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Save */
+.editor-actions .btn.primary {
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 10px;
+}
