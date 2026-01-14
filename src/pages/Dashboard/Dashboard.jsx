@@ -501,6 +501,7 @@ const DashboardContent = () => {
       </Row>
 
       <Row className="g-4 justify-content-between my-2" >
+
         {/* Peak Hours Heatmap */}
         <Col >
           <Card className="rounded-4 shadow-sm h-100 chart-card">
