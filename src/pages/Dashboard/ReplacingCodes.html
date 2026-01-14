@@ -1,4 +1,4 @@
-   
+<!--    
 
 
 
@@ -176,61 +176,7 @@
         </Card.Body>
       </Card>
 
-      <Card className="rounded-4 shadow-sm mb-4">
-        <Card.Body>
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <h6 className="fw-semibold mb-0">Recent Activity</h6>
-            <Button variant="link" size="sm" className="p-0">
-              View all
-            </Button>
-          </div>
-
-          {recentConversations.slice(0, 10).map((item) => (
-            <div
-              key={item.id}
-              className="d-flex align-items-center justify-content-between py-2 border-bottom"
-            >
-              {/* Left */}
-              <div className="flex-grow-1 me-3">
-                <div className="small text-muted">{item.timeAgo}</div>
-                <div className="fw-medium text-truncate activity-message">
-                  {item.message}
-                </div>
-
-                <div className="d-flex align-items-center gap-2 mt-1">
-                  <span
-                    className={`badge bg-${intentVariant(item.intent)}`}
-                  >
-                    {item.intent}
-                  </span>
-
-                  <div className="confidence-bar">
-                    <ProgressBar
-                      now={item.confidence}
-                      variant="success"
-                      style={{ height: 6 }}
-                    />
-                  </div>
-
-                  <small className="text-muted">
-                    {item.confidence}%
-                  </small>
-                </div>
-              </div>
-
-              {/* Right */}
-              <Button
-                size="sm"
-                variant="outline-primary"
-                onClick={() => handleView(item)}
-              >
-                View
-              </Button>
-
-            </div>
-          ))}
-        </Card.Body>
-      </Card>
+      
 
 
 
@@ -253,4 +199,4 @@
       </div>
     </Card.Body>
   </Card>
-);
+); -->

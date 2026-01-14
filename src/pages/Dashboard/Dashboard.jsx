@@ -459,62 +459,6 @@ const DashboardContent = () => {
         </Modal>
       )}
 
-
-      <Card className="rounded-4 shadow-sm mb-4">
-        <Card.Body className='chart-body'>
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <h6 className="fw-semibold mb-0">Recent Activity</h6>
-            <Button variant="link" size="sm" className="p-0">
-              View all
-            </Button>
-          </div>
-
-         {recentConversations.slice(0, 10).map((item) => (
-  <div key={item.id} className="activity-item">
-
-    {/* Left content */}
-    <div className="activity-left">
-      <div className="activity-meta">
-        <span className="activity-time">{item.timeAgo}</span>
-        <span className={`badge bg-${intentVariant(item.intent)}`}>
-          {item.intent}
-        </span>
-      </div>
-
-      <div className="activity-message">
-        {item.message}
-      </div>
-
-      <div className="activity-confidence">
-        <ProgressBar
-          now={item.confidence}
-          variant="success"
-          style={{ height: 6 }}
-        />
-        <span>{item.confidence}%</span>
-      </div>
-    </div>
-
-    {/* Right button */}
-    <Button
-      size="sm"
-      variant="outline-primary"
-      className="activity-view-btn"
-      onClick={() => handleView(item)}
-    >
-      View
-    </Button>
-
-  </div>
-))}
-
-        </Card.Body>
-      </Card>
-
-
-
-
-
       <Row className="g-4 justify-content-between " >
         {/* Intent Distribution */}
         <Col>
@@ -556,13 +500,7 @@ const DashboardContent = () => {
         </Col>
       </Row>
 
-
-
-
-
       <Row className="g-4 justify-content-between my-2" >
-      
-
         {/* Peak Hours Heatmap */}
         <Col >
           <Card className="rounded-4 shadow-sm h-100 chart-card">
@@ -572,6 +510,62 @@ const DashboardContent = () => {
           </Card>
         </Col>
       </Row>
+
+      <Card className="rounded-4 shadow-sm mt-4">
+        <Card.Body>
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <h6 className="fw-semibold mb-0">Recent Activity</h6>
+            <Button variant="link" size="sm" className="p-0">
+              View all
+            </Button>
+          </div>
+
+          {recentConversations.slice(0, 10).map((item) => (
+            <div
+              key={item.id}
+              className="d-flex align-items-center justify-content-between py-2 border-bottom"
+            >
+              {/* Left */}
+              <div className="flex-grow-1 me-3">
+                <div className="small text-muted">{item.timeAgo}</div>
+                <div className="fw-medium text-truncate activity-message">
+                  {item.message}
+                </div>
+
+                <div className="d-flex align-items-center gap-2 mt-1">
+                  <span
+                    className={`badge bg-${intentVariant(item.intent)}`}
+                  >
+                    {item.intent}
+                  </span>
+
+                  <div className="confidence-bar">
+                    <ProgressBar
+                      now={item.confidence}
+                      variant="success"
+                      style={{ height: 6 }}
+                    />
+                  </div>
+
+                  <small className="text-muted">
+                    {item.confidence}%
+                  </small>
+                </div>
+              </div>
+
+              {/* Right */}
+              <Button
+                size="sm"
+                variant="outline-primary"
+                onClick={() => handleView(item)}
+              >
+                View
+              </Button>
+
+            </div>
+          ))}
+        </Card.Body>
+      </Card>
 
 
 
