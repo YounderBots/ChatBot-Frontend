@@ -1,9 +1,10 @@
-import React from 'react'
-
-const Settings = () => {
+const SettingsConfiguration = () => {
   return (
-    <div>Settings</div>
-  )
-}
+    <div style={{ padding: "24px" }}>
+      <h2>Settings & Configuration</h2>
+      <p>Manage chatbot settings and configurations here.</p>
+    </div>
+  );
+};
 
-export default Settings
+export default SettingsConfiguration;

@@ -1,0 +1,502 @@
+/* =========================================================
+   BASE
+========================================================= */
+
+.editor-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px 140px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #0f172a;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.editor-header h2 {
+  margin: 0;
+  font-size: 26px;
+}
+
+.editor-subtitle {
+  font-size: 14px;
+  color: #64748b;
+}
+
+.status-pill {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  font-size: 14px;
+}
+
+/* =========================================================
+   TABS
+========================================================= */
+
+.editor-tabs {
+  display: flex;
+  gap: 32px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 28px;
+}
+
+.editor-tabs button {
+  background: none;
+  border: none;
+  padding: 12px 0;
+  font-size: 15px;
+  color: #475569;
+  cursor: pointer;
+  position: relative;
+}
+
+.editor-tabs button.active {
+  color: #1e7bd9;
+  font-weight: 600;
+}
+
+.editor-tabs button.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 100%;
+  height: 2px;
+  background: #1e7bd9;
+}
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.editor-card {
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+}
+
+/* =========================================================
+   FORM ELEMENTS
+========================================================= */
+
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 14px;
+  outline: none;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #1e7bd9;
+  box-shadow: 0 0 0 2px rgba(30, 123, 217, 0.15);
+}
+
+/* =========================================================
+   ERRORS & HELPERS
+========================================================= */
+
+.error {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #ef4444;
+}
+
+.field-meta {
+  display: flex;
+  justify-content: space-between;
+}
+
+.slug-preview {
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* =========================================================
+   ARTICLE INFO – PROFESSIONAL GRID
+========================================================= */
+
+.article-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.article-info-grid > div:nth-child(1),
+.article-info-grid > div:nth-child(2) {
+  grid-column: span 2; /* Title + Slug full width */
+}
+
+.field {
+  position: relative;
+}
+
+/* Category select height */
+.field select {
+  height: 42px;
+}
+
+/* =========================================================
+   TAGS (FIXED LAYOUT)
+========================================================= */
+
+.tag-field {
+  position: relative;
+}
+
+.tag-input-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  min-height: 42px;
+  align-items: center;
+}
+
+.tag-input-wrapper input {
+  border: none;
+  flex: 1;
+  min-width: 120px;
+}
+
+.tag-chip {
+  background: #e7f1ff;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.tag-chip button {
+  background: none;
+  border: none;
+  margin-left: 6px;
+  cursor: pointer;
+}
+
+/* Autocomplete dropdown */
+.tag-suggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  z-index: 20;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.tag-suggestions div {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.tag-suggestions div:hover {
+  background: #f1f5f9;
+}
+
+/* =========================================================
+   CONTENT SECTION
+========================================================= */
+
+.content-section {
+  margin-bottom: 32px;
+}
+
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.content-toggle button {
+  padding: 6px 12px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  cursor: pointer;
+}
+
+.content-toggle .active {
+  background: #1e7bd9;
+  color: #ffffff;
+}
+
+/* Toolbar */
+
+.editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.editor-toolbar button {
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  cursor: pointer;
+}
+
+.editor-toolbar button.active {
+  background: #1e7bd9;
+  color: #ffffff;
+}
+
+/* TipTap editor */
+
+.tiptap-editor {
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 16px;
+  min-height: 300px;
+  background: #ffffff;
+}
+
+.tiptap-editor:focus-within {
+  border-color: #1e7bd9;
+  box-shadow: 0 0 0 2px rgba(30, 123, 217, 0.15);
+}
+
+.content-footer {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* Preview */
+
+.content-preview {
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 16px;
+  min-height: 300px;
+  background: #ffffff;
+}
+
+.empty-preview {
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* =========================================================
+   RELATED QUESTIONS
+========================================================= */
+
+.related-questions {
+  margin-top: 32px;
+}
+
+.question-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.question-row input {
+  flex: 1;
+}
+
+.question-row button {
+  background: #fee2e2;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.add-question-btn {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: #e7f1ff;
+  border: 1px dashed #1e7bd9;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* =========================================================
+   CHECKBOX
+========================================================= */
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+/* =========================================================
+   ACTION BAR
+========================================================= */
+
+.editor-actions {
+  position: fixed;
+  bottom: 0;
+  left: 260px;
+  right: 0;
+  background: #ffffff;
+  border-top: 1px solid #e5e7eb;
+  padding: 14px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  z-index: 30;
+}
+
+.btn {
+  padding: 10px 18px;
+  font-size: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+}
+
+.btn.primary {
+  background: #1e7bd9;
+  color: white;
+}
+
+.btn.secondary {
+  background: #e7f1ff;
+  color: #1e7bd9;
+}
+
+.btn.ghost {
+  background: transparent;
+  color: #475569;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1024px) {
+  .editor-actions {
+    left: 0;
+  }
+
+  .article-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* =========================================================
+   SEO & SETTINGS – FINAL STRUCTURE FIX
+========================================================= */
+
+.seo-section {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* Block separation */
+.seo-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.seo-block label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f172a;
+}
+
+/* Meta counter row */
+.seo-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* =========================
+   FEATURED IMAGE (FIX)
+========================= */
+
+.image-upload input {
+  display: none;
+}
+
+.image-upload-box {
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  background: #f8fafc;
+}
+
+.image-upload-box img {
+  max-width: 100%;
+  border-radius: 10px;
+}
+
+.image-upload-box span {
+  display: block;
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 6px;
+}
+
+/* =========================
+   STATUS / FEATURED / DATE GRID
+========================= */
+
+.seo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+.seo-grid small {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.align-bottom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+/* =========================
+   SEO ACTIONS (BOTTOM)
+========================= */
+
+.seo-actions {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.btn.danger {
+  background: #fee2e2;
+  color: #b91c1c;
+}

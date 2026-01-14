@@ -1,11 +1,18 @@
-import React, { useEffect, useRef, useState } from 'react'
-import menuList from './menulist'
 import { ChevronLeft, ChevronRight, ChevronRightIcon, ChevronsLeft, User } from 'lucide-react'
+<<<<<<< HEAD
 import favIconChatViq from './assets/favIconChatViq.png'
 import ChatViq from './assets/chatviq.png'
 import dpPlaceholder from './assets/dpPlaceholder.png'
 import { Outlet, useNavigate } from "react-router-dom";
+=======
+import { useEffect, useRef, useState } from 'react'
+import { Outlet, useNavigate } from "react-router-dom"
+>>>>>>> f45e9a58537da8effc4470b7b20a3a3356e6a7c2
 import './AppLayout.css'
+import ChatViq from './assets/chatviq.png'
+import dpPlaceholder from './assets/dpPlaceholder.png'
+import favIconChatViq from './assets/favIconChatViq.png'
+import menuList from './menulist'
 
 
 
@@ -54,7 +61,7 @@ const TopBar = ({ isMobile, toggleSidebar, activeMenu, setActiveMenu }) => {
             <div onClick={toggleSidebar}><ChevronsLeft /></div>
           </div>
         }
-        <div>{isMobile ? <img src={ChatViq} alt="ChatViq" className='topBarLogo' onClick={()=>{navigate('/'); setActiveMenu('Dashboard')}} /> : <h3 className='activeMenuHeading'>{activeMenu}</h3>}</div>
+        <div>{isMobile ? <img src={ChatViq} alt="ChatViq" className='topBarLogo' onClick={() => { navigate('/'); setActiveMenu('Dashboard') }} /> : <h3 className='activeMenuHeading'>{activeMenu}</h3>}</div>
         <div className='userIcon'>{dpImage ? <img src={dpImage} alt="" /> : <User />}</div>
       </nav>
       {
@@ -73,7 +80,7 @@ const SmallScreenSideBar = ({ isMobile, setSideBarOpen, activeMenu, setActiveMen
     <div className="offcanvas show offcanvas-start" tabIndex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
       <div className="offcanvas-header">
         {/* <h5 className="offcanvas-title" id="offcanvasExampleLabel">Logo</h5> */}
-        <img src={ChatViq} alt="ChatViq" onClick={()=>{navigate('/'); setActiveMenu('Dashboard')}} />
+        <img src={ChatViq} alt="ChatViq" onClick={() => { navigate('/'); setActiveMenu('Dashboard') }} />
         <button type="button" className="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close" onClick={() => { setSideBarOpen(false) }}></button>
       </div>
       <div className="offcanvas-body">
@@ -110,7 +117,7 @@ const BigScreenSideBar = ({ isExpanded, setIsExpanded, activeMenu, setActiveMenu
 
       <div className='sidebar-containerActual d-flex h-100 justify-content-between flex-column' onClick={() => { setIsExpanded(true) }} >
         <div className={`sidebarHeader ${!isExpanded ? 'sidebar-collapsed' : ''}`}>
-          <div className="logo-wrapper" onClick={()=>{navigage('/'); setActiveMenu('Dashboard')}}>
+          <div className="logo-wrapper" onClick={() => { navigage('/'); setActiveMenu('Dashboard') }}>
             <img src={ChatViq} className="logo logo-big" />
             <img src={favIconChatViq} className="logo logo-small" />
           </div>
