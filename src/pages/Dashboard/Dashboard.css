@@ -23,7 +23,7 @@
 }
 
 /* Force equal height */
-.kpi-row > div {
+.kpi-row>div {
   display: flex;
 }
 
@@ -136,6 +136,7 @@
 
 /* ================= Responsive ================= */
 @media (max-width: 768px) {
+
   .dashboard-card,
   .resolution-card {
     height: auto;
