@@ -1,4 +1,3 @@
-
 const ArticlesHeader = ({
   search,
   setSearch,

@@ -1,15 +1,43 @@
+import { useRef } from "react";
+
 const MAX_META = 160;
 
-const ArticleSEOSection = ({ form, setForm, errors }) => {
+const ArticleSEOSection = ({
+  form,
+  setForm,
+  errors = {},
+  onPreview,
+  onDelete,
+}) => {
+  const fileInputRef = useRef(null);
+
+  /* ---------------- IMAGE UPLOAD ---------------- */
+
   const handleImageUpload = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = () =>
-      setForm((prev) => ({ ...prev, featuredImage: reader.result }));
+    reader.onload = () => {
+      setForm((prev) => ({
+        ...prev,
+        featuredImage: reader.result,
+      }));
+    };
     reader.readAsDataURL(file);
   };
+
+  const removeImage = () => {
+    setForm((prev) => ({
+      ...prev,
+      featuredImage: "",
+    }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  /* ---------------- RENDER ---------------- */
 
   return (
     <section className="seo-section">
@@ -31,7 +59,9 @@ const ArticleSEOSection = ({ form, setForm, errors }) => {
           <span>
             {form.metaDescription.length}/{MAX_META}
           </span>
-          {errors.meta && <span className="error">{errors.meta}</span>}
+          {errors.meta && (
+            <span className="error">{errors.meta}</span>
+          )}
         </div>
       </div>
 
@@ -39,9 +69,19 @@ const ArticleSEOSection = ({ form, setForm, errors }) => {
       <div className="seo-block">
         <label>Featured Image</label>
 
-        <label className="image-upload">
-          <input type="file" accept="image/*" onChange={handleImageUpload} />
-          <div className="image-upload-box">
+        <div className="image-upload">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            hidden
+          />
+
+          <div
+            className="image-upload-box"
+            onClick={() => fileInputRef.current?.click()}
+          >
             {form.featuredImage ? (
               <img src={form.featuredImage} alt="Preview" />
             ) : (
@@ -51,10 +91,20 @@ const ArticleSEOSection = ({ form, setForm, errors }) => {
               </>
             )}
           </div>
-        </label>
+
+          {form.featuredImage && (
+            <button
+              type="button"
+              className="link-btn danger"
+              onClick={removeImage}
+            >
+              Remove image
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* PUBLISH CONTROLS */}
+      {/* STATUS / SETTINGS */}
       <div className="seo-grid">
         <div>
           <label>Status</label>
@@ -64,9 +114,9 @@ const ArticleSEOSection = ({ form, setForm, errors }) => {
               setForm({ ...form, status: e.target.value })
             }
           >
-            <option>Draft</option>
-            <option>Published</option>
-            <option>Archived</option>
+            <option value="Draft">Draft</option>
+            <option value="Published">Published</option>
+            <option value="Archived">Archived</option>
           </select>
         </div>
 
@@ -96,8 +146,21 @@ const ArticleSEOSection = ({ form, setForm, errors }) => {
 
       {/* SECONDARY ACTIONS */}
       <div className="seo-actions">
-        <button className="btn ghost">Preview</button>
-        <button className="btn danger">Delete</button>
+        <button
+          type="button"
+          className="btn ghost"
+          onClick={onPreview}
+        >
+          Preview
+        </button>
+
+        <button
+          type="button"
+          className="btn danger"
+          onClick={onDelete}
+        >
+          Delete Article
+        </button>
       </div>
     </section>
   );
