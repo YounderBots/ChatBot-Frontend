@@ -1,0 +1,103 @@
+import { useState } from "react";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Image from "@tiptap/extension-image";
+import { Table } from "@tiptap/extension-table";
+import { TableRow } from "@tiptap/extension-table-row";
+import { TableHeader } from "@tiptap/extension-table-header";
+import { TableCell } from "@tiptap/extension-table-cell";
+
+const ArticleContentSection = ({ form, setForm }) => {
+  const [preview, setPreview] = useState(false);
+
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({ heading: { levels: [2, 3, 4] } }),
+      Image,
+      Table.configure({ resizable: true }),
+      TableRow,
+      TableHeader,
+      TableCell,
+    ],
+    content: form.content,
+    onUpdate: ({ editor }) =>
+      setForm((p) => ({ ...p, content: editor.getHTML() })),
+  });
+
+  if (!editor) return null;
+
+  const wordCount = editor
+    .getText()
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
+
+  return (
+    <section className="content-section">
+      <div className="content-header">
+        <h4>Content</h4>
+        <div className="content-toggle">
+          <button
+            className={!preview ? "active" : ""}
+            onClick={() => setPreview(false)}
+          >
+            Edit
+          </button>
+          <button
+            className={preview ? "active" : ""}
+            onClick={() => setPreview(true)}
+          >
+            Preview
+          </button>
+        </div>
+      </div>
+
+      {!preview && (
+        <div className="editor-toolbar">
+          <button onClick={() => editor.chain().focus().toggleBold().run()}>B</button>
+          <button onClick={() => editor.chain().focus().toggleItalic().run()}>I</button>
+          <button onClick={() => editor.chain().focus().toggleUnderline().run()}>U</button>
+          <button onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}>H2</button>
+          <button onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}>H3</button>
+          <button onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}>H4</button>
+          <button onClick={() => editor.chain().focus().toggleBulletList().run()}>• List</button>
+          <button onClick={() => editor.chain().focus().toggleOrderedList().run()}>1. List</button>
+          <button
+            onClick={() => {
+              const url = prompt("Link URL");
+              if (url) editor.chain().focus().setLink({ href: url }).run();
+            }}
+          >
+            Link
+          </button>
+          <button
+            onClick={() => {
+              const url = prompt("Image URL");
+              if (url) editor.chain().focus().setImage({ src: url }).run();
+            }}
+          >
+            Image
+          </button>
+          <button onClick={() => editor.chain().focus().toggleCodeBlock().run()}>Code</button>
+          <button onClick={() => editor.chain().focus().toggleBlockquote().run()}>Quote</button>
+          <button onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3 }).run()}>
+            Table
+          </button>
+        </div>
+      )}
+
+      {!preview ? (
+        <EditorContent editor={editor} className="tiptap-editor" />
+      ) : (
+        <div
+          className="content-preview"
+          dangerouslySetInnerHTML={{ __html: form.content }}
+        />
+      )}
+
+      <div className="content-footer">Word count: {wordCount}</div>
+    </section>
+  );
+};
+
+export default ArticleContentSection;
