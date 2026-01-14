@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-const PeakHoursHeatmap = () => {
-  return <div>Peak Hours Heatmap</div>;
-=======
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 
 const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const hours = Array.from({ length: 24 }, (_, i) => i); // FIXED
@@ -44,7 +40,7 @@ const PeakHoursHeatmap = ({ data = [] }) => {
       <h6 className="fw-semibold mb-3">Peak Hours Heatmap</h6>
 
       <div className="d-flex justify-content-center" style={{ overflowX: "auto" }}>
-        <div  style={{ minWidth: 900 }}>
+        <div style={{ minWidth: 900 }}>
 
           {/* X Axis */}
           <div className="d-flex mb-2" style={{ marginLeft: 50 }}>
@@ -121,7 +117,6 @@ const PeakHoursHeatmap = ({ data = [] }) => {
       </div>
     </>
   );
->>>>>>> 812061a6c99e8d95675ad2d031e3c7a4dc62c834
 };
 
 export default PeakHoursHeatmap;
