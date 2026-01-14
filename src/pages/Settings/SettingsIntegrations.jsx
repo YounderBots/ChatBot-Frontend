@@ -296,7 +296,7 @@ const triggerWebhook = (index) => {
 
         <Button
           size="sm"
-          variant="outline-primary"
+          variant="primary"
           onClick={() => setShowModal(true)}
         >
           Add Webhook
