@@ -1,0 +1,694 @@
+import React, { useState } from "react";
+import { Card, Row, Col, Form, Button, Table,Modal } from "react-bootstrap";
+import Select from "react-select";
+import {FaEdit,FaTrash} from "react-icons/fa";
+
+const SettingsIntegrations = () => {
+  const [showApiKey, setShowApiKey] = useState(false);
+  const getCurrentTimestamp = () => {
+    const now = new Date();
+
+    return now.toLocaleString("en-IN", {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  };
+
+  const [settings, setSettings] = useState({
+    apiKey: "abcd-1234-xyz-9876",
+    apiEndpoint: "https://api.yourbot.com/v1",
+
+    webhooks: [
+      {
+        name: "Conversation Events",
+        url: "https://example.com/webhook",
+        events: "New Conversation, Escalation",
+        active: true,
+        lastTriggered: getCurrentTimestamp()
+      },
+    ],
+
+    slackConnected: false,
+    smtpConfigured: false,
+    crm: "None",
+  });
+
+ const [showEditModal, setShowEditModal] = useState(false);
+ const [editIndex, setEditIndex] = useState(null);
+ const [editWebhook, setEditWebhook] = useState({
+    name: "",
+    url: "",
+    events: "",
+    active: true,
+    });
+
+
+  const regenerateApiKey = () => {
+    const newKey = Math.random().toString(36).substring(2, 15);
+    setSettings({ ...settings, apiKey: newKey });
+    alert("API Key regenerated");
+  };
+
+  const [showModal, setShowModal] = useState(false);
+
+  const [newWebhook, setNewWebhook] = useState({
+  name: "",
+  url: "",
+  events: [],
+  secretKey: "",
+  retryAttempts: 3,
+  timeout: 30,
+  active: true,
+  lastTriggered: "Never",
+});
+
+const webhookEventOptions = [
+  { value: "Event1", label: "Event1" },
+  { value: "Event2", label: "Event2" },
+  { value: "Event3", label: "Event3" },
+  { value: "Event4", label: "Event4" },
+];
+
+ const handleAddWebhook = () => {
+  if (!newWebhook.name || !newWebhook.url) return;
+
+  setSettings({
+    ...settings,
+    webhooks: [
+      ...settings.webhooks,
+      {
+        ...newWebhook,
+        lastTriggered: getCurrentTimestamp(),
+      },
+    ],
+  });
+
+  setNewWebhook({
+    name: "",
+    url: "",
+    events: [],
+    secretKey: "",
+    retryAttempts: 3,
+    timeout: 30,
+    active: true,
+    lastTriggered: "",
+  });
+
+  setShowModal(false);
+};
+
+
+const openEditModal = (index) => {
+  setEditIndex(index);
+  setEditWebhook({ ...settings.webhooks[index] });
+  setShowEditModal(true);
+};
+
+const [slack, setSlack] = useState({
+  connected: false,
+  channel: "",
+  notifyOnEscalation: true,
+  notifyOnFailure: false,
+});
+
+const [smtp, setSmtp] = useState({
+  configured: false,
+  server: "",
+  port: "",
+  username: "",
+  password: "",
+  fromEmail: "",
+});
+
+const [crm, setCrm] = useState({
+  provider: "",
+  apiKey: "",
+  syncEnabled: false,
+});
+
+
+const handleUpdateWebhook = () => {
+  const updated = [...settings.webhooks];
+
+  updated[editIndex] = {
+    ...editWebhook,
+    lastTriggered: getCurrentTimestamp(),
+  };
+
+  setSettings({ ...settings, webhooks: updated });
+  setShowEditModal(false);
+};
+
+const triggerWebhook = (index) => {
+  const updated = [...settings.webhooks];
+
+  updated[index] = {
+    ...updated[index],
+    lastTriggered: getCurrentTimestamp(),
+  };
+
+  setSettings({ ...settings, webhooks: updated });
+};
+
+
+
+  return (
+    <Card className="border-0">
+      <Card.Body>
+
+        {/* API CONFIGURATION */}
+        <h6 className="text-primary mb-3">API Configuration</h6>
+
+        <Row className="mb-3">
+          <Col md={6}>
+            <Form.Label>API Key</Form.Label>
+            <Form.Control
+              type="text"
+              readOnly
+              value={showApiKey ? settings.apiKey : "••••••••••••"}
+            />
+          </Col>
+
+          <Col md={6} className="d-flex align-items-end gap-2">
+            <Button
+              size="sm"
+              variant="primary"
+              onClick={() => setShowApiKey(!showApiKey)}
+            >
+              {showApiKey ? "Hide" : "Show"}
+            </Button>
+
+            <Button
+              size="sm"
+              variant="primary"
+              onClick={() => {
+                navigator.clipboard.writeText(settings.apiKey);
+                alert("API Key copied");
+              }}
+            >
+              Copy
+            </Button>
+
+            <Button
+              size="sm"
+              variant="danger"
+              onClick={regenerateApiKey}
+            >
+              Regenerate
+            </Button>
+          </Col>
+        </Row>
+
+        <Row className="mb-4">
+            <Col md={6}>
+                <Form.Label>API Endpoint</Form.Label>
+
+                <div className="d-flex gap-2">
+                <Form.Control
+                    readOnly
+                    value={settings.apiEndpoint}
+                />
+
+                <Button
+                    variant="outline-secondary"
+                    onClick={() => {
+                    navigator.clipboard.writeText(settings.apiEndpoint);
+                    alert("API Endpoint copied!");
+                    }}
+                >
+                    Copy
+                </Button>
+                </div>
+            </Col>
+        </Row>
+
+        <Row className="mb-4">
+            <Col md={6}>
+                <Form.Label>Documentation Link</Form.Label>
+
+                <div>
+                <a
+                    href="https://docs.yourapi.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary fw-semibold"
+                >
+                    View Documentation Link
+                </a>
+                </div>
+            </Col>
+        </Row>
+
+
+        <hr />
+
+        {/* WEBHOOKS */}
+        <h6 className="text-primary mb-3">Webhooks</h6>
+
+        <Table bordered hover size="sm">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>URL</th>
+              <th>Events</th>
+              <th>Status</th>
+              <th>Last Triggered</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {settings.webhooks.map((wh, index) => (
+              <tr key={index}>
+                <td>{wh.name}</td>
+                <td>{wh.url}</td>
+                <td>{wh.events}</td>
+                <td>{wh.active ? "Active" : "Inactive"}</td>
+                 <td>{wh.lastTriggered}</td>
+                <td>
+                 <Button
+                    size="sm"
+                    variant="primary"
+                    className="me-2"
+                    onClick={() => openEditModal(index)}
+                 >
+                    <FaEdit />
+                 </Button>
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    onClick={() => {
+                      const updated = [...settings.webhooks];
+                      updated.splice(index, 1);
+                      setSettings({ ...settings, webhooks: updated });
+                    }}
+                  >
+                    <FaTrash/>
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+
+        <Button
+          size="sm"
+          variant="outline-primary"
+          onClick={() => setShowModal(true)}
+        >
+          Add Webhook
+        </Button>
+
+        <hr />
+
+        {/* THIRD PARTY */}
+        <h6 className="text-primary mb-3">Slack</h6>
+
+        <Row className="align-items-center mb-3">
+          <Col md={4}>
+            <strong>Status:</strong>{" "}
+            <span className={slack.connected ? "text-success" : "text-danger"}>
+              {slack.connected ? "Connected" : "Not Connected"}
+            </span>
+          </Col>
+
+          <Col md={4}>
+            <Button
+              size="sm"
+              variant={slack.connected ? "outline-danger" : "primary"}
+              onClick={() =>
+                setSlack({ ...slack, connected: !slack.connected })
+              }
+            >
+              {slack.connected ? "Disconnect" : "Connect Slack"}
+            </Button>
+          </Col>
+        </Row>
+
+        {slack.connected && (
+          <>
+            <Row className="mb-3">
+              <Col md={6}>
+                <Form.Label>Settings(if connected)</Form.Label>
+                <Form.Control
+                  value={slack.channel}
+                  onChange={(e) =>
+                    setSlack({ ...slack, channel: e.target.value })
+                  }
+                />
+              </Col>
+            </Row>
+          </>
+        )}
+
+
+    {/* SETTINGS */}
+    <h6 className="text-primary mb-3">Email (SMTP)</h6>
+
+    <Row className="align-items-center mb-3">
+      <Col md={4}>
+        <strong>Status:</strong>{" "}
+        <span className={smtp.configured ? "text-success" : "text-danger"}>
+          {smtp.configured ? "Configured" : "Not Configured"}
+        </span>
+      </Col>
+
+      <Col md={4}>
+        <Button
+          size="sm"
+          variant={smtp.configured ? "outline-secondary" : "primary"}
+          onClick={() =>
+            setSmtp({ ...smtp, configured: true })
+          }
+        >
+          Configure
+        </Button>
+      </Col>
+    </Row>
+
+    {/* SETTINGS */}
+    <Row className="mb-3">
+      <Col md={4}>
+        <Form.Label>SMTP Server</Form.Label>
+        <Form.Control
+          value={smtp.server}
+          onChange={(e) =>
+            setSmtp({ ...smtp, server: e.target.value })
+          }
+          placeholder="smtp.gmail.com"
+        />
+      </Col>
+
+      <Col md={4}>
+        <Form.Label>Port</Form.Label>
+        <Form.Control
+          type="number"
+          value={smtp.port}
+          onChange={(e) =>
+            setSmtp({ ...smtp, port: e.target.value })
+          }
+          placeholder="587"
+        />
+      </Col>
+
+      <Col md={4}>
+        <Form.Label>Username</Form.Label>
+        <Form.Control
+          value={smtp.username}
+          onChange={(e) =>
+            setSmtp({ ...smtp, username: e.target.value })
+          }
+        />
+      </Col>
+
+    </Row>
+
+    <Row className="mb-3">
+
+      <Col md={6}>
+        <Form.Label>Password</Form.Label>
+        <Form.Control
+          type="password"
+          value={smtp.password}
+          onChange={(e) =>
+            setSmtp({ ...smtp, password: e.target.value })
+          }
+        />
+      </Col>
+    
+      <Col md={6}>
+        <Form.Label>From Email</Form.Label>
+        <Form.Control
+          type="email"
+          value={smtp.fromEmail}
+          onChange={(e) =>
+            setSmtp({ ...smtp, fromEmail: e.target.value })
+          }
+        />
+      </Col>
+    </Row>
+
+    <Button
+      size="sm"
+      variant="primary"
+      onClick={() => alert("SMTP connection successful")}
+    >
+      Test Connection
+    </Button>
+    <hr/>
+
+        <Row>
+        <h6 className="text-primary mb-3">CRM</h6>
+
+        <Row className="mb-3">
+          <Col md={6}>
+            <Form.Label>CRM Provider</Form.Label>
+            <Form.Select
+              value={crm.provider}
+              onChange={(e) =>
+                setCrm({ ...crm, provider: e.target.value })
+              }
+            >
+              <option value="">Select CRM</option>
+              <option value="Salesforce">Salesforce</option>
+              <option value="HubSpot">HubSpot</option>
+              <option value="Zoho">Zoho</option>
+            </Form.Select>
+          </Col>
+        </Row>
+
+        <Row className="mb-3">
+          <Col md={6}>
+            <Form.Label>API Credentials</Form.Label>
+            <Form.Control
+              type="password"
+              placeholder="API Key / Token"
+              value={crm.apiKey}
+              onChange={(e) =>
+                setCrm({ ...crm, apiKey: e.target.value })
+              }
+            />
+          </Col>
+        </Row>
+      <Row className="mb-4">
+        <Col md={6} className="d-flex align-items-center gap-2">
+          <Button
+            size="sm"
+            variant="primary"
+          >
+            Sync settings
+          </Button>
+        </Col>
+      </Row>
+
+        </Row>
+
+         <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>Add Webhook</Modal.Title>
+          </Modal.Header>
+
+          <Modal.Body>
+            <Form>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Webhook Name</Form.Label>
+                <Form.Control
+                  value={newWebhook.name}
+                  onChange={(e) =>
+                    setNewWebhook({ ...newWebhook, name: e.target.value })
+                  }
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Webhook URL</Form.Label>
+                <Form.Control
+                  type="url"
+                  value={newWebhook.url}
+                  onChange={(e) =>
+                    setNewWebhook({ ...newWebhook, url: e.target.value })
+                  }
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Events</Form.Label>
+
+                <Select
+                  isMulti
+                  options={webhookEventOptions}
+                  placeholder="Select events"
+                  value={webhookEventOptions.filter(opt =>
+                    newWebhook.events.includes(opt.value)
+                  )}
+                  onChange={(selected) =>
+                    setNewWebhook({
+                      ...newWebhook,
+                      events: selected ? selected.map(s => s.value) : [],
+                    })
+                  }
+                  closeMenuOnSelect={false}
+                  isClearable
+
+                  menuPortalTarget={document.body}
+                  menuPosition="fixed"
+                  styles={{
+                    menuPortal: (base) => ({
+                      ...base,
+                      zIndex: 9999,
+                    }),
+                  }}
+                />
+
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Secret Key</Form.Label>
+                <Form.Control
+                  type="password"
+                  value={newWebhook.secretKey}
+                  onChange={(e) =>
+                    setNewWebhook({ ...newWebhook, secretKey: e.target.value })
+                  }
+                />
+              </Form.Group>
+
+              <Row className="mb-3">
+                <Col md={6}>
+                  <Form.Label>Retry Attempts</Form.Label>
+                  <Form.Control
+                    type="number"
+                    min={0}
+                    max={10}
+                    value={newWebhook.retryAttempts}
+                    onChange={(e) =>
+                      setNewWebhook({
+                        ...newWebhook,
+                        retryAttempts: Number(e.target.value),
+                      })
+                    }
+                  />
+                </Col>
+
+                <Col md={6}>
+                  <Form.Label>Timeout (seconds)</Form.Label>
+                  <Form.Control
+                    type="number"
+                    min={5}
+                    max={120}
+                    value={newWebhook.timeout}
+                    onChange={(e) =>
+                      setNewWebhook({
+                        ...newWebhook,
+                        timeout: Number(e.target.value),
+                      })
+                    }
+                  />
+                </Col>
+              </Row>
+
+              <Form.Check
+                type="switch"
+                label="Active"
+                checked={newWebhook.active}
+                onChange={(e) =>
+                  setNewWebhook({
+                    ...newWebhook,
+                    active: e.target.checked,
+                  })
+                }
+              />
+
+            </Form>
+          </Modal.Body>
+
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowModal(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleAddWebhook}>
+              Save
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+
+        <Modal
+        show={showEditModal}
+        onHide={() => setShowEditModal(false)}
+        centered
+        >
+        <Modal.Header closeButton>
+            <Modal.Title>Edit Webhook</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+            <Form>
+            <Form.Group className="mb-3">
+                <Form.Label>Name</Form.Label>
+                <Form.Control
+                value={editWebhook.name}
+                onChange={(e) =>
+                    setEditWebhook({ ...editWebhook, name: e.target.value })
+                }
+                />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+                <Form.Label>URL</Form.Label>
+                <Form.Control
+                value={editWebhook.url}
+                onChange={(e) =>
+                    setEditWebhook({ ...editWebhook, url: e.target.value })
+                }
+                />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+                <Form.Label>Events</Form.Label>
+                <Form.Control
+                value={editWebhook.events}
+                onChange={(e) =>
+                    setEditWebhook({ ...editWebhook, events: e.target.value })
+                }
+                />
+            </Form.Group>
+
+            <Form.Check
+                type="switch"
+                label="Active"
+                checked={editWebhook.active}
+                onChange={(e) =>
+                setEditWebhook({
+                    ...editWebhook,
+                    active: e.target.checked,
+                })
+                }
+            />
+            </Form>
+        </Modal.Body>
+
+        <Modal.Footer>
+            <Button
+            variant="secondary"
+            onClick={() => setShowEditModal(false)}
+            >
+            Cancel
+            </Button>
+            <Button variant="primary" onClick={handleUpdateWebhook}>
+            Update
+            </Button>
+        </Modal.Footer>
+        </Modal>
+
+
+      </Card.Body>
+    </Card>
+  );
+};
+
+export default SettingsIntegrations;

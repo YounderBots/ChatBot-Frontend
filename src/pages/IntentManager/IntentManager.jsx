@@ -3,78 +3,10 @@ import IntentTable from './components/IntentTable/IntentTable';
 import IntentGrid from './components/IntentGrid/IntentGrid';
 import IntentModal from './components/IntentModel/IntentModel';
 import TestPanel from './components/Testpanel/TestPanel';
-
+import { INITIAL_INTENTS } from './Dummy';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import './Theme.css';
-
-// Data
-const INITIAL_INTENTS = [
-    {
-        id: 1,
-        name: 'greeting',
-        displayName: 'Greeting',
-        category: 'General',
-        trainingPhrases: 12,
-        responses: 3,
-        usage: 1250,
-        confidence: 98,
-        status: 'Active',
-        lastModified: '2023-10-15',
-        description: 'Handles user greetings like hello, hi, etc.'
-    },
-    {
-        id: 2,
-        name: 'check_balance',
-        displayName: 'Check Balance',
-        category: 'Account',
-        trainingPhrases: 25,
-        responses: 2,
-        usage: 850,
-        confidence: 92,
-        status: 'Active',
-        lastModified: '2023-10-14',
-        description: 'Allows users to check their current account balance.'
-    },
-    {
-        id: 3,
-        name: 'transfer_funds',
-        displayName: 'Transfer Funds',
-        category: 'Payments',
-        trainingPhrases: 40,
-        responses: 5,
-        usage: 600,
-        confidence: 88,
-        status: 'Inactive',
-        lastModified: '2023-10-10',
-        description: 'Initiates a fund transfer process between accounts.'
-    },
-    {
-        id: 4,
-        name: 'support_contact',
-        displayName: 'Contact Support',
-        category: 'Support',
-        trainingPhrases: 15,
-        responses: 1,
-        usage: 300,
-        confidence: 95,
-        status: 'Active',
-        lastModified: '2023-10-12',
-        description: 'Provides contact information for customer support.'
-    },{
-        id: 5,
-        name: 'contact',
-        displayName: 'Contact',
-        category: 'Support',
-        trainingPhrases: 5,
-        responses: 1,
-        usage: 320,
-        confidence: 96,
-        status: 'Active',
-        lastModified: '2023-10-12',
-        description: 'Provides information for customer support.'
-    }
-];
 
 const IntentManager = () => {
     const [viewMode, setViewMode] = useState('table');
@@ -82,6 +14,10 @@ const IntentManager = () => {
     const [isTestPanelOpen, setIsTestPanelOpen] = useState(false);
     const [selectedIntent, setSelectedIntent] = useState(null);
     const [intents, setIntents] = useState(INITIAL_INTENTS);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [intentToDelete, setIntentToDelete] = useState(null);
+    const [selectedIds, setSelectedIds] = useState([]);
+
 
 
     const handleEdit = (intent) => {
@@ -90,9 +26,25 @@ const IntentManager = () => {
     };
 
     const handleDelete = (intent) => {
-    setIntents((prevIntents) =>
-        prevIntents.filter((item) => item.id !== intent.id));
+    setIntentToDelete(intent);
+    setShowDeleteModal(true);
     };
+
+    const confirmDelete = () => {
+    setIntents((prevIntents) =>
+        prevIntents.filter((item) => item.id !== intentToDelete.id)
+    );
+
+    setShowDeleteModal(false);
+    setIntentToDelete(null);
+    };
+
+    const cancelDelete = () => {
+        setShowDeleteModal(false);
+        setIntentToDelete(null);
+    };
+
+
 
     const handleDuplicate = (intent) => {
     const timestamp = Date.now();
@@ -115,6 +67,38 @@ const IntentManager = () => {
         setSelectedIntent(null);
         setIsModalOpen(true);
     };
+
+    const isAllSelected = intents.length > 0 && selectedIds.length === intents.length;
+
+    const toggleSelectAll = () => {
+    setSelectedIds(isAllSelected ? [] : intents.map(i => i.id));
+    };
+
+    const toggleSelectOne = (id) => {
+    setSelectedIds(prev =>
+        prev.includes(id)
+        ? prev.filter(x => x !== id)
+        : [...prev, id]
+    );
+    };
+
+    const bulkDelete = () => {
+        setIntents(prev => prev.filter(i => !selectedIds.includes(i.id)));
+        setSelectedIds([]);
+    };
+
+    const bulkUpdateStatus = (status) => {
+        setIntents(prev =>
+            prev.map(i =>
+            selectedIds.includes(i.id)
+                ? { ...i, status }
+                : i
+            )
+    );
+        setSelectedIds([]);
+    };
+
+
 
     return (
         <div className="p-4 h-100 d-flex flex-column gap-4 bg-cvq-bg overflow-auto">
@@ -139,6 +123,7 @@ const IntentManager = () => {
                             <option>All</option>
                             <option>Active</option>
                             <option>Inactive</option>
+                            <option>Inactive</option>
                         </select>
                     </div>
 
@@ -149,7 +134,50 @@ const IntentManager = () => {
                             <option>Sort by Date</option>
                         </select>
                     </div>
+                    {selectedIds.length > 0 && (
+                        <div className="input-group bg-white border rounded-3 shadow-sm px-2 py-1">
+                            <button
+                            className="form-select form-select-sm border-0 bg-transparent text-cvq-text d-flex align-items-center justify-content-between"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                            >
+                            Bulk actions
+                            </button>
 
+                            <ul className="dropdown-menu shadow-sm">
+                            <li>
+                                <button
+                                className="dropdown-item text-danger d-flex align-items-center gap-2"
+                                onClick={bulkDelete}
+                                >
+                                <i className="bi bi-trash"></i>
+                                Delete
+                                </button>
+                            </li>
+
+                            <li>
+                                <button
+                                className="dropdown-item d-flex align-items-center gap-2"
+                                onClick={() => bulkUpdateStatus('Active')}
+                                >
+                                <i className="bi bi-check-circle text-success"></i>
+                                Activate
+                                </button>
+                            </li>
+
+                            <li>
+                                <button
+                                className="dropdown-item d-flex align-items-center gap-2"
+                                onClick={() => bulkUpdateStatus('Inactive')}
+                                >
+                                <i className="bi bi-slash-circle text-warning"></i>
+                                Deactivate
+                                </button>
+                            </li>
+                            </ul>
+                        </div>
+                        )}
                     <div className="btn-group bg-light p-1 rounded-2">
                         <button
                             className={`btn btn-sm border-0 rounded ${viewMode === 'grid'
@@ -174,7 +202,6 @@ const IntentManager = () => {
                         </button>
                     </div>
 
-
                     <button
                         className="btn btn-primary d-inline-flex align-items-center fw-semibold px-4 py-1"
                         onClick={handleAdd}
@@ -183,12 +210,86 @@ const IntentManager = () => {
                         <i className="bi bi-plus-lg"></i> Add Intent
                     </button>
                 </div>
+
+            {showDeleteModal && (
+                <>
+                    {/* Backdrop */}
+                    <div className="modal-backdrop fade show"></div>
+
+                    {/* Modal */}
+                    <div
+                        className="modal fade show d-block"
+                        tabIndex="-1"
+                        role="dialog"
+                    >
+                        <div className="modal-dialog modal-dialog-centered modal-sm">
+                            <div className="modal-content border-0 shadow-lg rounded-4">
+
+                                <div className="modal-header border-0 pb-0">
+                                    <h5 className="modal-title text-cvq-blue-900 fw-semibold">
+                                        Confirm Delete
+                                    </h5>
+                                    <button
+                                        type="button"
+                                        className="btn-close"
+                                        onClick={cancelDelete}
+                                    />
+                                </div>
+                                <div className="modal-body text-center px-4">
+                                    <div
+                                        className="mx-auto mb-3 d-flex align-items-center justify-content-center"
+                                        style={{
+                                            width: 56,
+                                            height: 56,
+                                            borderRadius: '50%',
+                                            border: '1px solid #f21c32',
+                                            color: '#f21c32', 
+                                            fontSize: 22
+                                        }}
+                                    >
+                                        <i className="bi bi-x-lg icon-danger"></i>
+
+                                    </div>
+
+                                    <p className="mb-1 fw-medium text-cvq-text">
+                                        Are you sure you want to delete this intent?
+                                    </p>
+
+                                    <p className="small text-muted mb-0">
+                                        <strong>{intentToDelete?.displayName}</strong> will be permanently removed.
+                                    </p>
+                                </div>
+                                <div className="modal-footer border-0 pt-0 d-flex gap-2 justify-content-center">
+                                    <button
+                                        className="btn btn-light px-4"
+                                        onClick={cancelDelete}
+                                    >
+                                        Cancel
+                                    </button>
+
+                                    <button
+                                        className="btn btn-danger px-4"
+                                        onClick={confirmDelete}
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
+
+
             </div>
 
             {/* Content */}
             {viewMode === 'table' ? (
                 <IntentTable
                     intents={intents}
+                    selectedIds={selectedIds}
+                    onToggleAll={toggleSelectAll}
+                    onToggleOne={toggleSelectOne}
                     onEdit={handleEdit}
                     onDuplicate={handleDuplicate}
                     onDelete={handleDelete}
@@ -196,6 +297,8 @@ const IntentManager = () => {
             ) : (
                 <IntentGrid
                     intents={intents}
+                    selectedIds={selectedIds}
+                    onToggleOne={toggleSelectOne}
                     onEdit={handleEdit}
                     onDuplicate={handleDuplicate}
                     onDelete={handleDelete}

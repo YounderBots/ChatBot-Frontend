@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import NormalLayout from '../../components/NormalLayout';
-import { Button, Card, ProgressBar, Form, Modal, Row, Col, Container } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { ComposedChart, ScatterChart, Scatter, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Area, PieChart, Pie, Legend, Cell } from "recharts";
-import "./Dashboard.css";
 import html2canvas from "html2canvas";
-import { MessageSquare, Users, Timer, CheckCircle } from "lucide-react";
+import { CheckCircle, MessageSquare, Timer, Users } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { Button, Card, Col, Form, Modal, ProgressBar, Row } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { Area, CartesianGrid, Cell, Legend, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import NormalLayout from '../../components/NormalLayout';
+import "./Dashboard.css";
 import PeakHoursHeatmap from './components/PeakHoursHeatmap';
 import { heatmapData } from './components/heatmapData';
 

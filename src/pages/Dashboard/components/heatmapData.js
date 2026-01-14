@@ -59,16 +59,16 @@ export const heatmapData = [
       hour < 6
         ? 1
         : hour < 9
-        ? 18
-        : hour < 12
-        ? 40
-        : hour < 15
-        ? 48
-        : hour < 18
-        ? 42
-        : hour < 21
-        ? 28
-        : 10,
+          ? 18
+          : hour < 12
+            ? 40
+            : hour < 15
+              ? 48
+              : hour < 18
+                ? 42
+                : hour < 21
+                  ? 28
+                  : 10,
   })),
 
   // Wednesday
@@ -79,16 +79,16 @@ export const heatmapData = [
       hour < 6
         ? 2
         : hour < 9
-        ? 20
-        : hour < 12
-        ? 45
-        : hour < 15
-        ? 55
-        : hour < 18
-        ? 48
-        : hour < 21
-        ? 32
-        : 12,
+          ? 20
+          : hour < 12
+            ? 45
+            : hour < 15
+              ? 55
+              : hour < 18
+                ? 48
+                : hour < 21
+                  ? 32
+                  : 12,
   })),
 
   // Thursday
@@ -99,16 +99,16 @@ export const heatmapData = [
       hour < 6
         ? 2
         : hour < 9
-        ? 22
-        : hour < 12
-        ? 48
-        : hour < 15
-        ? 60
-        : hour < 18
-        ? 52
-        : hour < 21
-        ? 36
-        : 14,
+          ? 22
+          : hour < 12
+            ? 48
+            : hour < 15
+              ? 60
+              : hour < 18
+                ? 52
+                : hour < 21
+                  ? 36
+                  : 14,
   })),
 
   // Friday
@@ -119,16 +119,16 @@ export const heatmapData = [
       hour < 6
         ? 3
         : hour < 9
-        ? 25
-        : hour < 12
-        ? 55
-        : hour < 15
-        ? 65
-        : hour < 18
-        ? 58
-        : hour < 21
-        ? 40
-        : 20,
+          ? 25
+          : hour < 12
+            ? 55
+            : hour < 15
+              ? 65
+              : hour < 18
+                ? 58
+                : hour < 21
+                  ? 40
+                  : 20,
   })),
 
   // Saturday
@@ -139,15 +139,15 @@ export const heatmapData = [
       hour < 6
         ? 1
         : hour < 9
-        ? 10
-        : hour < 12
-        ? 25
-        : hour < 15
-        ? 30
-        : hour < 18
-        ? 28
-        : hour < 21
-        ? 20
-        : 8,
+          ? 10
+          : hour < 12
+            ? 25
+            : hour < 15
+              ? 30
+              : hour < 18
+                ? 28
+                : hour < 21
+                  ? 20
+                  : 8,
   })),
 ];
