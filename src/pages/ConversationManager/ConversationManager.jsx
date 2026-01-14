@@ -22,7 +22,7 @@ const ConversationManager = () => {
 
 
 
-  const totalPages = 5
+  const totalPages = 3
 
 
   const toggleIntent = (intent) => {
@@ -101,140 +101,143 @@ const ConversationManager = () => {
         tabTitle: "Conversations",
         tabKey: "Conversations",
         tabContent: <>
+          <Row>
 
-          <Row className="g-1">
-            <Form.Label className="text-primary">Filters</Form.Label><br></br>
-            <Form.Label className="mt-3 text-primary">Chat Search</Form.Label>
-            <InputGroup>
-              <InputGroup.Text>
-                <Search size={16} />
-              </InputGroup.Text>
-              <Form.Control
-                placeholder="Search by message or session ID"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-              {search && (
-                <Button variant="outline-secondary" onClick={() => setSearch("")}>
-                  <X size={16} />
-                </Button>
-              )}
-            </InputGroup>
-            <Form.Label className="mt-2 text-primary">Date Range</Form.Label>
+            <Row className="g-2 align-items-center">
 
-            <Row>
-              <Col>
-                <Form.Label className="mt-2 text-primary">Start Date</Form.Label>
-                <Form.Control
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
+              <Col xs={12} md={6}>
+                <Row className="g-1 align-items-end">
+                  <Col xs={12} md={6}>
+                    <Form.Label className="text-primary">Chat Search</Form.Label>
+                    <InputGroup>
+                      <InputGroup.Text>
+                        <Search size={16} />
+                      </InputGroup.Text>
+                      <Form.Control
+                        placeholder="Search by message or session ID"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                      />
+                      {search && (
+                        <Button
+                          variant="outline-secondary"
+                          onClick={() => setSearch("")}
+                        >
+                          <X size={16} />
+                        </Button>
+                      )}
+                    </InputGroup>
+                  </Col>
+
+                                  <Col xs={6} md={3}>
+                    <Form.Label className="text-primary">Start Date</Form.Label>
+                    <Form.Control
+                      className="w-400"
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                    />
+                  </Col>
+
+                              <Col xs={6} md={3}>
+                    <Form.Label className="text-primary mt-0">End Date</Form.Label>
+                    <Form.Control
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                    />
+                  </Col>
+
+                </Row>
+              </Col>
+
+              <Col xs={12} md={6} >
+                <Form.Label className="text-primary">Confidence Range</Form.Label>
+
+                <div className="d-flex justify-content-between small ">
+                  <span >Min {confidence[0]}%</span>
+                  <span>Max {confidence[1]}%</span>
+                </div>
+
+                <Form.Range
+                  min={0}
+                  max={100}
+                  value={confidence[0]}
+                  onChange={(e) =>
+                    setConfidence([Number(e.target.value), confidence[1]])
+                  }
+                />
+
+                <Form.Range
+                  min={0}
+                  max={100}
+                  value={confidence[1]}
+                  onChange={(e) =>
+                    setConfidence([confidence[0], Number(e.target.value)])
+                  }
                 />
               </Col>
-              <Col>
-                <Form.Label className="mt-2 text-primary">End Date</Form.Label>
-                <Form.Control
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                />
+
+              <Col xs={12} md={6}>
+                <Form.Label className="text-primary">Intent</Form.Label>
+
+                <Row>
+                  {intents.map((intent) => (
+                    <Col xs={12} sm={6} key={intent} className="mb-2">
+                      <Form.Check
+                        type="checkbox"
+                        label={intent}
+                        className="text-truncate"
+                        checked={selectedIntents.includes(intent)}
+                        onChange={() => toggleIntent(intent)}
+                      />
+                    </Col>
+                  ))}
+                </Row>
+
+                <div className="text-end mt-2">
+                  <Button
+                    size="sm"
+                    style={{
+                      backgroundColor: "#0d3357",
+                      fontSize: "13px",
+                    }}
+                    onClick={() => setSelectedIntents([])}
+                  >
+                    Clear all
+                  </Button>
+                </div>
               </Col>
-            </Row>
 
-            <Row className="mt-2">
-              <Form.Label className="mt-3 text-primary">Intent</Form.Label>
-              {intents.map((intent) => (
-                <Col
-                  key={intent}
-                  xs={12}
-                  sm={6}
-
-                  className="mb-2"
-                >
-                  <Form.Check
-                    key={intent}
-                    type="checkbox"
-                    className="text-truncate"
-                    label={intent}
-                    checked={selectedIntents.includes(intent)}
-                    onChange={() => toggleIntent(intent)}
-                  />
-                </Col>
-              ))}
-            </Row>
-
-            <div className="text-end mt-1">
-              <Button
-                className="text-light"
-                style={{ cursor: "pointer", backgroundColor: "#0d3357", fontSize: "13px" }}
-                onClick={() => setSelectedIntents([])}
-              >
-                Clear all
-              </Button>
-            </div>
-
-            <Form.Label className="mt-3 text-primary">Confidence Range</Form.Label>
-            <div className="d-flex justify-content-between small">
-              <span>Min {confidence[0]}%</span>
-              <span>Max {confidence[1]}%</span>
-            </div>
-            <Form.Range
-              min={0}
-              max={100}
-              value={confidence[0]}
-              onChange={(e) =>
-                setConfidence([Number(e.target.value), confidence[1]])
-              }
-            />
-            <Form.Range
-              min={0}
-              max={100}
-              value={confidence[1]}
-              onChange={(e) =>
-                setConfidence([confidence[0], Number(e.target.value)])
-
-              }
-            />
-
-            <Form.Label className="mt-3 text-primary">Status</Form.Label>
-
-            <Row className="mt-2">
-
-              <Select
-                isMulti
-                options={[
-                  { value: 'Resolved', label: 'Resolved' },
-                  { value: 'Pending', label: 'Pending' },
-                  { value: 'Escalated', label: 'Escalated' },
-                  { value: 'Failed', label: 'Failed' },
-                ]}
-                value={statusFilter}
-                onChange={(selectedOptions) => setStatusFilter(selectedOptions)}
-              ></Select>
-
-
-            </Row>
-
-            <Row className="mt-2">
-              <Form.Label className="mt-3 text-primary">Sentiment</Form.Label>
               
-               
-              <Select
-              isMulti
-                options={[
-                  { value: "All", label: "All" },
-                { value: "Positive", label: "Positive" },
-                { value: "Neutral", label: "Neutral" },
-                { value: "Negative", label: "Negative" },
-                ]}
-              ></Select>
-                   
-               
-             
+              <Col xs={12} md={6}>
+                <Form.Label className="text-primary">Status</Form.Label>
+                <Select
+                  isMulti
+                  className="mb-3"
+                  options={[
+                    { value: "Resolved", label: "Resolved" },
+                    { value: "Pending", label: "Pending" },
+                    { value: "Escalated", label: "Escalated" },
+                    { value: "Failed", label: "Failed" },
+                  ]}
+                  value={statusFilter}
+                  onChange={(selected) => setStatusFilter(selected)}
+                />
+
+                <Form.Label className="text-primary">Sentiment</Form.Label>
+                <Select
+                  isMulti
+                  options={[
+                    { value: "All", label: "All" },
+                    { value: "Positive", label: "Positive" },
+                    { value: "Neutral", label: "Neutral" },
+                    { value: "Negative", label: "Negative" },
+                  ]}
+                />
+              </Col>
+
             </Row>
-
-
-
 
             <Col xs={12} lg={4} className="bg-light p-2 border rounded mt-2" style={{ maxHeight: "90vh", }}>
 
@@ -255,8 +258,6 @@ const ConversationManager = () => {
                       style={{ cursor: "pointer", overflowY: "auto" }}
                       onClick={() => setSelectedConversation(conv)}
                     >
-
-
                       <div
                         className="rounded-circle d-flex align-items-center justify-content-center me-md-3 mb-2 mb-md-0"
                         style={{
@@ -331,8 +332,6 @@ const ConversationManager = () => {
                   ))}
               </div>
 
-
-
               <div className="d-flex gap-2 mt-4">
                 <Button className="w-100"
                   style={{ backgroundColor: "#0d3357" }}>
@@ -343,20 +342,10 @@ const ConversationManager = () => {
                 </Button>
               </div>
 
-              <div className="mt-4">
-                <Form.Label>Items per page</Form.Label>
-                <Form.Select
-                  size="sm"
-                  value={itemsPerPage}
-                  onChange={handleItemsPerPageChange}
-                  className="mb-2"
-                >
-                  <option value={5}>5</option>
-
-                </Form.Select>
+              <div className="mt-4">    
 
                 {totalPages > 1 && (
-                  <div className="d-flex justify-content-between align-items-center px-3 py-2 border-top">
+                  <div className=" justify-content-between align-items-center border-top">
                     <small className="text-muted">
                       Page {currentPage} of {totalPages}
                     </small>
@@ -365,7 +354,7 @@ const ConversationManager = () => {
                       <ul className="pagination pagination-sm mb-0">
                         <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
                           <button
-                            className="page-link"
+                            className="page-link w-100"
                             onClick={() => handlePageChange(currentPage - 1)}
                           >
                             Prev
@@ -378,7 +367,7 @@ const ConversationManager = () => {
                             className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}
                           >
                             <button
-                              className="page-link"
+                              className="page-link g-0"
                               onClick={() => handlePageChange(i + 1)}
                             >
                               {i + 1}
@@ -388,7 +377,7 @@ const ConversationManager = () => {
 
                         <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
                           <button
-                            className="page-link"
+                            className="page-link w-auto"
                             onClick={() => handlePageChange(currentPage + 1)}
                           >
                             Next
@@ -401,7 +390,6 @@ const ConversationManager = () => {
               </div>
 
             </Col>
-
 
             <Col
               xs={12}
@@ -488,7 +476,7 @@ const ConversationManager = () => {
                   <div className="border-top pt-2">
                     <h6>Analytics</h6>
                     <div className="d-flex flex-wrap gap-3">
-                      <span>Sentiment: 😊 Positive</span>
+                      <span>Sentiment:Positive</span>
                       <span>Average Confidence: 88%</span>
                       <span>Intents Triggered: Order Status (2), Payment Issue (1)</span>
                       <span>Resolution Status: Pending</span>
@@ -502,8 +490,6 @@ const ConversationManager = () => {
                 </div>
               )}
             </Col>
-
-
 
           </Row>
         </>
