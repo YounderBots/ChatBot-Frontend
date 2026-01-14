@@ -1,17 +1,39 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 
-const IntentTable = ({ intents, onEdit, onDelete, onDuplicate }) => {
+const ITEMS_PER_PAGE = 10;
+
+const IntentTable = ({ intents, selectedIds,onToggleAll,onToggleOne,onEdit, onDelete, onDuplicate }) => {
+    const [currentPage, setCurrentPage] = useState(1);
+
+    const totalPages = Math.ceil(intents.length / ITEMS_PER_PAGE);
+
+    const paginatedIntents = useMemo(() => {
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        return intents.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+    }, [intents, currentPage]);
+
+    const handlePageChange = (page) => {
+        if (page >= 1 && page <= totalPages) {
+            setCurrentPage(page);
+        }
+    };
+
     return (
         <div className="bg-white rounded-16 shadow">
 
             <div
-                className="table-responsive overflow-auto"
-                style={{ maxHeight: '90vh' }}
-            >
+                className="table-responsive overflow-auto">
                 <table className="table table-hover mb-0">
                     <thead className="table-light sticky-top">
                         <tr>
-                            <th style={{ width: '40px' }}></th>
+                            <th style={{ width: '40px' }}>
+                                 <input
+                                    type="checkbox"
+                                    className="form-check-input"
+                                    checked={intents.length > 0 && selectedIds.length === intents.length}
+                                    onChange={onToggleAll}
+                                />
+                            </th>
                             <th>Intent Name</th>
                             <th>Display Name</th>
                             <th>Category</th>
@@ -25,11 +47,15 @@ const IntentTable = ({ intents, onEdit, onDelete, onDuplicate }) => {
                         </tr>
                     </thead>
 
-                    <tbody >
-                        {intents.map(intent => (
+                    <tbody>
+                        {paginatedIntents.map(intent => (
                             <tr key={intent.id}>
                                 <td>
-                                    <input type="checkbox" className="form-check-input" />
+                                    <input type="checkbox"
+                                    className="form-check-input"
+                                    checked={selectedIds.includes(intent.id)}
+                                    onChange={() => onToggleOne(intent.id)}
+                                    />
                                 </td>
 
                                 <td
@@ -53,16 +79,19 @@ const IntentTable = ({ intents, onEdit, onDelete, onDuplicate }) => {
                                 <td>{intent.confidence}%</td>
 
                                 <td>
-                                    <div className="form-check form-switch" onClick={(e) => e.stopPropagation()}>
+                                    <div
+                                        className="form-check form-switch"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
                                         <input
                                             className="form-check-input"
                                             type="checkbox"
                                             role="switch"
                                             checked={intent.status === 'Active'}
-                                            onChange={() => { }} // Read-only for mock
+                                            onChange={() => {}}
                                             style={{ cursor: 'pointer' }}
                                         />
-                                        <label className="form-check-label small ms-1 text-secondary" style={{ fontSize: '0.85em' }}>
+                                        <label className="form-check-label small ms-1 text-secondary">
                                             {intent.status}
                                         </label>
                                     </div>
@@ -88,16 +117,70 @@ const IntentTable = ({ intents, onEdit, onDelete, onDuplicate }) => {
 
                                         <button
                                             className="btn btn-sm btn-secondary"
-                                            onClick={() => onDelete(intent)}>
+                                            onClick={() => onDelete(intent)}
+                                        >
                                             <i className="bi bi-trash" />
                                         </button>
                                     </div>
                                 </td>
                             </tr>
                         ))}
+
+                        {paginatedIntents.length === 0 && (
+                            <tr>
+                                <td colSpan="11" className="text-center py-4 text-muted">
+                                    No intents found
+                                </td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className="d-flex justify-content-between align-items-center px-3 py-2 border-top">
+                    <small className="text-muted">
+                        Page {currentPage} of {totalPages}
+                    </small>
+
+                    <nav>
+                        <ul className="pagination pagination-sm mb-0">
+                            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                <button
+                                    className="page-link"
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                >
+                                    Prev
+                                </button>
+                            </li>
+
+                            {[...Array(totalPages)].map((_, i) => (
+                                <li
+                                    key={i}
+                                    className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}
+                                >
+                                    <button
+                                        className="page-link"
+                                        onClick={() => handlePageChange(i + 1)}
+                                    >
+                                        {i + 1}
+                                    </button>
+                                </li>
+                            ))}
+
+                            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                                <button
+                                    className="page-link"
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                >
+                                    Next
+                                </button>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            )}
         </div>
     );
 };

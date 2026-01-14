@@ -99,6 +99,15 @@
 .shadow-lg {
     box-shadow: var(--cvq-shadow-lg) !important;
 }
+.dropdown-menu {
+  z-index: 1055; /* higher than cards & tables */
+}
+
+/* Prevent parent clipping */
+.table-responsive,
+.bg-cvq-bg {
+  overflow: visible !important;
+}
 
 .table th {
     background-color: var(--cvq-gray-50) !important;
@@ -120,6 +129,7 @@
     vertical-align: middle;
     
 }
+
 
 .table-hover tbody tr:hover {
     background-color: var(--cvq-blue-100) !important;
@@ -154,3 +164,4 @@
     transform: translateY(-4px);
     border-color: var(--cvq-blue-500) !important;
 }
+
