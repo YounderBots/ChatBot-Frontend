@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import menuList from './menulist'
 import { ChevronLeft, ChevronRight, ChevronRightIcon, ChevronsLeft, User } from 'lucide-react'
 import favIconChatViq from './assets/favIconChatViq.png'
-import ChatViq from './assets/ChatViq.png'
+import ChatViq from './assets/chatviq.png'
 import dpPlaceholder from './assets/dpPlaceholder.png'
 import { Outlet, useNavigate } from "react-router-dom";
 import './AppLayout.css'
