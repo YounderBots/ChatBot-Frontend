@@ -383,7 +383,7 @@ const Analytics = () => {
   return (
     <div className="p-3 h-100">
       {/* ================= FILTER BAR ================= */}
-      <Card className="rounded-4 shadow-sm mb-3">
+      <Card className="rounded-4 shadow-sm mt-2 analytics-card">
         <Card.Body>
           <Row className="g-3 align-items-end">
             <Col md={2}>
@@ -408,18 +408,25 @@ const Analytics = () => {
               <Form.Control type="date" />
             </Col>
 
-            <Col md={3}>
+            <Col md={3} className="d-flex justify-content-end align-items-center">
               <Form.Check
-                label="Compare with previous period"
+                type="switch"
+                id="compare-switch"
                 checked={compare}
                 onChange={(e) => setCompare(e.target.checked)}
+                label={
+                  <span className="small fw-medium text-muted ms-2">
+                    Compare with previous period
+                  </span>
+                }
               />
             </Col>
 
             <Col md={3} className="text-end">
               <Button
-                size="px-4"
+                size="sm"
                 variant="outline-secondary"
+                className="border border-secondary"
               >
                 Apply Filter
               </Button>
@@ -433,7 +440,7 @@ const Analytics = () => {
         {/* TOTAL CONVERSATIONS */}
         <Col md={4}>
           <Card
-            className="rounded-4 shadow-sm h-100 cursor-pointer"
+            className="rounded-4 shadow-sm mt-2 analytics-card h-100"
             onClick={() => handleDrillDown("total_conversations")}
           >
             <Card.Body>
@@ -522,7 +529,8 @@ const Analytics = () => {
             <Modal.Footer>
               <Button
                 size="sm"
-                variant="secondary"
+                variant="outline-danger"
+                className="px-3 border border-danger"
                 onClick={() => setShowDrillModal(false)}
               >
                 Close
@@ -534,7 +542,7 @@ const Analytics = () => {
 
         {/* UNIQUE USERS */}
         <Col md={4}>
-          <Card className="rounded-4 shadow-sm h-100">
+          <Card className="rounded-4 shadow-sm mt-2 analytics-card h-100">
             <Card.Body>
               <div className="text-muted small">Unique Users</div>
               <h3 className="fw-bold mt-2">6,850</h3>
@@ -562,7 +570,7 @@ const Analytics = () => {
 
         {/* AVG MESSAGES */}
         <Col md={4}>
-          <Card className="rounded-4 shadow-sm h-100">
+          <Card className="rounded-4 shadow-sm mt-2 analytics-card h-100">
             <Card.Body>
               <div className="text-muted small">
                 Avg Messages / Conversation
@@ -577,7 +585,7 @@ const Analytics = () => {
 
         {/* RESOLUTION RATE */}
         <Col md={4}>
-          <Card className="rounded-4 shadow-sm h-100">
+          <Card className="rounded-4 shadow-sm mt-2 analytics-card h-100">
             <Card.Body>
               <div className="text-muted small">Resolution Rate</div>
               <h3 className="fw-bold mt-2">84%</h3>
@@ -614,7 +622,7 @@ const Analytics = () => {
 
         {/* AVG RESPONSE TIME */}
         <Col md={4}>
-          <Card className="rounded-4 shadow-sm h-100">
+          <Card className="rounded-4 shadow-sm mt-2 analytics-card h-100">
             <Card.Body>
               <div className="text-muted small">Avg Response Time</div>
               <h3 className="fw-bold mt-2 text-success">1.2s</h3>
@@ -637,7 +645,7 @@ const Analytics = () => {
 
         {/* CUSTOMER SATISFACTION */}
         <Col md={4}>
-          <Card className="rounded-4 shadow-sm h-100">
+          <Card className="rounded-4 shadow-sm mt-2 analytics-card h-100">
             <Card.Body>
               <div className="text-muted small">
                 Customer Satisfaction
@@ -657,7 +665,7 @@ const Analytics = () => {
 
         {/* ================== CHART 1 (12 COL) ================== */}
         <Col md={12}>
-          <Card className="rounded-4 shadow-sm analytics-chart-card">
+          <Card className="rounded-4 shadow-sm mt-2 analytics-card">
             <Card.Body className="analytics-chart-body">
               {/* Header */}
               <div className="analytics-chart-header">
@@ -668,6 +676,7 @@ const Analytics = () => {
                 <Button
                   size="sm"
                   variant="outline-secondary"
+                  className="border border-secondary"
                   onClick={exportPNG}
                   disabled={!chartRef.current}
                 >
@@ -704,7 +713,7 @@ const Analytics = () => {
 
         {/* ================== CHART 2 (6 COL) ================== */}
         <Col md={6}>
-          <Card className="rounded-4 shadow-sm mt-2">
+          <Card className="rounded-4 shadow-sm mt-2 analytics-card">
             <Card.Body>
               {/* Header */}
               <div className="d-flex justify-content-between align-items-center mb-3">
@@ -791,7 +800,7 @@ const Analytics = () => {
 
         {/* ================== CHART 4 (12 COL) ================== */}
         <Col md={12}>
-          <Card className="rounded-4 shadow-sm analytics-card mt-2">
+          <Card className="rounded-4 shadow-sm mt-2 analytics-card">
             <Card.Body className="analytics-card-body">
 
               <h6 className="analytics-card-title">
@@ -843,7 +852,7 @@ const Analytics = () => {
 
         {/* ================== CHART 5 (6 COL) ================== */}
         <Col md={12}>
-          <Card className="rounded-4 shadow-sm">
+          <Card className="rounded-4 shadow-sm mt-2 analytics-card">
             <Card.Body>
 
               <h6 className="fw-semibold mb-3">
@@ -913,7 +922,7 @@ const Analytics = () => {
 
         {/* ================== CHART 6 (6 COL) ================== */}
         <Col md={12}>
-          <Card className="rounded-4 shadow-sm mt-2">
+          <Card className="rounded-4 shadow-sm mt-2 analytics-card">
             <Card.Body>
               <h6 className="fw-semibold mb-3"> User Journey Funnel </h6>
               <ResponsiveContainer width="100%" height={360}>
@@ -954,6 +963,7 @@ const Analytics = () => {
                   <Button
                     size="sm"
                     variant="outline-secondary"
+                    className="border border-secondary"
                     onClick={() => setShowFilterModal(true)}
                   >
                     Apply Filter
@@ -962,6 +972,7 @@ const Analytics = () => {
                   <Button
                     size="sm"
                     variant="outline-secondary"
+                    className="border border-secondary"
                     onClick={exportCSV}
                   >
                     Export CSV
@@ -1012,9 +1023,10 @@ const Analytics = () => {
                           <Button
                             size="sm"
                             variant="outline-secondary"
+                            className="border border-secondary"
                             onClick={() => handleViewDetails(row)}
                           >
-                            <FaEye /> View
+                            View
                           </Button>
 
                         </td>
@@ -1022,6 +1034,8 @@ const Analytics = () => {
                     ))}
                   </tbody>
                 </Table>
+
+                {/*--------------- Table Filter ---------------*/}
                 <Modal
                   show={showFilterModal}
                   onHide={() => setShowFilterModal(false)}
@@ -1037,12 +1051,9 @@ const Analytics = () => {
                         <Col md={5}>
                           <strong>{col.label}</strong>
                         </Col>
-
-                        <Col md={7}>
+                        <Col md={7} className="d-flex gap-4">
                           <Form.Check
-                            inline
                             type="radio"
-                            label="ASC"
                             name={`sort-${col.key}`}
                             checked={
                               pendingSort.key === col.key &&
@@ -1051,12 +1062,15 @@ const Analytics = () => {
                             onChange={() =>
                               setPendingSort({ key: col.key, direction: "asc" })
                             }
+                            label={
+                              <span className="small fw-medium ms-2 mt-2">
+                                ASC
+                              </span>
+                            }
                           />
 
                           <Form.Check
-                            inline
                             type="radio"
-                            label="DESC"
                             name={`sort-${col.key}`}
                             checked={
                               pendingSort.key === col.key &&
@@ -1065,30 +1079,38 @@ const Analytics = () => {
                             onChange={() =>
                               setPendingSort({ key: col.key, direction: "desc" })
                             }
+                            label={
+                              <span className="small fw-medium ms-2 mt-2">
+                                DESC
+                              </span>
+                            }
                           />
                         </Col>
                       </Row>
                     ))}
                   </Modal.Body>
-
                   <Modal.Footer>
                     <Button
-                      variant="secondary"
                       size="sm"
+                      variant="outline-danger"
+                      className="px-3 border border-danger"
                       onClick={() => setShowFilterModal(false)}
                     >
                       Cancel
                     </Button>
 
                     <Button
-                      variant="secondary"
                       size="sm"
+                      variant="outline-success"
+                      className="px-3 border border-success"
                       onClick={applyTableFilter}
                     >
                       Apply
                     </Button>
                   </Modal.Footer>
                 </Modal>
+
+                {/* ------------------ Intent Details -------------------- */}
                 <Modal
                   show={!!selectedIntent}
                   onHide={() => setSelectedIntent(null)}
@@ -1126,11 +1148,11 @@ const Analytics = () => {
                       <div className="text-muted">No data available</div>
                     )}
                   </Modal.Body>
-
                   <Modal.Footer>
                     <Button
                       size="sm"
-                      variant="secondary"
+                      variant="outline-danger"
+                      className="px-3 border border-danger"
                       onClick={() => setSelectedIntent(null)}
                     >
                       Close
@@ -1190,6 +1212,7 @@ const Analytics = () => {
                         <Button
                           size="sm"
                           variant="outline-secondary"
+                          className=" border border-secondary"
                           onClick={() => {
                             setSelectedSession(row);
                             setShowSessionModal(true);
@@ -1233,7 +1256,8 @@ const Analytics = () => {
           <Modal.Footer>
             <Button
               size="sm"
-              variant="secondary"
+              variant="outline-danger"
+              className="px-3 border border-danger"
               onClick={() => setShowSessionModal(false)}
             >
               Close
@@ -1296,17 +1320,23 @@ const Analytics = () => {
 
                 {/* Export Format */}
                 <Col xs={12} md={4}>
-                  <Form.Label>Format</Form.Label>
-
-                  <div className="d-flex flex-column flex-sm-row flex-wrap gap-2 mt-2">
+                  <Form.Label className="form-label small mb-1">
+                    Format
+                  </Form.Label>
+                  <div className="d-flex align-items-center flex-wrap mt-2 gap-2">
                     {["pdf", "csv", "excel", "json"].map((fmt) => (
                       <Form.Check
                         key={`format-${fmt}`}
                         type="radio"
-                        label={fmt.toUpperCase()}
+                        inline
                         name="export-format"
                         checked={exportFormat === fmt}
                         onChange={() => setExportFormat(fmt)}
+                        label={
+                          <span className="small text-muted fw-medium ms-1">
+                            {fmt.toUpperCase()}
+                          </span>
+                        }
                       />
                     ))}
                   </div>
@@ -1317,6 +1347,7 @@ const Analytics = () => {
                   <Button
                     size="sm"
                     variant="outline-secondary"
+                    className="px-3 border border-secondary"
                     onClick={generateReport}
                     disabled={generating || (scheduleEnabled && !emailTo)}
                   >
@@ -1324,15 +1355,21 @@ const Analytics = () => {
                   </Button>
                 </Col>
 
+
                 {/* Schedule Toggle */}
-                <Col md={12}>
+                <Col md={12} className="d-flex align-items-center">
                   <Form.Check
                     type="switch"
-                    label="Schedule Report"
+                    id="schedule-switch"
                     checked={scheduleEnabled}
                     onChange={(e) => setScheduleEnabled(e.target.checked)}
+                    className="me-2"
                   />
+                  <span className="fw-medium">
+                    Schedule Report
+                  </span>
                 </Col>
+
 
                 {scheduleEnabled && (
                   <>
@@ -1424,7 +1461,6 @@ const Analytics = () => {
                     </Card.Body>
                   </Card>
                 </Col>
-
               </Row>
             </Card.Body>
           </Card>
