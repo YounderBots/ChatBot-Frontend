@@ -5,7 +5,7 @@ const SettingsAppearance = () => {
  
   const defaultSettings = {
   primaryColor: "#0d6efd",
-  headerColor: "#0d6efd",
+  headerColor: "#f1f3f5",
   secondaryColor: "#f1f3f5",
   fontFamily: "Sans-serif",
 
@@ -27,8 +27,6 @@ const [settings, setSettings] = useState(defaultSettings);
 const handleReset = () => {
   setSettings(defaultSettings);
 };
-
-
 
   return (
     <Card className="border-0">
@@ -250,26 +248,54 @@ const handleReset = () => {
         {/* PREVIEW */}
         <h6 className="text-primary mb-3">Preview</h6>
 
-        <div
-          style={{
-            background: settings.primaryColor,
-            color: "#fff",
-            width:
-              settings.widgetSize === "small"
-                ? "220px"
-                : settings.widgetSize === "large"
-                ? "320px"
-                : "260px",
-            borderRadius: "12px",
-            padding: "12px",
-            fontFamily: settings.fontFamily,
-          }}
-        >
-          <strong>{settings.chatBubbleText}</strong>
-          <div style={{ fontSize: "12px", marginTop: "8px" }}>
-            Hello! How can I help you?
-          </div>
+     <div
+      style={{
+        background: settings.secondaryColor,
+        width:
+          settings.widgetSize === "small"
+            ? "220px"
+            : settings.widgetSize === "large"
+            ? "320px"
+            : "260px",
+        borderRadius: "14px",
+        fontFamily: settings.fontFamily,
+        position: "relative",
+        boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          background: settings.primaryColor,
+          color: settings.headerColor,
+          padding: "10px 12px",
+          fontWeight: "600",
+          fontSize: "14px",
+        }}
+      >
+        {settings.chatBubbleText}
+      </div>
+
+      <div style={{ padding: "12px", color: "#000" }}>
+        <div style={{ fontSize: "13px" }}>
+          Hello! How can I help you?
         </div>
+      </div>
+
+      <div
+        style={{
+          position: "absolute",
+          bottom: "-18px",
+          right: settings.widgetPosition === "bottom-right" ? "0" : "auto",
+          left: settings.widgetPosition === "bottom-left" ? "0" : "auto",
+          fontSize: "10px",
+          color: "#6c757d",
+          textTransform: "capitalize",
+        }}
+      >
+        {settings.widgetPosition.replace("-", " ")}
+      </div>
+    </div>
 
         <div className="mt-3">
           <Button size="sm" variant="danger"  onClick={handleReset}>
