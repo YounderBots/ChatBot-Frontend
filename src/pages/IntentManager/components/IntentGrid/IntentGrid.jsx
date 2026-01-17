@@ -1,4 +1,5 @@
     import React, { useState } from 'react';
+    import { Edit2, Trash2, Copy } from "lucide-react";
 
     const ITEMS_PER_PAGE = 12;
 
@@ -18,17 +19,22 @@
 
     const PAGE_WINDOW = 3;
 
-    const getPageNumbers = () => {
-        const startPage =
-            Math.floor((currentPage - 1) / PAGE_WINDOW) * PAGE_WINDOW + 1;
+const getPageNumbers = () => {
+    let start = Math.max(1, currentPage - 1);
+    let end = start + PAGE_WINDOW - 1;
 
-        const endPage = Math.min(startPage + PAGE_WINDOW - 1, totalPages);
+    // Fix overflow on last pages
+    if (end > totalPages) {
+        end = totalPages;
+        start = Math.max(1, end - PAGE_WINDOW + 1);
+    }
 
-        return Array.from(
-            { length: endPage - startPage + 1 },
-            (_, i) => startPage + i
-        );
-    };
+    return Array.from(
+        { length: end - start + 1 },
+        (_, i) => start + i
+    );
+};
+
 
         return (
             <>
@@ -113,25 +119,35 @@
                                         </div>
                                     </div>
 
-                                    <div className="d-flex gap-2 mt-auto">
-                                        <button
-                                            className="btn btn-secondary w-100 fw-semibold"
+                                    <div className="d-flex gap-5 mt-auto">
+                                        <Edit2
+                                            size={16}
+                                            className="cursorPointer"
                                             onClick={() => onEdit(intent)}
-                                        >
-                                            <i className="bi bi-pencil"></i>
-                                        </button>
-                                        <button
+                                        />
+                                        <Copy
+                                            size={16}
+                                            className="cursorPointer"
+                                            onClick={() => onDuplicate?.(intent)}
+                                        />
+                                        
+                                        <Trash2
+                                            size={16}
+                                            className="cursorPointer text-danger"
+                                            onClick={() => onDelete(intent)}
+                                        />
+                                        {/* <button
                                             className="btn btn-secondary w-100 fw-semibold"
                                             onClick={() => onDuplicate(intent)}
                                         >
                                             <i className="bi bi-copy"></i>
-                                        </button>
-                                        <button
+                                        </button> */}
+                                        {/* <button
                                             className="btn btn-secondary w-100 fw-semibold"
                                             onClick={() => onDelete(intent)}
                                         >
                                             <i className="bi bi-trash"></i>
-                                        </button>
+                                        </button> */}
                                     </div>
                                 </div>
                             </div>

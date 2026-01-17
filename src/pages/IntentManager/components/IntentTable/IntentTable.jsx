@@ -1,4 +1,5 @@
 import React, { useState,useEffect, useMemo } from 'react';
+import { Edit2, Trash2, Copy } from "lucide-react";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -21,9 +22,16 @@ const IntentTable = ({ intents, selectedIds,onToggleAll,onToggleOne,onEdit, onDe
 const PAGE_WINDOW = 3;
 
 const getPageNumbers = () => {
-    const startPage = Math.max(1, Math.floor((currentPage - 1) / PAGE_WINDOW) * PAGE_WINDOW + 1);
-    const endPage = Math.min(startPage + PAGE_WINDOW - 1, totalPages);
-    return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+    let start = Math.max(1, currentPage - 1);
+    let end = start + PAGE_WINDOW - 1;
+
+    // Adjust if end exceeds totalPages
+    if (end > totalPages) {
+        end = totalPages;
+        start = Math.max(1, end - PAGE_WINDOW + 1);
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
 };
 
 
@@ -109,27 +117,40 @@ const getPageNumbers = () => {
                                 <td>{intent.lastModified}</td>
 
                                 <td>
-                                    <div className="d-flex gap-2">
-                                        <button
+                                    <div className="d-flex gap-4">
+                                        <Edit2
+                                            size={16}
+                                            className="cursorPointer"
+                                            onClick={() => onEdit(intent)}
+                                        />
+                                        {/* <button
                                             className="btn btn-sm btn-secondary"
                                             onClick={() => onEdit(intent)}
                                         >
                                             <i className="bi bi-pencil" />
-                                        </button>
-
-                                        <button
+                                        </button> */}
+                                        <Copy
+                                            size={16}
+                                            className="cursorPointer"
+                                            onClick={() => onDuplicate?.(intent)}
+                                        />
+                                        {/* <button
                                             className="btn btn-sm btn-secondary"
                                             onClick={() => onDuplicate?.(intent)}
                                         >
                                             <i className="bi bi-copy" />
-                                        </button>
-
-                                        <button
+                                        </button> */}
+                                        <Trash2
+                                            size={16}
+                                            className="cursorPointer text-danger"
+                                            onClick={() => onDelete(intent)}
+                                        />
+                                        {/* <button
                                             className="btn btn-sm btn-secondary"
                                             onClick={() => onDelete(intent)}
                                         >
                                             <i className="bi bi-trash" />
-                                        </button>
+                                        </button> */}
                                     </div>
                                 </td>
                             </tr>
