@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Table, Button, Modal, Form } from "react-bootstrap";
+import { Table, Button, Modal, Form, Card, Row, Col } from "react-bootstrap";
 import { Edit2, Trash2 } from "lucide-react";
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -184,52 +184,75 @@ export default function RolesTab() {
 
     return (
         <>
-            <div className="mt-2 d-flex justify-content-end">
-                <Button className="primaryBtn" onClick={() => openAddRole()}>
-                    Add Role
-                </Button>
-            </div>
+
+            {/* ===== ROLES HEADER ===== */}
+            <Card className="mb-3 shadow-sm border-0">
+                <Card.Body>
+                    <Row className="align-items-center g-2">
+                        <Col md={6}>
+                            <h5 className="mb-0 text-primary">Roles</h5>
+                        </Col>
+
+                        <Col md={6} className="d-flex justify-content-end">
+                            <Button size="sm" className="primaryBtn" onClick={openAddRole}>
+                                Add Role
+                            </Button>
+                        </Col>
+                    </Row>
+                </Card.Body>
+            </Card>
+
+
 
             {/* ===== ROLES TABLE ===== */}
-            <Table bordered hover responsive className="mt-3">
-                <thead className="table-light">
-                    <tr>
-                        <th>Role</th>
-                        <th className="text-center">Actions</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {roles.map((role) => (
-                        <tr key={role.key}>
-                            <td>
-                                <strong>{role.name}</strong>
-                            </td>
-                            <td className="text-center">
-                                <div className="d-flex justify-content-center gap-3">
-                                    <Edit2
-                                        size={16}
-                                        className="cursorPointer"
-                                        onClick={() => openEdit(role)}
-                                    />
-                                    <Trash2
-                                        size={16}
-                                        className="cursorPointer text-danger"
-                                        onClick={() => deleteRole(role.key)}
-                                    />
-                                </div>
-                            </td>
+            {/* ===== ROLES TABLE ===== */}
+            <Card className="shadow-sm border-0">
+                <Table hover responsive className="mb-0 align-middle">
+                    <thead className="table-light">
+                        <tr>
+                            <th>Role</th>
+                            <th className="text-center">Actions</th>
                         </tr>
-                    ))}
-                </tbody>
-            </Table>
-            
+                    </thead>
+
+                    <tbody>
+                        {roles.map((role) => (
+                            <tr key={role.key}>
+                                <td>
+                                    <strong>{role.name}</strong>
+                                </td>
+                                <td className="text-center">
+                                    <div className="d-flex justify-content-center gap-3">
+                                        <Edit2
+                                            size={16}
+                                            className="cursorPointer"
+                                            onClick={() => openEdit(role)}
+                                        />
+                                        <Trash2
+                                            size={16}
+                                            className="cursorPointer text-danger"
+                                            onClick={() => deleteRole(role.key)}
+                                        />
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </Table>
+            </Card>
+
+
 
 
             {/* ===== EDIT MODAL ===== */}
             <Modal show={showModal} onHide={() => setShowModal(false)} size="xl" centered>
                 <Modal.Header closeButton>
-                    <Modal.Title>Edit Permissions – {editingRole?.name}</Modal.Title>
+                    <Modal.Title>
+                        {roles.some(r => r.key === editingRole?.key)
+                            ? `Edit Role & Permissions – ${editingRole?.name}`
+                            : "Add Role & Permissions"}
+                    </Modal.Title>
+
                 </Modal.Header>
 
                 <Modal.Body>
@@ -311,7 +334,7 @@ export default function RolesTab() {
                         </tbody>
 
                     </Table>
-                    
+
 
                 </Modal.Body>
 
