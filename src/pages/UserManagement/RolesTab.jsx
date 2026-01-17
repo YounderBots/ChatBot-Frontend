@@ -184,6 +184,12 @@ export default function RolesTab() {
 
     return (
         <>
+            <div className="mt-2 d-flex justify-content-end">
+                <Button className="primaryBtn" onClick={() => openAddRole()}>
+                    Add Role
+                </Button>
+            </div>
+
             {/* ===== ROLES TABLE ===== */}
             <Table bordered hover responsive className="mt-3">
                 <thead className="table-light">
@@ -217,11 +223,7 @@ export default function RolesTab() {
                     ))}
                 </tbody>
             </Table>
-            <div className="mt-2 d-flex justify-content-end">
-                <Button className="primaryBtn" onClick={() => openAddRole()}>
-                    Add Role
-                </Button>
-            </div>
+            
 
 
             {/* ===== EDIT MODAL ===== */}
@@ -309,25 +311,7 @@ export default function RolesTab() {
                         </tbody>
 
                     </Table>
-                    <hr className="my-3" />
-                    <h6 className="mb-3">Section 3: Status</h6>
-                    <Form.Group className="mb-2 d-flex align-items-center justify-content-between">
-                        <Form.Label className="mb-0">Account Status</Form.Label>
-                        <Form.Check
-                            type="switch"
-                            checked={editingRole?.status ?? true}
-                            onChange={(e) => setEditingRole(prev => ({ ...prev, status: e.target.checked }))}
-                        />
-                    </Form.Group>
-
-                    <Form.Group className="mb-2 d-flex align-items-center justify-content-between">
-                        <Form.Label className="mb-0">Email Notifications</Form.Label>
-                        <Form.Check
-                            type="checkbox"
-                            checked={editingRole?.emailNotifications ?? false}
-                            onChange={(e) => setEditingRole(prev => ({ ...prev, emailNotifications: e.target.checked }))}
-                        />
-                    </Form.Group>
+                    
 
                 </Modal.Body>
 

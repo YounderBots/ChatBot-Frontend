@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import {Container,Row,Col,Form,Button,Table,Badge,Card,Modal,Image,} from "react-bootstrap";
-import {Search,Plus,Edit2,Trash2,Eye,EyeOff,RefreshCw,} from "lucide-react";
+import { Container, Row, Col, Form, Button, Table, Badge, Card, Modal, Image, } from "react-bootstrap";
+import { Search, Plus, Edit2, Trash2, Eye, EyeOff, RefreshCw, } from "lucide-react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./UserMgmt.css";
 
@@ -418,6 +418,8 @@ export default function UsersTab() {
     confirmPassword: "",
     role: "Admin",
     permissions: {},
+    status: true,
+    emailNotifications: false
   });
   const passwordStrength = getPasswordStrength(form.password);
 
@@ -452,6 +454,8 @@ export default function UsersTab() {
       password: "",
       confirmPassword: "",
       role: user.role,
+      status: user.status ?? true,                     // ✅ ADD
+      emailNotifications: user.emailNotifications ?? false // ✅ ADD
     });
     setShowModal(true);
   };
@@ -465,7 +469,9 @@ export default function UsersTab() {
         role: form.role,
         permissions: form.role === "Custom" ? {} : form.permissions,
         lastLogin: editingUser ? editingUser.lastLogin : "-",
-        status: editingUser ? editingUser.status : true,
+        // status: editingUser ? editingUser.status : true,
+        status: form.status,                       // ✅ ADD
+        emailNotifications: form.emailNotifications, // ✅ ADD
       };
 
       if (editingUser) {
@@ -786,6 +792,33 @@ export default function UsersTab() {
                   />
                 ))}
               </Form.Group>
+              <hr className="my-4" />
+
+              <h6 className="mb-3">Status</h6>
+
+              <Form.Group className="mb-3 d-flex justify-content-between align-items-center">
+                <Form.Label className="mb-0">Account Status</Form.Label>
+                <Form.Check
+                  type="switch"
+                  checked={form.status}
+                  onChange={(e) =>
+                    setForm({ ...form, status: e.target.checked })
+                  }
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-2 d-flex justify-content-between align-items-center">
+                <Form.Label className="mb-0">Email Notifications</Form.Label>
+                <Form.Check
+                  type="checkbox"
+                  checked={form.emailNotifications}
+                  onChange={(e) =>
+                    setForm({ ...form, emailNotifications: e.target.checked })
+                  }
+                />
+              </Form.Group>
+
+
 
               {/* {form.role === "Custom" && (
                 <div className="permissionTree">
