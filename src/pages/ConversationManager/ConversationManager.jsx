@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, Row, Col, Form, Button, InputGroup } from "react-bootstrap";
+import { Card, Row, Col, Form, Button, InputGroup, Modal } from "react-bootstrap";
 import { Search, X } from "lucide-react";
 import Select from "react-select";
 
@@ -15,6 +15,7 @@ const ConversationManager = () => {
   const [sentiment, setSentiment] = useState("All");
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [showConfidenceModal, setShowConfidenceModal] = useState(false);
   // const [itemsPerPage, setItemsPerPage] = useState(10);
   const [selectedConversation, setSelectedConversation] = useState(null);
 
@@ -274,13 +275,12 @@ const ConversationManager = () => {
 
   return (
 
-
-    <Card className="">
+    <Card className="shadow-sm border-0 rounded-4 p-3">
       <Card.Body>
         <h1 className="font-weight-bold text-cvq-blue-900 mb-0">Conversation</h1>
 
         <Row className="g-3 mt-1">
-          <Col xs={4} md={6} lg={3}>
+          <Col xs={4} md={6} lg={6}>
             <div className="input-group bg-white border rounded-3 shadow-sm ">
               <InputGroup>
                 <InputGroup.Text>
@@ -356,7 +356,6 @@ const ConversationManager = () => {
             </div>
           </Col>
 
-
           <Col xs={4} md={6} lg={3}>
 
             <div className="input-group bg-white rounded-3 shadow-sm">
@@ -388,9 +387,7 @@ const ConversationManager = () => {
             </div>
           </Col>
 
-
           <Col xs={4} md={6} lg={3}>
-
             <div className="input-group bg-white rounded-3 shadow-sm">
               <Select
                 isMulti
@@ -418,52 +415,32 @@ const ConversationManager = () => {
                 }}
               />
             </div>
-          </Col>
+          </Col>        
 
-
-          <Col xs={12} md={12} lg={6}>
-           
-
-            <div className="d-flex justify-content-between small">
-              <span >Min {confidence[0]}%</span>
-              <span className="text-primary">Confidence Range</span>
-              <span>Max {confidence[1]}%</span>
+          <Col xs={12} md={12} lg={3}>
+            <div className=" rounded-3 shadow-sm text-center border "
+            
+              style={{ cursor: "pointer", padding: "5px",textAlign: "center" ,backgroundColor:"#e2e8f0"}}
+               
+                onClick={() => setShowConfidenceModal(true)}
+              >
+                Confidence Range
+              
             </div>
-
-            <Form.Range
-              className="p-2"
-              min={0}
-              max={100}
-              value={confidence[0]}
-              onChange={(e) =>
-                setConfidence([Number(e.target.value), confidence[1]])
-              }
-            />
-
-            <Form.Range
-              className="p-2"
-              min={0}
-              max={100}
-              value={confidence[1]}
-              onChange={(e) =>
-                setConfidence([confidence[0], Number(e.target.value)])
-              }
-            />
-
           </Col>
 
-          <div className="d-flex gap-2 mt-0">
-            <Button className=""
-              style={{ backgroundColor: "#0d3357", }}
+          <div className="d-flex gap-2 mt-3 align-content-end justify-content-end">
+            <Button className="p-1"
+              style={{ backgroundColor: "#0d3357",width:"150px",height:"40px" }}
               onClick={handleApplyFilters}>
               Apply
             </Button>
-            <Button variant="outline-secondary" className="" onClick={resetFilters}>
+            <Button variant="outline-secondary p-1" style={{width:"150px",height:"40px"}} className="" onClick={resetFilters}>
               Reset
             </Button>
           </div>
 
-          <Col xs={12} lg={4} className="bg-light p-1 border rounded " style={{ maxHeight: "90vh", }}>
+          <Col xs={12} lg={4} className="bg-light p-1 border rounded" style={{ maxHeight: "90vh", }}>
             <div className="mt-3 g-2" >
               {filteredConversations
                 .filter(conv =>
@@ -476,13 +453,13 @@ const ConversationManager = () => {
 
                   <div
                     key={conv.id}
-                    className={`d-flex flex-column flex-md-row align-items-start align-items-md-center 
+                    className={`d-flex  flex-md-row align-items-start align-items-md-center p-2 overflow-auto mb-2 rounded 
                        ${selectedConversation?.id === conv.id ? "bg-light" : ""} `}
-                    style={{ cursor: "pointer", overflowY: "auto" }}
+                    style={{ cursor: "pointer" }}
                     onClick={() => setSelectedConversation(conv)}
                   >
                     <div
-                      className="rounded-circle d-flex align-items-center justify-content-center me-md-3 mb-2 mb-md-0"
+                      className="rounded-circle d-flex align-items-center justify-content-center m-2"
                       style={{
                         width: "44px",
                         height: "44px",
@@ -550,7 +527,7 @@ const ConversationManager = () => {
                 ))}
             </div>
 
-            <div className="mt-4">
+            <div className="">
 
               {totalPages > 1 && (
                 <div className="pagination-bar">
@@ -580,7 +557,6 @@ const ConversationManager = () => {
                 </div>
               )}
             </div>
-
           </Col>
 
           <Col
@@ -604,7 +580,6 @@ const ConversationManager = () => {
                     </div>
                   </div>
 
-
                   <div className="d-flex gap-2  p-2 rounded">
                     <Form.Select
                       size="sm"
@@ -625,8 +600,7 @@ const ConversationManager = () => {
                   </div>
                 </div>
 
-
-                <div className="flex-grow-1 overflow-auto mb-3" style={{ maxHeight: "50vh" }}>
+                <div className="flex-grow-1 overflow-auto mb-3" style={{ minHeight: "40vh" }}>
                   {selectedConversation.messages.map((msg, idx) => (
                     <div
                       key={idx}
@@ -680,8 +654,6 @@ const ConversationManager = () => {
                   ))}
                 </div>
 
-
-
                 <div className="border-top pt-2">
                   <h6>Analytics</h6>
                   <div className="d-flex flex-wrap gap-3">
@@ -691,15 +663,52 @@ const ConversationManager = () => {
                     <span>Status: {selectedConversation.status}</span>
                   </div>
                 </div>
-
               </>
             ) : (
-              <div className="flex-grow-1 d-flex align-items-center justify-content-center">
+              <div className="flex-grow-1 d-flex align-items-center justify-content-center" style={{ minHeight: "80vh" }}>
                 <p>Select a conversation to view details</p>
               </div>
             )}
           </Col>
         </Row>
+         <Modal
+            show={showConfidenceModal}
+            onHide={() => setShowConfidenceModal(false)}
+            centered
+          >
+            <Modal.Header closeButton>
+              <Modal.Title className="text-primary">Confidence Range</Modal.Title>
+            </Modal.Header>
+
+            <Modal.Body>
+              <div className="d-flex justify-content-between small mb-2">
+                <span>Min {confidence[0]}%</span>
+                
+                <span>Max {confidence[1]}%</span>
+              </div>
+
+              <Form.Range
+                className="p-2"
+                min={0}
+                max={100}
+                value={confidence[0]}
+                onChange={(e) =>
+                  setConfidence([Number(e.target.value), confidence[1]])
+                }
+              />
+
+              <Form.Range
+                className="p-2"
+                min={0}
+                max={100}
+                value={confidence[1]}
+                onChange={(e) =>
+                  setConfidence([confidence[0], Number(e.target.value)])
+                }
+              />
+            </Modal.Body>
+
+          </Modal>
       </Card.Body>
     </Card>
 
