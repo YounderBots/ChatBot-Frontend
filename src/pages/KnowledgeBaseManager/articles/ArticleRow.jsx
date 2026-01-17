@@ -1,4 +1,3 @@
-
 const ArticleRow = ({ article }) => {
   return (
     <tr>
