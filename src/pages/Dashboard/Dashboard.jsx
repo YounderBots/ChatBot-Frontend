@@ -575,7 +575,31 @@ const DashboardContent = () => {
           <div className="d-flex justify-content-between align-items-center mb-3">
             <h6 className="fw-semibold mb-0">Recent Activity</h6>
 
+            {/* View All button (below values) */}
+            {!showAllActivities && recentConversations.length > 4 && (
+              <div className="d-flex justify-content-center mt-3">
+                <Button
+                  size="sm"
+                  variant="primary"
+                  onClick={handleViewAll}
+                >
+                  View All
+                </Button>
+              </div>
+            )}
 
+            {/* View Less button (below values) */}
+            {showAllActivities && (
+              <div className="d-flex justify-content-center mt-3">
+                <Button
+                  size="sm"
+                  variant="primary"
+                  onClick={handleViewLess}
+                >
+                  View Less
+                </Button>
+              </div>
+            )}
 
           </div>
 
@@ -608,32 +632,6 @@ const DashboardContent = () => {
               </Button>
             </div>
           ))}
-          {/* View All button BELOW values */}
-          {!showAllActivities && recentConversations.length > 4 && (
-            <div className="d-flex justify-content-end mt-3">
-              <Button
-                size="sm"
-                variant="primary"
-                onClick={handleViewAll}
-              >
-                View All
-              </Button>
-            </div>
-          )}
-
-          {/* View Less button BELOW values */}
-          {showAllActivities && (
-            <div className="d-flex justify-content-end mt-3">
-              <Button
-                size="sm"
-                variant="primary"
-                onClick={handleViewLess}
-              >
-                View Less
-              </Button>
-            </div>
-          )}
-
         </Card.Body>
       </Card>
 
