@@ -419,7 +419,7 @@ const DashboardContent = () => {
               </Form.Select>
 
 
-              <Button size="sm" className="always-visible-btn" onClick={downloadChart}>
+              <Button size="sm" variant='primary' onClick={downloadChart}>
                 Download
               </Button>
             </div>
@@ -570,7 +570,7 @@ const DashboardContent = () => {
           <div className="d-flex justify-content-between align-items-center mb-3">
             <h6 className="fw-semibold mb-0">Recent Activity</h6>
             {!showAllActivities && (
-              <Button size="sm" className="always-visible-btn activity-view-btn" onClick={handleViewAll}>
+              <Button size="sm" variant='primary' onClick={handleViewAll}>
                 View All
               </Button>
             )}
@@ -597,7 +597,7 @@ const DashboardContent = () => {
               {/* Right */}
               <Button
                 size="sm"
-                className="activity-view-btn always-visible-btn"
+                variant='primary'
                 onClick={() => handleView(item)}
               >
                 View
