@@ -235,6 +235,11 @@ const DashboardContent = () => {
     setShowAllActivities(true);
   };
 
+  const handleViewLess = () => {
+    setShowAllActivities(false);
+  };
+
+
   const handleView = (conversation) => {
     setSelectedConversation(conversation);
     setShowModal(true);
@@ -569,12 +574,11 @@ const DashboardContent = () => {
         <Card.Body>
           <div className="d-flex justify-content-between align-items-center mb-3">
             <h6 className="fw-semibold mb-0">Recent Activity</h6>
-            {!showAllActivities && (
-              <Button size="sm" variant='primary' onClick={handleViewAll}>
-                View All
-              </Button>
-            )}
+
+
+
           </div>
+
 
           {(showAllActivities ? recentConversations : recentConversations.slice(0, 4)).map((item) => (
             <div key={item.id} className="activity-item">
@@ -604,6 +608,32 @@ const DashboardContent = () => {
               </Button>
             </div>
           ))}
+          {/* View All button BELOW values */}
+          {!showAllActivities && recentConversations.length > 4 && (
+            <div className="d-flex justify-content-end mt-3">
+              <Button
+                size="sm"
+                variant="primary"
+                onClick={handleViewAll}
+              >
+                View All
+              </Button>
+            </div>
+          )}
+
+          {/* View Less button BELOW values */}
+          {showAllActivities && (
+            <div className="d-flex justify-content-end mt-3">
+              <Button
+                size="sm"
+                variant="primary"
+                onClick={handleViewLess}
+              >
+                View Less
+              </Button>
+            </div>
+          )}
+
         </Card.Body>
       </Card>
 
