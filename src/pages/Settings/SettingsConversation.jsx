@@ -246,7 +246,7 @@ const removeKeyword = (index) => {
               <Col md={4} className="mb-2">
               <Button
                   size="sm"
-                  variant="outline-primary"
+                  variant="primary"
                   className="mt-2"
                   onClick={() => setShowKeywordModal(true)}
                 >

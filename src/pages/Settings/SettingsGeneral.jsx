@@ -295,7 +295,7 @@ const copyToAllDays = (sourceIndex) => {
         ))}
         <Button
         size="sm"
-        variant="outline-primary"
+        variant="primary"
         onClick={() => copyToAllDays(0)}
       >
         Copy to all days
