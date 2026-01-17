@@ -335,7 +335,7 @@ export default function UsersTab() {
                   />
                 </td>
                 <td>
-                  <div className="d-flex justify-content-center align-items-center gap-2 h-100 w-100">
+                  <div className="d-flex justify-content-center align-items-center gap-3 h-100 w-100">
 
                     <Edit2 size={16} className="cursorPointer" onClick={() => openEditUser(u)} />
                     <Trash2

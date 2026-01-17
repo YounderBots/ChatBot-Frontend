@@ -1,4 +1,5 @@
     import React, { useState } from 'react';
+    import { Edit2, Trash2, Copy } from "lucide-react";
 
     const ITEMS_PER_PAGE = 12;
 
@@ -15,6 +16,25 @@
                 setCurrentPage(page);
             }
         };
+
+    const PAGE_WINDOW = 3;
+
+const getPageNumbers = () => {
+    let start = Math.max(1, currentPage - 1);
+    let end = start + PAGE_WINDOW - 1;
+
+    // Fix overflow on last pages
+    if (end > totalPages) {
+        end = totalPages;
+        start = Math.max(1, end - PAGE_WINDOW + 1);
+    }
+
+    return Array.from(
+        { length: end - start + 1 },
+        (_, i) => start + i
+    );
+};
+
 
         return (
             <>
@@ -99,25 +119,35 @@
                                         </div>
                                     </div>
 
-                                    <div className="d-flex gap-2 mt-auto">
-                                        <button
-                                            className="btn btn-secondary w-100 fw-semibold"
+                                    <div className="d-flex gap-5 mt-auto">
+                                        <Edit2
+                                            size={16}
+                                            className="cursorPointer"
                                             onClick={() => onEdit(intent)}
-                                        >
-                                            <i className="bi bi-pencil"></i>
-                                        </button>
-                                        <button
+                                        />
+                                        <Copy
+                                            size={16}
+                                            className="cursorPointer"
+                                            onClick={() => onDuplicate?.(intent)}
+                                        />
+                                        
+                                        <Trash2
+                                            size={16}
+                                            className="cursorPointer text-danger"
+                                            onClick={() => onDelete(intent)}
+                                        />
+                                        {/* <button
                                             className="btn btn-secondary w-100 fw-semibold"
                                             onClick={() => onDuplicate(intent)}
                                         >
                                             <i className="bi bi-copy"></i>
-                                        </button>
-                                        <button
+                                        </button> */}
+                                        {/* <button
                                             className="btn btn-secondary w-100 fw-semibold"
                                             onClick={() => onDelete(intent)}
                                         >
                                             <i className="bi bi-trash"></i>
-                                        </button>
+                                        </button> */}
                                     </div>
                                 </div>
                             </div>
@@ -127,53 +157,59 @@
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                    <div className="d-flex justify-content-center mt-4">
-                        <nav>
-                            <ul className="pagination pagination-sm mb-0">
+                    <div className="grid-pagination-wrapper mt-5">
+
+                        {/* Page info */}
+                        <div className="text-center mb-2">
+                            <small className="text-muted">
+                                Page <strong>{currentPage}</strong> of <strong>{totalPages}</strong>
+                            </small>
+                        </div>
+
+                        {/* Pagination */}
+                        <nav className="custom-pagination d-flex justify-content-center">
+                            <ul className="pagination pagination-sm mb-0 align-items-center">
+
+                                {/* Prev */}
                                 <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
                                     <button
-                                        className="page-link"
+                                        className="page-link pill prev"
                                         onClick={() => handlePageChange(currentPage - 1)}
                                     >
-                                        ‹
+                                        Prev
                                     </button>
                                 </li>
 
-                                {[...Array(totalPages)].map((_, index) => {
-                                    const page = index + 1;
-                                    return (
-                                        <li
-                                            key={page}
-                                            className={`page-item ${
-                                                page === currentPage ? 'active' : ''
-                                            }`}
+                                {/* Page Numbers */}
+                                {getPageNumbers().map(page => (
+                                    <li
+                                        key={page}
+                                        className={`page-item ${currentPage === page ? 'active' : ''}`}
+                                    >
+                                        <button
+                                            className="page-link pill"
+                                            onClick={() => handlePageChange(page)}
                                         >
-                                            <button
-                                                className="page-link"
-                                                onClick={() => handlePageChange(page)}
-                                            >
-                                                {page}
-                                            </button>
-                                        </li>
-                                    );
-                                })}
+                                            {page}
+                                        </button>
+                                    </li>
+                                ))}
 
-                                <li
-                                    className={`page-item ${
-                                        currentPage === totalPages ? 'disabled' : ''
-                                    }`}
-                                >
+                                {/* Next */}
+                                <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
                                     <button
-                                        className="page-link"
+                                        className="page-link pill next"
                                         onClick={() => handlePageChange(currentPage + 1)}
                                     >
-                                        ›
+                                        Next
                                     </button>
                                 </li>
+
                             </ul>
                         </nav>
                     </div>
-                )}
+)}
+
             </>
         );
     };

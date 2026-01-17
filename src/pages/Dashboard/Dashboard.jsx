@@ -81,6 +81,46 @@ const apiGetRecentConversations = async () => ([
     confidence: 88,
     timeAgo: "5 mins ago",
   },
+  {
+    id: 3,
+    message: "I want to upgrade my account",
+    intent: "Upgrade", confidence: 80,
+    timeAgo: "10 mins ago"
+  },
+  {
+    id: 4,
+    message: "I need a refund for my last purchase",
+    intent: "Refund",
+    confidence: 95, timeAgo: "15 mins ago"
+  },
+  {
+    id: 5,
+    message: "The support response is too slow",
+    intent: "Complaint",
+    confidence: 70,
+    timeAgo: "20 mins ago"
+  },
+  {
+    id: 6,
+    message: "How do I book a new service?",
+    intent: "Booking",
+    confidence: 85,
+    timeAgo: "25 mins ago"
+  },
+  {
+    id: 7,
+    message: "Feedback for your last update",
+    intent: "Feedback",
+    confidence: 60,
+    timeAgo: "30 mins ago"
+  },
+  {
+    id: 8,
+    message: "Can I downgrade my plan?",
+    intent: "Downgrade",
+    confidence: 75,
+    timeAgo: "40 mins ago"
+  },
 ]);
 
 const DashboardCard = ({
@@ -162,6 +202,14 @@ const intentVariant = (intent) => {
       return "success";
     case "Refund":
       return "info";
+    case "Complaint":
+      return "warning";     // yellow
+    case "Booking":
+      return "secondary";   // gray
+    case "Feedback":
+      return "dark";        // dark
+    case "Downgrade":
+      return "info";       // light gray
     default:
       return "secondary";
   }
@@ -181,6 +229,11 @@ const DashboardContent = () => {
   const navigate = useNavigate();
   const [trendRange, setTrendRange] = useState("7");
 
+  const [showAllActivities, setShowAllActivities] = useState(false);
+
+  const handleViewAll = () => {
+    setShowAllActivities(true);
+  };
 
   const handleView = (conversation) => {
     setSelectedConversation(conversation);
@@ -366,7 +419,7 @@ const DashboardContent = () => {
               </Form.Select>
 
 
-              <Button size="sm" variant="outline-primary" onClick={downloadChart}>
+              <Button size="sm" variant='primary' onClick={downloadChart}>
                 Download
               </Button>
             </div>
@@ -516,62 +569,43 @@ const DashboardContent = () => {
         <Card.Body>
           <div className="d-flex justify-content-between align-items-center mb-3">
             <h6 className="fw-semibold mb-0">Recent Activity</h6>
-            <Button variant="link" size="sm" className="p-0">
-              View all
-            </Button>
+            {!showAllActivities && (
+              <Button size="sm" variant='primary' onClick={handleViewAll}>
+                View All
+              </Button>
+            )}
           </div>
 
-          {recentConversations.slice(0, 10).map((item) => (
-            <div
-              key={item.id}
-              className="d-flex align-items-center justify-content-between py-2 border-bottom"
-            >
+          {(showAllActivities ? recentConversations : recentConversations.slice(0, 4)).map((item) => (
+            <div key={item.id} className="activity-item">
               {/* Left */}
               <div className="flex-grow-1 me-3">
                 <div className="small text-muted">{item.timeAgo}</div>
-                <div className="fw-medium text-truncate activity-message">
-                  {item.message}
-                </div>
+                <div className="fw-medium text-truncate activity-message">{item.message}</div>
 
                 <div className="d-flex align-items-center gap-2 mt-1">
-                  <span
-                    className={`badge bg-${intentVariant(item.intent)}`}
-                  >
-                    {item.intent}
-                  </span>
+                  <span className={`badge bg-${intentVariant(item.intent)}`}>{item.intent}</span>
 
                   <div className="confidence-bar">
-                    <ProgressBar
-                      now={item.confidence}
-                      variant="success"
-                      style={{ height: 6 }}
-                    />
+                    <ProgressBar now={item.confidence} variant="success" style={{ height: 6 }} />
                   </div>
 
-                  <small className="text-muted">
-                    {item.confidence}%
-                  </small>
+                  <small className="text-muted">{item.confidence}%</small>
                 </div>
               </div>
 
               {/* Right */}
               <Button
                 size="sm"
-                variant="outline-primary"
+                variant='primary'
                 onClick={() => handleView(item)}
               >
                 View
               </Button>
-
             </div>
           ))}
         </Card.Body>
       </Card>
-
-
-
-
-
 
 
 
