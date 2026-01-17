@@ -3,7 +3,7 @@ import { Edit, Copy, Trash2 } from "lucide-react";
 import NewArticleDialog from "../dialog/NewArticleDialog";
 
 /* ================= MOCK DATA ================= */
-const MOCK_ARTICLES = Array.from({ length: 18 }).map((_, i) => ({
+const MOCK_ARTICLES = Array.from({ length: 50 }).map((_, i) => ({
   id: i + 1,
   title: `Sample Article ${i + 1}`,
   category:
@@ -15,13 +15,14 @@ const MOCK_ARTICLES = Array.from({ length: 18 }).map((_, i) => ({
   status:
     i % 3 === 0 ? "Published" : i % 3 === 1 ? "Draft" : "Archived",
   views: Math.floor(Math.random() * 500),
+  helpful: Math.floor(Math.random() * 100),
   updatedAt: `2026-01-${String((i % 28) + 1).padStart(2, "0")}`,
   author: i % 2 === 0 ? "Admin" : "Support",
 }));
 
 const PAGE_SIZE = 5;
 
-const ArticlesPanel = () => {
+export default function ArticlesPanel({ activeCategory = "All" }) {
   const [articles, setArticles] = useState(MOCK_ARTICLES);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -37,25 +38,56 @@ const ArticlesPanel = () => {
       const matchSearch = a.title
         .toLowerCase()
         .includes(search.toLowerCase());
+
       const matchStatus =
         statusFilter === "All" || a.status === statusFilter;
-      return matchSearch && matchStatus;
+
+      const matchCategory =
+        activeCategory === "All" || a.category === activeCategory;
+
+      return matchSearch && matchStatus && matchCategory;
     });
 
-    if (sort === "updated")
-      data.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-    if (sort === "views") data.sort((a, b) => b.views - a.views);
+    switch (sort) {
+      case "updated":
+        data.sort(
+          (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+        );
+        break;
+
+      case "az":
+        data.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+
+      case "views":
+        data.sort((a, b) => b.views - a.views);
+        break;
+
+      case "helpful":
+        data.sort((a, b) => b.helpful - a.helpful);
+        break;
+
+      default:
+        break;
+    }
 
     return data;
-  }, [articles, search, statusFilter, sort]);
+  }, [articles, search, statusFilter, sort, activeCategory]);
 
+  /* ================= PAGINATION ================= */
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+
   const paginated = filtered.slice(
     (page - 1) * PAGE_SIZE,
     page * PAGE_SIZE
   );
 
-  /* ================= ACTION HANDLERS ================= */
+  const visiblePages = Array.from(
+    { length: Math.min(3, totalPages - page + 1) },
+    (_, i) => page + i
+  );
+
+  /* ================= ACTIONS ================= */
   const handleEdit = (article) => {
     setEditingArticle(article);
     setDialogOpen(true);
@@ -101,12 +133,13 @@ const ArticlesPanel = () => {
               setPage(1);
             }}
           >
-            <option>All</option>
-            <option>Published</option>
-            <option>Draft</option>
-            <option>Archived</option>
+            <option value="All">All</option>
+            <option value="Published">Published</option>
+            <option value="Draft">Draft</option>
+            <option value="Archived">Archived</option>
           </select>
 
+          {/* ✅ FIXED: COMPLETE SORT DROPDOWN */}
           <select
             value={sort}
             onChange={(e) => {
@@ -115,7 +148,9 @@ const ArticlesPanel = () => {
             }}
           >
             <option value="updated">Recently Updated</option>
+            <option value="az">Title A–Z</option>
             <option value="views">Most Viewed</option>
+            <option value="helpful">Most Helpful</option>
           </select>
 
           <button
@@ -154,40 +189,26 @@ const ArticlesPanel = () => {
                     {a.title}
                   </button>
                 </td>
-
                 <td>
                   <span className="category-badge">{a.category}</span>
                 </td>
-
                 <td>
                   <span className={`status ${a.status.toLowerCase()}`}>
                     {a.status}
                   </span>
                 </td>
-
                 <td>{a.views}</td>
                 <td>{a.updatedAt}</td>
                 <td>{a.author}</td>
-
-                {/* ✅ WORKING ACTION ICONS */}
                 <td className="actions">
-                  <button
-                    title="Edit"
-                    onClick={() => handleEdit(a)}
-                  >
+                  <button onClick={() => handleEdit(a)}>
                     <Edit size={16} />
                   </button>
-
-                  <button
-                    title="Duplicate"
-                    onClick={() => handleDuplicate(a)}
-                  >
+                  <button onClick={() => handleDuplicate(a)}>
                     <Copy size={16} />
                   </button>
-
                   <button
                     className="danger"
-                    title="Delete"
                     onClick={() => handleDelete(a.id)}
                   >
                     <Trash2 size={16} />
@@ -195,10 +216,23 @@ const ArticlesPanel = () => {
                 </td>
               </tr>
             ))}
+
+            {paginated.length === 0 && (
+              <tr>
+                <td colSpan={7} style={{ textAlign: "center" }}>
+                  No articles found
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
 
-        {/* PAGINATION */}
+        {/* PAGE INFO */}
+        <div className="page-info">
+          Page {page} of {totalPages}
+        </div>
+
+        {/* PAGINATION: Prev | 1 | 2 | 3 | Next */}
         {totalPages > 1 && (
           <div className="pagination-bar">
             <button
@@ -208,13 +242,13 @@ const ArticlesPanel = () => {
               Prev
             </button>
 
-            {Array.from({ length: totalPages }).map((_, i) => (
+            {visiblePages.map((p) => (
               <button
-                key={i}
-                className={page === i + 1 ? "active" : ""}
-                onClick={() => setPage(i + 1)}
+                key={p}
+                className={p === page ? "active" : ""}
+                onClick={() => setPage(p)}
               >
-                {i + 1}
+                {p}
               </button>
             ))}
 
@@ -240,6 +274,4 @@ const ArticlesPanel = () => {
       )}
     </>
   );
-};
-
-export default ArticlesPanel;
+}
