@@ -272,8 +272,6 @@ const ConversationManager = () => {
   };
 
 
-
-
   return (
 
 
@@ -462,7 +460,6 @@ const ConversationManager = () => {
             </Button>
           </div>
 
-
           <Col xs={12} lg={4} className="bg-light p-1 border rounded " style={{ maxHeight: "90vh", }}>
             <div className="mt-3 g-2" >
               {filteredConversations
@@ -507,13 +504,11 @@ const ConversationManager = () => {
                         </small>
                       </div>
 
-
                       <div className="d-flex flex-wrap align-items-center gap-2 mt-1">
 
                         <span className="badge bg-secondary">
                           {conv.intent}
                         </span>
-
 
                         <div className="progress flex-grow-1" style={{ height: "5px", minWidth: "40px" }}>
                           <div
@@ -526,9 +521,7 @@ const ConversationManager = () => {
                           />
                         </div>
 
-
                         <div className="d-flex align-items-center gap-1 ms-md-auto">
-
 
                           <span
                             className={`badge ${conv.status === "Resolved"
@@ -545,7 +538,6 @@ const ConversationManager = () => {
                         </div>
 
                       </div>
-
                       <small className="text-muted d-block mt-1">
                         {conv.id}
                       </small>
@@ -554,7 +546,6 @@ const ConversationManager = () => {
                   </div>
                 ))}
             </div>
-
 
             <div className="mt-4">
 
@@ -682,6 +673,7 @@ const ConversationManager = () => {
                         </small>
                       </div>
                     </div>
+
                   ))}
                 </div>
 
@@ -690,13 +682,13 @@ const ConversationManager = () => {
                 <div className="border-top pt-2">
                   <h6>Analytics</h6>
                   <div className="d-flex flex-wrap gap-3">
-                    <span>Sentiment:{selectedConversation.sentiment}</span>
-                    <span>Average Confidence: 88%</span>
-                    <span>Intents Triggered: Order Status (2), Payment Issue (1)</span>
-                    <span>Resolution Status: Pending</span>
-                    <span>Feedback:"Quick response, thanks!"</span>
+                    <span>Sentiment: {selectedConversation.sentiment}</span>
+                    <span>Confidence: {selectedConversation.confidence}%</span>
+                    <span>Intent: {selectedConversation.intent}</span>
+                    <span>Status: {selectedConversation.status}</span>
                   </div>
                 </div>
+
               </>
             ) : (
               <div className="flex-grow-1 d-flex align-items-center justify-content-center">
