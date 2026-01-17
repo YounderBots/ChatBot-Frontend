@@ -91,7 +91,7 @@
         <Card.Body className="p-0 d-flex flex-column">
           <div 
           className="flex-grow-1 overflow-auto p-4"
-          style={{ maxHeight: "calc(100vh - 160px)" }}>
+          style={{ maxHeight: "calc(100vh - 400px)" }}>
 
           {/* TRAINING & LEARNING */}
           <h6 className="text-primary mb-3">Training & Learning</h6>

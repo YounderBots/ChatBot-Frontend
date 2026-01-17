@@ -15,27 +15,21 @@ const MOCK_ARTICLES = Array.from({ length: 18 }).map((_, i) => ({
   status:
     i % 3 === 0 ? "Published" : i % 3 === 1 ? "Draft" : "Archived",
   views: Math.floor(Math.random() * 500),
-  helpful: Math.floor(Math.random() * 100),
-  updatedAt: `2026-01-${(i % 28) + 1}`,
+  updatedAt: `2026-01-${String((i % 28) + 1).padStart(2, "0")}`,
   author: i % 2 === 0 ? "Admin" : "Support",
 }));
 
-/* ================= CONFIG ================= */
 const PAGE_SIZE = 5;
 
-const ArticlesPanel = ({ activeCategory = "All" }) => {
+const ArticlesPanel = () => {
   const [articles, setArticles] = useState(MOCK_ARTICLES);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [sort, setSort] = useState("updated");
-  const [selected, setSelected] = useState([]);
+  const [page, setPage] = useState(1);
 
-  /* dialog */
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingArticle, setEditingArticle] = useState(null);
-
-  /* pagination */
-  const [page, setPage] = useState(1);
 
   /* ================= FILTER + SORT ================= */
   const filtered = useMemo(() => {
@@ -43,48 +37,36 @@ const ArticlesPanel = ({ activeCategory = "All" }) => {
       const matchSearch = a.title
         .toLowerCase()
         .includes(search.toLowerCase());
-
       const matchStatus =
         statusFilter === "All" || a.status === statusFilter;
-
-      const matchCategory =
-        activeCategory === "All" || a.category === activeCategory;
-
-      return matchSearch && matchStatus && matchCategory;
+      return matchSearch && matchStatus;
     });
 
-    if (sort === "title")
-      data.sort((a, b) => a.title.localeCompare(b.title));
     if (sort === "updated")
-      data.sort(
-        (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
-      );
+      data.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
     if (sort === "views") data.sort((a, b) => b.views - a.views);
-    if (sort === "usage") data.sort((a, b) => b.helpful - a.helpful);
 
     return data;
-  }, [articles, search, statusFilter, sort, activeCategory]);
+  }, [articles, search, statusFilter, sort]);
 
-  /* ================= PAGINATION ================= */
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paginated = filtered.slice(
     (page - 1) * PAGE_SIZE,
     page * PAGE_SIZE
   );
 
-  /* ================= ACTIONS ================= */
-  const toggleSelect = (id) => {
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
+  /* ================= ACTION HANDLERS ================= */
+  const handleEdit = (article) => {
+    setEditingArticle(article);
+    setDialogOpen(true);
   };
 
-  const duplicateArticle = (article) => {
+  const handleDuplicate = (article) => {
     setArticles((prev) => [
       {
         ...article,
         id: Date.now(),
-        title: article.title + " (Copy)",
+        title: `${article.title} (Copy)`,
         status: "Draft",
         updatedAt: new Date().toISOString().slice(0, 10),
       },
@@ -92,8 +74,8 @@ const ArticlesPanel = ({ activeCategory = "All" }) => {
     ]);
   };
 
-  const deleteArticle = (id) => {
-    if (!confirm("Delete this article?")) return;
+  const handleDelete = (id) => {
+    if (!window.confirm("Delete this article?")) return;
     setArticles((prev) => prev.filter((a) => a.id !== id));
   };
 
@@ -133,9 +115,7 @@ const ArticlesPanel = ({ activeCategory = "All" }) => {
             }}
           >
             <option value="updated">Recently Updated</option>
-            <option value="title">Title A–Z</option>
             <option value="views">Most Viewed</option>
-            <option value="usage">Most Used</option>
           </select>
 
           <button
@@ -153,14 +133,10 @@ const ArticlesPanel = ({ activeCategory = "All" }) => {
         <table className="articles-table">
           <thead>
             <tr>
-              <th>
-                <input type="checkbox" />
-              </th>
               <th>Title</th>
               <th>Category</th>
               <th>Status</th>
               <th>Views</th>
-              <th>Usage</th>
               <th>Last Updated</th>
               <th>Author</th>
               <th>Actions</th>
@@ -171,20 +147,9 @@ const ArticlesPanel = ({ activeCategory = "All" }) => {
             {paginated.map((a) => (
               <tr key={a.id}>
                 <td>
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(a.id)}
-                    onChange={() => toggleSelect(a.id)}
-                  />
-                </td>
-
-                <td>
                   <button
                     className="link-btn"
-                    onClick={() => {
-                      setEditingArticle(a);
-                      setDialogOpen(true);
-                    }}
+                    onClick={() => handleEdit(a)}
                   >
                     {a.title}
                   </button>
@@ -201,55 +166,48 @@ const ArticlesPanel = ({ activeCategory = "All" }) => {
                 </td>
 
                 <td>{a.views}</td>
-                <td>{a.helpful}</td>
                 <td>{a.updatedAt}</td>
                 <td>{a.author}</td>
 
-                {/* ICON ACTIONS */}
+                {/* ✅ WORKING ACTION ICONS */}
                 <td className="actions">
                   <button
-                    className="icon-btn"
                     title="Edit"
-                    onClick={() => {
-                      setEditingArticle(a);
-                      setDialogOpen(true);
-                    }}
+                    onClick={() => handleEdit(a)}
                   >
                     <Edit size={16} />
                   </button>
 
                   <button
-                    className="icon-btn"
                     title="Duplicate"
-                    onClick={() => duplicateArticle(a)}
+                    onClick={() => handleDuplicate(a)}
                   >
                     <Copy size={16} />
                   </button>
 
                   <button
-                    className="icon-btn danger"
+                    className="danger"
                     title="Delete"
-                    onClick={() => deleteArticle(a.id)}
+                    onClick={() => handleDelete(a.id)}
                   >
                     <Trash2 size={16} />
                   </button>
                 </td>
               </tr>
             ))}
-
-            {paginated.length === 0 && (
-              <tr>
-                <td colSpan={9} style={{ textAlign: "center" }}>
-                  No articles found
-                </td>
-              </tr>
-            )}
           </tbody>
         </table>
 
         {/* PAGINATION */}
         {totalPages > 1 && (
-          <div className="pagination">
+          <div className="pagination-bar">
+            <button
+              disabled={page === 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              Prev
+            </button>
+
             {Array.from({ length: totalPages }).map((_, i) => (
               <button
                 key={i}
@@ -259,6 +217,13 @@ const ArticlesPanel = ({ activeCategory = "All" }) => {
                 {i + 1}
               </button>
             ))}
+
+            <button
+              disabled={page === totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Next
+            </button>
           </div>
         )}
       </section>

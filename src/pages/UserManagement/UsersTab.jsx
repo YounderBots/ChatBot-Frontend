@@ -1,285 +1,8 @@
 import React, { useState } from "react";
-import {Container,Row,Col,Form,Button,Table,Badge,Card,Modal,Image,} from "react-bootstrap";
-import {Search,Plus,Edit2,Trash2,Eye,EyeOff,RefreshCw,} from "lucide-react";
+import { Container, Row, Col, Form, Button, Table, Badge, Card, Modal, Image, } from "react-bootstrap";
+import { Search, Plus, Edit2, Trash2, Eye, EyeOff, RefreshCw, } from "lucide-react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./UserMgmt.css";
-
-// // ================= Dummy APIs =================
-// const apiCreateUser = async (userData) =>
-//   new Promise((resolve) =>
-//     setTimeout(() => resolve({ ...userData, id: Date.now() }), 500)
-//   );
-
-// const apiUpdateUser = async (id, userData) =>
-//   new Promise((resolve) =>
-//     setTimeout(() => resolve({ ...userData, id }), 500)
-//   );
-
-// const apiDeleteUser = async () =>
-//   new Promise((resolve) => setTimeout(() => resolve(true), 500));
-
-// // ================= Helpers =================
-// const getPasswordStrength = (password) => {
-//   let score = 0;
-//   if (password.length >= 8) score++;
-//   if (/[A-Z]/.test(password)) score++;
-//   if (/[0-9]/.test(password)) score++;
-//   if (/[^A-Za-z0-9]/.test(password)) score++;
-
-//   if (score <= 1) return { label: "Weak", value: 25, variant: "danger" };
-//   if (score === 2) return { label: "Medium", value: 60, variant: "warning" };
-//   return { label: "Strong", value: 100, variant: "success" };
-// };
-
-// const generatePassword = () =>
-//   Math.random().toString(36).slice(-10) + "@A1";
-
-// // ================= Initial Data =================
-// const initialUsers = [
-//   {
-//     id: 1,
-//     avatar: "https://i.pravatar.cc/40?img=1",
-//     name: "Admin One",
-//     email: "admin1@mail.com",
-//     role: "Admin",
-//     permissions: 12,
-//     lastLogin: "2026-01-12",
-//     status: true,
-//   },
-//   {
-//     id: 2,
-//     avatar: "https://i.pravatar.cc/40?img=2",
-//     name: "Admin Two",
-//     email: "admin2@mail.com",
-//     role: "Viewer",
-//     permissions: 4,
-//     lastLogin: "2026-01-10",
-//     status: false,
-//   },
-// ];
-
-// // ================= UsersTab Component =================
-// const UsersTab = () => {
-//   const [users, setUsers] = useState(initialUsers);
-//   const [search, setSearch] = useState("");
-//   const [filter, setFilter] = useState("All");
-//   const [showModal, setShowModal] = useState(false);
-//   const [editingUser, setEditingUser] = useState(null);
-//   const [showPassword, setShowPassword] = useState(false);
-
-//   const [form, setForm] = useState({
-//     avatar: null,
-//     name: "",
-//     email: "",
-//     password: "",
-//     confirmPassword: "",
-//     role: "Admin",
-//   });
-
-//   const passwordStrength = getPasswordStrength(form.password);
-
-//   // ================= Handlers =================
-//   const openAddUser = () => {
-//     resetForm();
-//     setShowModal(true);
-//   };
-
-//   const openEditUser = (user) => {
-//     setEditingUser(user);
-//     setForm({
-//       avatar: user.avatar || null,
-//       name: user.name,
-//       email: user.email,
-//       password: "",
-//       confirmPassword: "",
-//       role: user.role,
-//     });
-//     setShowModal(true);
-//   };
-
-//   const saveUser = async () => {
-//     const userData = {
-//       avatar: form.avatar,
-//       name: form.name,
-//       email: form.email,
-//       role: form.role,
-//       lastLogin: editingUser ? editingUser.lastLogin : "-",
-//       status: editingUser ? editingUser.status : true,
-//     };
-
-//     if (editingUser) {
-//       const updated = await apiUpdateUser(editingUser.id, userData);
-//       setUsers(users.map((u) => (u.id === editingUser.id ? updated : u)));
-//     } else {
-//       const created = await apiCreateUser(userData);
-//       setUsers([...users, created]);
-//     }
-
-//     setShowModal(false);
-//     resetForm();
-//   };
-
-//   const deleteUser = async (id) => {
-//     await apiDeleteUser(id);
-//     setUsers(users.filter((u) => u.id !== id));
-//   };
-
-//   const resetForm = () => {
-//     setEditingUser(null);
-//     setShowPassword(false);
-//     setForm({
-//       avatar: null,
-//       name: "",
-//       email: "",
-//       password: "",
-//       confirmPassword: "",
-//       role: "Admin",
-//     });
-//   };
-
-//   const filteredUsers = users.filter((u) => {
-//     const matchesSearch = u.name
-//       .toLowerCase()
-//       .includes(search.toLowerCase());
-//     const matchesFilter =
-//       filter === "All" ||
-//       (filter === "Active" && u.status) ||
-//       (filter === "Inactive" && !u.status);
-//     return matchesSearch && matchesFilter;
-//   });
-
-//   // ================= JSX =================
-//   return (
-//     <Container fluid className="userMgmtWrapper">
-//       {/* HEADER */}
-//       <Card className="mb-3 shadow-sm border-0">
-//         <Card.Body>
-//           <Row className="align-items-center g-2">
-//             <Col md={4}>
-//               <h5 className="mb-0 text-primary">Admin Users</h5>
-//             </Col>
-//             <Col md={8} className="d-flex justify-content-end gap-2">
-//               <Form className="position-relative searchForm">
-//                 <Search size={14} className="searchIcon" />
-//                 <Form.Control
-//                   size="sm"
-//                   placeholder="Search users"
-//                   value={search}
-//                   onChange={(e) => setSearch(e.target.value)}
-//                   className="ps-4"
-//                 />
-//               </Form>
-
-//               <Form.Select
-//                 size="sm"
-//                 className="w-auto"
-//                 value={filter}
-//                 onChange={(e) => setFilter(e.target.value)}
-//               >
-//                 <option>All</option>
-//                 <option>Active</option>
-//                 <option>Inactive</option>
-//               </Form.Select>
-
-//               <Button size="sm" onClick={openAddUser}>
-//                 <Plus size={14} /> Add User
-//               </Button>
-//             </Col>
-//           </Row>
-//         </Card.Body>
-//       </Card>
-
-//       {/* TABLE */}
-//       <Card className="shadow-sm border-0">
-//         <Table hover responsive className="mb-0 align-middle">
-//           <thead className="table-light">
-//             <tr>
-//               <th>Avatar</th>
-//               <th>Name</th>
-//               <th>Email</th>
-//               <th>Role</th>
-//               <th>Status</th>
-//               <th>Actions</th>
-//             </tr>
-//           </thead>
-//           <tbody>
-//             {filteredUsers.map((u) => (
-//               <tr key={u.id}>
-//                 <td>
-//                   <Image
-//                     src={u.avatar}
-//                     roundedCircle
-//                     width={32}
-//                     height={32}
-//                   />
-//                 </td>
-//                 <td>{u.name}</td>
-//                 <td>{u.email}</td>
-//                 <td>
-//                   <Badge bg="info">{u.role}</Badge>
-//                 </td>
-//                 <td>
-//                   <Form.Check
-//                     type="switch"
-//                     checked={u.status}
-//                     onChange={() =>
-//                       setUsers(
-//                         users.map((x) =>
-//                           x.id === u.id
-//                             ? { ...x, status: !x.status }
-//                             : x
-//                         )
-//                       )
-//                     }
-//                   />
-//                 </td>
-//                 <td className="d-flex gap-2">
-//                   <Edit2 size={16} onClick={() => openEditUser(u)} />
-//                   <Trash2
-//                     size={16}
-//                     className="text-danger"
-//                     onClick={() => deleteUser(u.id)}
-//                   />
-//                 </td>
-//               </tr>
-//             ))}
-//           </tbody>
-//         </Table>
-//       </Card>
-
-//       {/* MODAL */}
-//       <Modal
-//         show={showModal}
-//         onHide={() => setShowModal(false)}
-//         centered
-//         size="lg"
-//       >
-//         <Modal.Header closeButton>
-//           <Modal.Title>
-//             {editingUser ? "Edit User" : "Add User"}
-//           </Modal.Title>
-//         </Modal.Header>
-
-//         <Modal.Body>
-//           {/* You already had this — keep as-is */}
-//         </Modal.Body>
-
-//         <Modal.Footer>
-//           <Button variant="secondary" onClick={() => setShowModal(false)}>
-//             Cancel
-//           </Button>
-//           <Button onClick={saveUser}>Save</Button>
-//         </Modal.Footer>
-//       </Modal>
-//     </Container>
-//   );
-// };
-
-// export default UsersTab;
-
-
-
-
 
 // Dummy API calls (replace with real endpoints later)
 const apiCreateUser = async (userData) => {
@@ -418,6 +141,8 @@ export default function UsersTab() {
     confirmPassword: "",
     role: "Admin",
     permissions: {},
+    status: true,
+    emailNotifications: false
   });
   const passwordStrength = getPasswordStrength(form.password);
 
@@ -452,6 +177,8 @@ export default function UsersTab() {
       password: "",
       confirmPassword: "",
       role: user.role,
+      status: user.status ?? true,                     // ✅ ADD
+      emailNotifications: user.emailNotifications ?? false // ✅ ADD
     });
     setShowModal(true);
   };
@@ -465,7 +192,9 @@ export default function UsersTab() {
         role: form.role,
         permissions: form.role === "Custom" ? {} : form.permissions,
         lastLogin: editingUser ? editingUser.lastLogin : "-",
-        status: editingUser ? editingUser.status : true,
+        // status: editingUser ? editingUser.status : true,
+        status: form.status,                       // ✅ ADD
+        emailNotifications: form.emailNotifications, // ✅ ADD
       };
 
       if (editingUser) {
@@ -533,7 +262,7 @@ export default function UsersTab() {
         <Card.Body>
           <Row className="align-items-center g-2">
             <Col md={4}>
-              <h5 className="mb-0 text-primary">Admin Users</h5>
+              <h5 className="mb-0 text-primary">Users</h5>
             </Col>
             <Col md={8} className="d-flex justify-content-end gap-2">
               <Form className="position-relative searchForm">
@@ -605,13 +334,16 @@ export default function UsersTab() {
                     onChange={() => setUsers(users.map(x => x.id === u.id ? { ...x, status: !x.status } : x))}
                   />
                 </td>
-                <td className="d-flex gap-2">
-                  <Edit2 size={16} className="cursorPointer" onClick={() => openEditUser(u)} />
-                  <Trash2
-                    size={16}
-                    className="cursorPointer text-danger"
-                    onClick={() => deleteUser(u.id)}
-                  />
+                <td>
+                  <div className="d-flex justify-content-center align-items-center gap-2 h-100 w-100">
+
+                    <Edit2 size={16} className="cursorPointer" onClick={() => openEditUser(u)} />
+                    <Trash2
+                      size={16}
+                      className="cursorPointer text-danger"
+                      onClick={() => deleteUser(u.id)}
+                    />
+                  </div>
 
                 </td>
               </tr>
@@ -638,16 +370,35 @@ export default function UsersTab() {
         <Modal.Body>
           <h6 className="mb-3">Basic Info</h6>
           <Row className="g-3">
-            <Col md={4} className="text-center">
-              {form.avatar && (
-                <Image
-                  src={form.avatar}
-                  roundedCircle
-                  width={80}
-                  height={80}
-                  className="mb-2"
-                />
-              )}
+            <Col md={4} className="text-center pt-3">
+              <div className="mb-2 d-flex justify-content-center ">
+                {form.avatar ? (
+                  <Image
+                    src={form.avatar}
+                    roundedCircle
+                    width={80}
+                    height={80}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: 80,
+                      height: 80,
+                      borderRadius: "50%",
+                      backgroundColor: "#e2e8f0",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 24,
+                      color: "#64748b",
+                      
+                    }}
+                  >
+                    
+                  </div>
+                )}
+              </div>
+
 
               <Form.Control
                 size="sm"
@@ -786,41 +537,35 @@ export default function UsersTab() {
                   />
                 ))}
               </Form.Group>
+              <hr className="my-4" />
 
-              {/* {form.role === "Custom" && (
-                <div className="permissionTree">
-                  {Object.entries(PERMISSIONS).map(([key, section]) => (
-                    <Card key={key} className="mb-2 shadow-sm border-0">
-                      <Card.Body className="py-2">
-                        <strong>{section.label}</strong>
-                        <div className="ms-3 mt-1">
-                          {Object.entries(section.children).map(([permKey, label]) => (
-                            <Form.Check
-                              key={permKey}
-                              type="checkbox"
-                              label={label}
-                              checked={form.permissions[key]?.includes(permKey) || false}
-                              onChange={(e) => {
-                                const updated = { ...form.permissions };
-                                const perms = updated[key] || [];
+              <h6 className="mb-3">Status</h6>
 
-                                if (e.target.checked) {
-                                  updated[key] = [...perms, permKey];
-                                } else {
-                                  updated[key] = perms.filter((p) => p !== permKey);
-                                }
+              <Form.Group className="mb-3 d-flex justify-content-between align-items-center">
+                <Form.Label className="mb-0">Account Status</Form.Label>
+                <Form.Check
+                  type="switch"
+                  checked={form.status}
+                  onChange={(e) =>
+                    setForm({ ...form, status: e.target.checked })
+                  }
+                />
+              </Form.Group>
 
-                                setForm({ ...form, permissions: updated });
-                              }}
-                              className="mb-1"
-                            />
-                          ))}
-                        </div>
-                      </Card.Body>
-                    </Card>
-                  ))}
-                </div>
-              )} */}
+              <Form.Group className="mb-2 d-flex justify-content-between align-items-center">
+                <Form.Label className="mb-0">Email Notifications</Form.Label>
+                <Form.Check
+                  type="checkbox"
+                  checked={form.emailNotifications}
+                  onChange={(e) =>
+                    setForm({ ...form, emailNotifications: e.target.checked })
+                  }
+                />
+              </Form.Group>
+
+
+
+
             </Col>
           </Row>
         </Modal.Body>
