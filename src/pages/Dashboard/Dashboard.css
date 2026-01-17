@@ -230,3 +230,41 @@
     align-self: flex-end;
   }
 }
+
+/* ================= Permanent Buttons with Equal Padding ================= */
+
+/* Apply to all main dashboard buttons */
+button.always-visible-btn,
+button.activity-view-btn,
+button.btn-link.always-visible-btn {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  background-color: #0d6efd;  /* solid blue */
+  color: white;                /* white text */
+  border: none;
+  padding: 6px 16px;           /* equal padding for all buttons */
+  border-radius: 6px;          /* rounded corners */
+  font-size: 14px;             /* same font size */
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Hover effect */
+button.always-visible-btn:hover,
+button.activity-view-btn:hover,
+button.btn-link.always-visible-btn:hover {
+  background-color: #0b5ed7;
+  transform: translateY(-1px);
+}
+
+/* Ensure small buttons inside activity items keep same padding */
+.activity-view-btn {
+  padding: 6px 16px; /* same as others */
+  font-size: 14px;
+}
+
