@@ -388,6 +388,7 @@ const ConversationManager = () => {
             </div>
           </Col>
 
+
           <Col xs={4} md={6} lg={3}>
 
             <div className="input-group bg-white rounded-3 shadow-sm">
@@ -421,15 +422,16 @@ const ConversationManager = () => {
 
 
           <Col xs={12} md={12} lg={6}>
-            <Form.Label className="text-primary">Confidence Range</Form.Label>
+           
 
-            <div className="d-flex justify-content-between small p-3">
+            <div className="d-flex justify-content-between small">
               <span >Min {confidence[0]}%</span>
+              <span className="text-primary">Confidence Range</span>
               <span>Max {confidence[1]}%</span>
             </div>
 
             <Form.Range
-              className="p-3"
+              className="p-2"
               min={0}
               max={100}
               value={confidence[0]}
@@ -439,7 +441,7 @@ const ConversationManager = () => {
             />
 
             <Form.Range
-              className="p-3"
+              className="p-2"
               min={0}
               max={100}
               value={confidence[1]}
@@ -447,15 +449,16 @@ const ConversationManager = () => {
                 setConfidence([confidence[0], Number(e.target.value)])
               }
             />
+
           </Col>
 
-          <div className="d-flex gap-2 mb-2">
-            <Button className="px-4"
+          <div className="d-flex gap-2 mt-0">
+            <Button className=""
               style={{ backgroundColor: "#0d3357", }}
               onClick={handleApplyFilters}>
               Apply
             </Button>
-            <Button variant="outline-secondary" className="px-4" onClick={resetFilters}>
+            <Button variant="outline-secondary" className="" onClick={resetFilters}>
               Reset
             </Button>
           </div>
