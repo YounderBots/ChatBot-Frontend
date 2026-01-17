@@ -16,6 +16,20 @@
             }
         };
 
+    const PAGE_WINDOW = 3;
+
+    const getPageNumbers = () => {
+        const startPage =
+            Math.floor((currentPage - 1) / PAGE_WINDOW) * PAGE_WINDOW + 1;
+
+        const endPage = Math.min(startPage + PAGE_WINDOW - 1, totalPages);
+
+        return Array.from(
+            { length: endPage - startPage + 1 },
+            (_, i) => startPage + i
+        );
+    };
+
         return (
             <>
                 {/* Grid */}
@@ -127,53 +141,59 @@
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                    <div className="d-flex justify-content-center mt-4">
-                        <nav>
-                            <ul className="pagination pagination-sm mb-0">
+                    <div className="grid-pagination-wrapper mt-5">
+
+                        {/* Page info */}
+                        <div className="text-center mb-2">
+                            <small className="text-muted">
+                                Page <strong>{currentPage}</strong> of <strong>{totalPages}</strong>
+                            </small>
+                        </div>
+
+                        {/* Pagination */}
+                        <nav className="custom-pagination d-flex justify-content-center">
+                            <ul className="pagination pagination-sm mb-0 align-items-center">
+
+                                {/* Prev */}
                                 <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
                                     <button
-                                        className="page-link"
+                                        className="page-link pill prev"
                                         onClick={() => handlePageChange(currentPage - 1)}
                                     >
-                                        ‹
+                                        Prev
                                     </button>
                                 </li>
 
-                                {[...Array(totalPages)].map((_, index) => {
-                                    const page = index + 1;
-                                    return (
-                                        <li
-                                            key={page}
-                                            className={`page-item ${
-                                                page === currentPage ? 'active' : ''
-                                            }`}
+                                {/* Page Numbers */}
+                                {getPageNumbers().map(page => (
+                                    <li
+                                        key={page}
+                                        className={`page-item ${currentPage === page ? 'active' : ''}`}
+                                    >
+                                        <button
+                                            className="page-link pill"
+                                            onClick={() => handlePageChange(page)}
                                         >
-                                            <button
-                                                className="page-link"
-                                                onClick={() => handlePageChange(page)}
-                                            >
-                                                {page}
-                                            </button>
-                                        </li>
-                                    );
-                                })}
+                                            {page}
+                                        </button>
+                                    </li>
+                                ))}
 
-                                <li
-                                    className={`page-item ${
-                                        currentPage === totalPages ? 'disabled' : ''
-                                    }`}
-                                >
+                                {/* Next */}
+                                <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
                                     <button
-                                        className="page-link"
+                                        className="page-link pill next"
                                         onClick={() => handlePageChange(currentPage + 1)}
                                     >
-                                        ›
+                                        Next
                                     </button>
                                 </li>
+
                             </ul>
                         </nav>
                     </div>
-                )}
+)}
+
             </>
         );
     };

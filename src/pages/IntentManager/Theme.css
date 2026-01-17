@@ -103,11 +103,15 @@
   z-index: 1055; /* higher than cards & tables */
 }
 
-/* Prevent parent clipping */
-.table-responsive,
-.bg-cvq-bg {
-  overflow: visible !important;
+.table-responsive {
+  overflow-x: auto;
+  overflow-y: auto;
 }
+
+.bg-cvq-bg {
+  overflow: auto;
+}
+
 
 .table th {
     background-color: var(--cvq-gray-50) !important;
@@ -155,7 +159,6 @@
     border-radius: 16px !important;
 }
 
-/* Custom transitions previously in IntentGrid.css */
 .transition-hover {
     transition: transform 0.2s, border-color 0.2s;
 }
@@ -165,3 +168,40 @@
     border-color: var(--cvq-blue-500) !important;
 }
 
+.custom-pagination .pagination {
+    gap: 6px;
+}
+
+.custom-pagination .page-link.pill {
+    border-radius: 10px;
+    border: none;
+    padding: 6px 12px;
+    font-weight: 500;
+    color: #fff;
+    background-color: #0f3d6e;
+    transition: all 0.2s ease;
+}
+
+
+.custom-pagination .page-item.active .page-link {
+    background-color: #2b6ef2; /* bright blue */
+    box-shadow: 0 2px 6px rgba(43, 110, 242, 0.4);
+}
+
+/* Hover */
+.custom-pagination .page-link:hover {
+    background-color: #1d4ed8;
+}
+
+.custom-pagination .page-link.prev,
+.custom-pagination .page-link.next {
+    background-color: #0f3d6e;
+    padding: 6px 14px;
+}
+
+.custom-pagination .page-item.disabled .page-link {
+    background-color: #dbe5f1;
+    color: #7a8ca3;
+    cursor: not-allowed;
+    box-shadow: none;
+}
