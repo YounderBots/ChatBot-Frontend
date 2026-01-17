@@ -1,11 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState,useEffect, useMemo } from 'react';
+import { Edit2, Trash2, Copy } from "lucide-react";
 
 const ITEMS_PER_PAGE = 10;
 
 const IntentTable = ({ intents, selectedIds,onToggleAll,onToggleOne,onEdit, onDelete, onDuplicate }) => {
     const [currentPage, setCurrentPage] = useState(1);
-
-    const totalPages = Math.ceil(intents.length / ITEMS_PER_PAGE);
+    useEffect(() => {setCurrentPage(1);}, [intents.length]);
+    const totalPages = Math.max(1, Math.ceil(intents.length / ITEMS_PER_PAGE));
 
     const paginatedIntents = useMemo(() => {
         const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -18,11 +19,27 @@ const IntentTable = ({ intents, selectedIds,onToggleAll,onToggleOne,onEdit, onDe
         }
     };
 
+const PAGE_WINDOW = 3;
+
+const getPageNumbers = () => {
+    let start = Math.max(1, currentPage - 1);
+    let end = start + PAGE_WINDOW - 1;
+
+    // Adjust if end exceeds totalPages
+    if (end > totalPages) {
+        end = totalPages;
+        start = Math.max(1, end - PAGE_WINDOW + 1);
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+};
+
+
+
     return (
         <div className="bg-white rounded-16 shadow">
 
-            <div
-                className="table-responsive overflow-auto">
+            <div className="table-responsive overflow-auto">
                 <table className="table table-hover mb-0">
                     <thead className="table-light sticky-top">
                         <tr>
@@ -100,39 +117,53 @@ const IntentTable = ({ intents, selectedIds,onToggleAll,onToggleOne,onEdit, onDe
                                 <td>{intent.lastModified}</td>
 
                                 <td>
-                                    <div className="d-flex gap-2">
-                                        <button
+                                    <div className="d-flex gap-4">
+                                        <Edit2
+                                            size={16}
+                                            className="cursorPointer"
+                                            onClick={() => onEdit(intent)}
+                                        />
+                                        {/* <button
                                             className="btn btn-sm btn-secondary"
                                             onClick={() => onEdit(intent)}
                                         >
                                             <i className="bi bi-pencil" />
-                                        </button>
-
-                                        <button
+                                        </button> */}
+                                        <Copy
+                                            size={16}
+                                            className="cursorPointer"
+                                            onClick={() => onDuplicate?.(intent)}
+                                        />
+                                        {/* <button
                                             className="btn btn-sm btn-secondary"
                                             onClick={() => onDuplicate?.(intent)}
                                         >
                                             <i className="bi bi-copy" />
-                                        </button>
-
-                                        <button
+                                        </button> */}
+                                        <Trash2
+                                            size={16}
+                                            className="cursorPointer text-danger"
+                                            onClick={() => onDelete(intent)}
+                                        />
+                                        {/* <button
                                             className="btn btn-sm btn-secondary"
                                             onClick={() => onDelete(intent)}
                                         >
                                             <i className="bi bi-trash" />
-                                        </button>
+                                        </button> */}
                                     </div>
                                 </td>
                             </tr>
                         ))}
 
-                        {paginatedIntents.length === 0 && (
+                        {paginatedIntents.length === 0 && intents.length === 0 && (
                             <tr>
                                 <td colSpan="11" className="text-center py-4 text-muted">
                                     No intents found
                                 </td>
                             </tr>
-                        )}
+)}
+
                     </tbody>
                 </table>
             </div>
@@ -144,41 +175,48 @@ const IntentTable = ({ intents, selectedIds,onToggleAll,onToggleOne,onEdit, onDe
                         Page {currentPage} of {totalPages}
                     </small>
 
-                    <nav>
-                        <ul className="pagination pagination-sm mb-0">
+                    <nav className="custom-pagination">
+                        <ul className="pagination pagination-sm mb-0 align-items-center">
+
+                            {/* Prev */}
                             <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
                                 <button
-                                    className="page-link"
+                                    className="page-link pill prev"
                                     onClick={() => handlePageChange(currentPage - 1)}
                                 >
                                     Prev
                                 </button>
                             </li>
 
-                            {[...Array(totalPages)].map((_, i) => (
+                            {/* Page Numbers */}
+                            {getPageNumbers().map(page => (
                                 <li
-                                    key={i}
-                                    className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}
+                                    key={page}
+                                    className={`page-item ${currentPage === page ? 'active' : ''}`}
                                 >
                                     <button
-                                        className="page-link"
-                                        onClick={() => handlePageChange(i + 1)}
+                                        className="page-link pill"
+                                        onClick={() => handlePageChange(page)}
                                     >
-                                        {i + 1}
+                                        {page}
                                     </button>
                                 </li>
                             ))}
 
+                            {/* Next */}
                             <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
                                 <button
-                                    className="page-link"
+                                    className="page-link pill next"
                                     onClick={() => handlePageChange(currentPage + 1)}
                                 >
                                     Next
                                 </button>
                             </li>
+
                         </ul>
                     </nav>
+
+
                 </div>
             )}
         </div>
