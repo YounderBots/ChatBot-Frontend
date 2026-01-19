@@ -4,10 +4,13 @@
 .kb-layout {
   display: grid;
   grid-template-columns: 280px 1fr;
-  min-height: 100vh;          /* 🔥 FIX */
+  min-height: 100vh;
   background: transparent;
   position: relative;
-  overflow: visible;          /* 🔥 FIX */
+  overflow: visible;
+
+  /* 🔑 CRITICAL FIX */
+  align-items: start; /* prevents grid stretch */
 }
 
 /* =====================
@@ -24,14 +27,18 @@
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
   position: relative;
   z-index: 2;
+
+  /* 🔑 CRITICAL FIX */
+  height: fit-content;
 }
 
+/* All Articles */
 .kb-sidebar .all-articles {
   font-weight: 600;
-  padding: 12px 14px;
+  padding: 10px 14px;
   border-radius: 12px;
   cursor: pointer;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .kb-sidebar .all-articles.active {
@@ -39,10 +46,11 @@
   color: #2563eb;
 }
 
+/* Categories */
 .kb-sidebar .category-row {
   display: flex;
   justify-content: space-between;
-  padding: 10px 12px;
+  padding: 8px 12px;
   border-radius: 12px;
   cursor: pointer;
   font-size: 14px;
@@ -57,8 +65,9 @@
   font-size: 12px;
 }
 
+/* Manage Button */
 .manage-btn {
-  margin-top: auto;
+  margin-top: 12px;
   padding: 10px;
   border-radius: 12px;
   border: 1px solid #d1d5db;
@@ -81,7 +90,7 @@
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
   position: relative;
   z-index: 1;
-  overflow: visible;          /* 🔥 FIX */
+  overflow: visible;
 }
 
 /* =====================
@@ -124,6 +133,9 @@
   background: #ffffff;
   border-radius: 16px;
   border: 1px solid #e5e7eb;
+  overflow: hidden;
+  margin-top: 12px;
+  margin-bottom: 16px;
 }
 
 .articles-table thead th {
@@ -249,7 +261,6 @@
   cursor: not-allowed;
 }
 
-
 /* =====================
    ICON BUTTONS (KB STYLE)
 ===================== */
@@ -265,7 +276,6 @@
   transition: all 0.15s ease;
 }
 
-/* Drag handle */
 .icon-btn.drag {
   color: #64748b;
 }
@@ -274,7 +284,6 @@
   color: #334155;
 }
 
-/* Edit */
 .icon-btn.edit {
   color: #2563eb;
 }
@@ -282,7 +291,6 @@
   background: #eaf2ff;
 }
 
-/* Save */
 .icon-btn.success {
   color: #15803d;
 }
@@ -290,7 +298,6 @@
   background: #dcfce7;
 }
 
-/* Delete */
 .icon-btn.danger {
   color: #dc2626;
 }
@@ -298,7 +305,6 @@
   background: #fee2e2;
 }
 
-/* Disabled */
 .icon-btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;

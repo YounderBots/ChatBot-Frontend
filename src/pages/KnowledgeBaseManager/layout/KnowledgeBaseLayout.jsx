@@ -63,12 +63,14 @@ export default function KnowledgeBaseLayout() {
         </button>
       </aside>
 
-      {/* ================= CONTENT ================= */}
-      <ArticlesPanel
-        activeCategory={activeCategory}
-        onNewArticle={() => navigate("/articles/new")}
-        onEdit={(a) => navigate(`/articles/${a.id}/edit`)}
-      />
+      {/* ================= CONTENT (🔥 FIX) ================= */}
+      <div className="kb-content">
+        <ArticlesPanel
+          activeCategory={activeCategory}
+          onNewArticle={() => navigate("/articles/new")}
+          onEdit={(a) => navigate(`/articles/${a.id}/edit`)}
+        />
+      </div>
 
       {/* ================= MODAL ================= */}
       {manageOpen && (
