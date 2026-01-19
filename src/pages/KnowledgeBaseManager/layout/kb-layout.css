@@ -263,3 +263,118 @@
 body {
   scrollbar-gutter: stable;
 }
+/* =========================
+   RESPONSIVE LAYOUT
+========================= */
+
+/* ---------- Large tablets & small laptops ---------- */
+@media (max-width: 1200px) {
+  .kb-layout {
+    grid-template-columns: 240px 1fr;
+  }
+
+  .articles-header input,
+  .articles-header select {
+    min-width: 180px;
+  }
+}
+
+/* ---------- Tablets ---------- */
+/* ---------- Tablets & Responsive Screens ---------- */
+@media (max-width: 992px) {
+
+  .kb-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .articles-header {
+    display: flex;
+    flex-wrap: nowrap;          /* 🔥 force horizontal */
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* Search bar */
+  .articles-header input {
+    flex: 2;
+    min-width: 0;               /* 🔥 allow shrinking */
+    height: 44px;
+  }
+
+  /* Dropdowns */
+  .articles-header select {
+    flex: 1;
+    min-width: 0;               /* 🔥 critical */
+    height: 44px;
+  }
+
+  /* Button moves to next row */
+  .articles-header .btn,
+  .articles-header button {
+    width: 100%;
+    margin-top: 10px;
+    height: 46px;
+  }
+}
+
+/* ---------- Mobile (KEEP HORIZONTAL) ---------- */
+@media (max-width: 768px) {
+
+  .kb-layout {
+    padding-right: 0;
+  }
+
+  .kb-content {
+    margin: 12px;
+    padding: 14px;
+  }
+
+  .articles-header {
+    display: flex;
+    flex-wrap: nowrap;          /* 🔥 STILL horizontal */
+    gap: 8px;
+  }
+
+  .articles-header input {
+    flex: 2;
+    min-width: 0;
+  }
+
+  .articles-header select {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+/* ===== FILTER BAR SIZE BALANCE FIX ===== */
+
+.articles-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+/* 🔹 Make all 3 filters equal & bigger */
+.articles-header input,
+.articles-header select {
+  flex: 1.2;        /* equal + slightly wider */
+  min-width: 0;
+  height: 44px;
+}
+
+/* 🔹 Reduce New Article button size */
+.articles-header .btn,
+.articles-header button {
+  flex: 0.7;        /* smaller than filters */
+  height: 44px;
+  margin-top: 0;
+  white-space: nowrap;
+}
+
+/* ===== Responsive safety (keeps horizontal) ===== */
+@media (max-width: 992px) {
+  .articles-header {
+    flex-wrap: nowrap;
+  }
+}
