@@ -1,3 +1,4 @@
+/* ===== ROOT LAYOUT ===== */
 .kb-layout {
   display: grid;
   grid-template-columns: 280px 1fr;
@@ -5,8 +6,11 @@
   background: transparent;
   position: relative;
   overflow: visible;
+  padding-right: 24px;
+  box-sizing: border-box;
 }
 
+/* ===== SIDEBAR ===== */
 .kb-sidebar {
   background: #ffffff;
   border-radius: 18px;
@@ -63,20 +67,23 @@
   cursor: pointer;
 }
 
+/* ===== CONTENT ===== */
 .kb-content {
   background: #ffffff;
   border-radius: 18px;
   margin: 16px;
-  padding: 16px;
+  padding: 16px 24px 16px 16px;
   display: flex;
   flex-direction: column;
   border: 1px solid #e5e7eb;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
   position: relative;
   z-index: 1;
-  overflow: visible;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
+/* ===== HEADER ===== */
 .articles-header {
   display: flex;
   align-items: center;
@@ -96,8 +103,6 @@
 
 .articles-header select {
   appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
   height: 44px;
   min-width: 200px;
   padding: 0 44px 0 16px;
@@ -125,19 +130,7 @@
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
 }
 
-.articles-header select option {
-  padding: 10px 14px;
-  font-size: 14px;
-  background: #ffffff;
-  color: #0f172a;
-}
-
-.articles-header select option:checked,
-.articles-header select option:hover {
-  background-color: #eaf2ff;
-  color: #1d4ed8;
-}
-
+/* ===== TABLE ===== */
 .articles-table {
   width: 100%;
   border-collapse: separate;
@@ -146,6 +139,7 @@
   border-radius: 18px;
   border: 1px solid #e5e7eb;
   overflow: hidden;
+  margin-right: 8px;
 }
 
 .articles-table thead th {
@@ -161,24 +155,31 @@
   padding: 14px 12px;
   font-size: 14px;
   border-bottom: 1px solid #edf2f7;
-}
-
-.articles-table tbody tr {
-  background: #ffffff;
+  vertical-align: middle;
 }
 
 .articles-table tbody tr:hover {
   background: #f8fafc;
 }
 
-.link-btn {
-  background: none;
-  border: none;
+/* ===== TITLE COLUMN (IMAGE MATCH) ===== */
+.articles-table tbody td:first-child {
+  background: transparent;
+}
+
+.articles-table tbody td:first-child * {
+  all: unset;
   color: #2563eb;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
 }
 
+.articles-table tbody td:first-child *:hover {
+  text-decoration: underline;
+}
+
+/* ===== BADGES ===== */
 .category-badge {
   background: #eef2ff;
   color: #4338ca;
@@ -208,6 +209,7 @@
   color: #374151;
 }
 
+/* ===== ACTIONS ===== */
 .actions {
   display: flex;
   gap: 6px;
@@ -229,13 +231,7 @@
   color: #dc2626;
 }
 
-.page-info {
-  text-align: center;
-  font-size: 13px;
-  color: #64748b;
-  margin: 18px 0 10px;
-}
-
+/* ===== PAGINATION ===== */
 .pagination-bar {
   display: flex;
   justify-content: flex-end;
@@ -263,35 +259,7 @@
   cursor: not-allowed;
 }
 
-.icon-btn {
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
-  border-radius: 10px;
-  padding: 6px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease;
-}
-
-.icon-btn.drag {
-  color: #64748b;
-}
-
-.icon-btn.edit {
-  color: #2563eb;
-}
-
-.icon-btn.success {
-  color: #15803d;
-}
-
-.icon-btn.danger {
-  color: #dc2626;
-}
-
-.icon-btn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
+/* ===== SCROLLBAR SAFETY ===== */
+body {
+  scrollbar-gutter: stable;
 }
