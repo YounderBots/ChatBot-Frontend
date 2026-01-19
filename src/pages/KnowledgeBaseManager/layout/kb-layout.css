@@ -1,18 +1,13 @@
-/* =====================
-   ROOT (TRANSPARENT BACKGROUND)
-===================== */
 .kb-layout {
   display: grid;
   grid-template-columns: 280px 1fr;
-  min-height: 100vh;          /* 🔥 FIX */
   background: transparent;
   position: relative;
-  overflow: visible;          /* 🔥 FIX */
+  overflow: visible;
+  align-items: start;
+  z-index: 0;
 }
 
-/* =====================
-   SIDEBAR (CURVED CARD)
-===================== */
 .kb-sidebar {
   background: #ffffff;
   border-radius: 18px;
@@ -23,15 +18,16 @@
   border: 1px solid #e5e7eb;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
   position: relative;
-  z-index: 2;
+  z-index: 1;
+  height: fit-content;
 }
 
 .kb-sidebar .all-articles {
   font-weight: 600;
-  padding: 12px 14px;
+  padding: 10px 14px;
   border-radius: 12px;
   cursor: pointer;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .kb-sidebar .all-articles.active {
@@ -42,7 +38,7 @@
 .kb-sidebar .category-row {
   display: flex;
   justify-content: space-between;
-  padding: 10px 12px;
+  padding: 8px 12px;
   border-radius: 12px;
   cursor: pointer;
   font-size: 14px;
@@ -58,7 +54,7 @@
 }
 
 .manage-btn {
-  margin-top: auto;
+  margin-top: 12px;
   padding: 10px;
   border-radius: 12px;
   border: 1px solid #d1d5db;
@@ -67,9 +63,6 @@
   cursor: pointer;
 }
 
-/* =====================
-   CONTENT WRAPPER
-===================== */
 .kb-content {
   background: #ffffff;
   border-radius: 18px;
@@ -81,12 +74,9 @@
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
   position: relative;
   z-index: 1;
-  overflow: visible;          /* 🔥 FIX */
+  overflow: visible;
 }
 
-/* =====================
-   HEADER BAR
-===================== */
 .articles-header {
   display: flex;
   align-items: center;
@@ -114,9 +104,6 @@
   font-weight: 600;
 }
 
-/* =====================
-   TABLE
-===================== */
 .articles-table {
   width: 100%;
   border-collapse: separate;
@@ -124,6 +111,9 @@
   background: #ffffff;
   border-radius: 16px;
   border: 1px solid #e5e7eb;
+  overflow: hidden;
+  margin-top: 12px;
+  margin-bottom: 16px;
 }
 
 .articles-table thead th {
@@ -145,9 +135,6 @@
   background: #f9fbff;
 }
 
-/* =====================
-   LINKS & BADGES
-===================== */
 .link-btn {
   background: none;
   border: none;
@@ -185,9 +172,6 @@
   color: #374151;
 }
 
-/* =====================
-   ACTION ICONS
-===================== */
 .actions {
   display: flex;
   gap: 6px;
@@ -209,9 +193,6 @@
   color: #dc2626;
 }
 
-/* =====================
-   PAGE INFO
-===================== */
 .page-info {
   text-align: center;
   font-size: 13px;
@@ -219,9 +200,6 @@
   margin: 18px 0 10px;
 }
 
-/* =====================
-   PAGINATION BAR
-===================== */
 .pagination-bar {
   display: flex;
   justify-content: flex-end;
@@ -249,10 +227,6 @@
   cursor: not-allowed;
 }
 
-
-/* =====================
-   ICON BUTTONS (KB STYLE)
-===================== */
 .icon-btn {
   border: 1px solid #e5e7eb;
   background: #ffffff;
@@ -265,41 +239,48 @@
   transition: all 0.15s ease;
 }
 
-/* Drag handle */
 .icon-btn.drag {
   color: #64748b;
 }
-.icon-btn.drag:hover {
-  background: #f1f5f9;
-  color: #334155;
-}
 
-/* Edit */
 .icon-btn.edit {
   color: #2563eb;
 }
-.icon-btn.edit:hover {
-  background: #eaf2ff;
-}
 
-/* Save */
 .icon-btn.success {
   color: #15803d;
 }
-.icon-btn.success:hover {
-  background: #dcfce7;
-}
 
-/* Delete */
 .icon-btn.danger {
   color: #dc2626;
 }
-.icon-btn.danger:hover {
-  background: #fee2e2;
-}
 
-/* Disabled */
 .icon-btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
+}
+
+.article-editor-overlay,
+.new-article-overlay,
+.edit-article-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.article-editor,
+.new-article-container,
+.edit-article-container {
+  background: #ffffff;
+  width: 90%;
+  max-width: 1200px;
+  height: calc(100vh - 80px);
+  border-radius: 18px;
+  position: relative;
+  z-index: 1001;
+  overflow: auto;
 }
