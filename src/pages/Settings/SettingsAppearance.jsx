@@ -290,7 +290,6 @@ const handleReset = () => {
           style={{
             width:"100%",
             maxWidth: "400px",
-            margin: "0 auto",
             borderRadius: "16px",
             fontFamily: settings.fontFamily,
             boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
