@@ -178,7 +178,7 @@ const IntentManager = () => {
                             </ul>
                         </div>
                         )}
-                    <div className="btn-group bg-light p-1 rounded-2">
+                    <div className="btn-group bg-light rounded-2">
                         <button
                             className={`btn btn-sm border-0 rounded ${viewMode === 'grid'
                                 ? 'bg-white shadow-sm text-primary'
@@ -203,11 +203,10 @@ const IntentManager = () => {
                     </div>
 
                     <button
-                        className="btn btn-primary d-inline-flex align-items-center fw-semibold px-4 py-1"
+                        className="btn btn-primary d-inline-flex align-items-center fw-semibold add-intent-btn"
                         onClick={handleAdd}
-                        style={{ borderRadius: '8px', gap: '3px', fontSize: '11px' }}
                     >
-                        <i className="bi bi-plus-lg"></i> Add Intent
+                        <i className="bi bi-plus-lg me-1"></i>   Add Intent
                     </button>
                 </div>
 

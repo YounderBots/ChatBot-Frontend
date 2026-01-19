@@ -37,9 +37,9 @@ const getPageNumbers = () => {
 
 
     return (
-        <div className="bg-white rounded-16 shadow">
+        <div className="bg-white rounded-4 shadow">
 
-            <div className="table-responsive overflow-auto">
+            <div className="table-responsive overflow-hidden rounded-top-4">
                 <table className="table table-hover mb-0">
                     <thead className="table-light sticky-top">
                         <tr>

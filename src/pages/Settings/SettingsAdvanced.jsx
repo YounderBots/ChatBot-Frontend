@@ -178,9 +178,8 @@
               value={settings.dataRetentionDays}
               isInvalid={!!dataRetentionError}
               onChange={(e) => {
-                  const value = e.target.value; // keep as string
+                  const value = e.target.value;
 
-                  // Update state first (allows 0, empty, typing)
                   setSettings({
                   ...settings,
                   dataRetentionDays: value,
@@ -433,14 +432,14 @@
         }}
       >
         <Container fluid className="py-3">
-          <Row className="align-items-center">
-            <Col md={6} className="text-muted">
+          <Row className="align-items-center gy-2">
+            <Col md={6} xs={12}className="text-muted">
               {lastSavedAt
                 ? <>Last saved: <strong>{lastSavedAt.toLocaleString()}</strong></>
                 : "Not saved yet"}
             </Col>
 
-            <Col md={6} className="text-end">
+            <Col md={6} xs={12} className="text-end">
               <Button
                 variant="secondary"
                 className="me-2"

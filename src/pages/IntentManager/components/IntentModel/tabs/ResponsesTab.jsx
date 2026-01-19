@@ -1,147 +1,185 @@
-import React, { useState } from "react";
+import React from "react";
 
-const ResponsesTab = () => {
-  const [responses, setResponses] = useState([
-    {
-      id: 1,
-      text: "Your current balance is {balance}.",
-      type: "text",
-      priority: 1,
-      preview: false,
-    },
-  ]);
+const VARIABLES = [
+  "{user_name}",
+  "{product_name}",
+  "{current_time}",
+  "{balance}",
+];
 
-  const variables = [
-    "{user_name}",
-    "{product_name}",
-    "{current_time}",
-    "{balance}",
-  ];
+const RESPONSE_TYPES = [
+  { value: "text", label: "Text Only" },
+  { value: "quick", label: "Quick Replies" },
+  { value: "buttons", label: "Buttons" },
+  { value: "card", label: "Card" },
+];
 
-  const addResponse = () => {
-    setResponses((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        text: "",
-        type: "text",
-        priority: prev.length + 1,
-        preview: false,
-      },
-    ]);
+const ResponsesTab = ({
+  responses,
+  setResponses,
+  onSelectQuickResponse,
+}) => {
+
+  /* ---------- HELPERS ---------- */
+  const normalizePriority = (list) =>
+    list.map((r, i) => ({ ...r, priority: i + 1 }));
+
+  const updateResponse = (id, key, value) => {
+    setResponses(prev =>
+      prev.map(r =>
+        r.id === id ? { ...r, [key]: value } : r
+      )
+    );
   };
 
-  const updateResponse = (id, field, value) => {
-    setResponses((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, [field]: value } : r))
+  const addResponse = () => {
+    setResponses(prev =>
+      normalizePriority([
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          content: "",
+          type: "text",
+          preview: false,
+          priority: prev.length + 1,
+          quickReplies: [],
+        },
+      ])
     );
   };
 
   const deleteResponse = (id) => {
-    setResponses((prev) => prev.filter((r) => r.id !== id));
+    setResponses(prev =>
+      normalizePriority(prev.filter(r => r.id !== id))
+    );
   };
 
   const moveResponse = (index, direction) => {
-    const updated = [...responses];
-    const target = direction === "up" ? index - 1 : index + 1;
-    if (target < 0 || target >= updated.length) return;
-    [updated[index], updated[target]] = [updated[target], updated[index]];
-    setResponses(updated);
+    setResponses(prev => {
+      const updated = [...prev];
+      const target = direction === "up" ? index - 1 : index + 1;
+      if (target < 0 || target >= updated.length) return prev;
+      [updated[index], updated[target]] = [updated[target], updated[index]];
+      return normalizePriority(updated);
+    });
   };
 
+  const insertVariable = (variable) => {
+    document.execCommand("insertText", false, variable);
+  };
+
+  const formatText = (command, value = null) => {
+    document.execCommand(command, false, value);
+  };
+
+  /* ---------- RENDER ---------- */
   return (
     <div className="d-flex gap-4">
-      {/* LEFT PANEL */}
       <div className="flex-grow-1">
-        {/* Header */}
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h5 className="mb-0 text-dark fw-semibold">Responses</h5>
+
+        {/* HEADER */}
+        <div className="d-flex justify-content-between mb-3">
+          <h5 className="fw-semibold">Responses</h5>
           <button
-            className="btn btn-sm text-white"
-            style={{ background: "var(--cvq-blue-600)" }}
+            className="btn btn-sm btn-primary"
             onClick={addResponse}
           >
-            <i className="bi bi-plus-lg me-1"></i> Add Response
+            <i className="bi bi-plus-lg me-1" /> Add Response
           </button>
         </div>
 
-        {/* Response List */}
+        {/* RESPONSES */}
         {responses.map((res, index) => (
           <div
             key={res.id}
-            className="mb-3 p-3 rounded-3"
-            style={{
-              background: "var(--cvq-white)",
-              boxShadow: "var(--cvq-shadow-sm)",
-              border: "1px solid var(--cvq-gray-200)",
-            }}
+            className="p-3 mb-3 border rounded shadow-sm bg-white"
           >
-            {/* Card Header */}
-            <div className="d-flex justify-content-between align-items-center mb-2">
-              <span className="fw-semibold text-secondary">
-                Response #{index + 1}
-              </span>
-
+            {/* HEADER */}
+            <div className="d-flex justify-content-between mb-2">
+              <strong>Response #{index + 1}</strong>
               <div className="btn-group btn-group-sm">
                 <button
                   className="btn btn-light"
                   onClick={() => moveResponse(index, "up")}
                 >
-                  <i className="bi bi-arrow-up"></i>
+                  ↑
                 </button>
                 <button
                   className="btn btn-light"
                   onClick={() => moveResponse(index, "down")}
                 >
-                  <i className="bi bi-arrow-down"></i>
+                  ↓
                 </button>
                 <button
                   className="btn btn-light text-danger"
                   onClick={() => deleteResponse(res.id)}
                 >
-                  <i className="bi bi-trash"></i>
+                  🗑
                 </button>
               </div>
             </div>
 
-            {/* Toolbar */}
-            <div className="d-flex flex-wrap align-items-center gap-2 mb-2">
-              <div className="btn-group btn-group-sm shadow-sm">
-                <button className="btn btn-light fw-bold">B</button>
-                <button className="btn btn-light fst-italic">I</button>
-                <button className="btn btn-light text-decoration-underline">
-                  U
+            {/* TOOLBAR */}
+            <div className="d-flex flex-wrap gap-2 mb-2">
+
+              <div className="btn-group btn-group-sm">
+                <button
+                  className="btn btn-light fw-bold"
+                  onMouseDown={e => e.preventDefault()}
+                  onClick={() => formatText("bold")}
+                >
+                  B
                 </button>
-                <button className="btn btn-light">
-                  <i className="bi bi-link"></i>
+                <button
+                  className="btn btn-light fst-italic"
+                  onMouseDown={e => e.preventDefault()}
+                  onClick={() => formatText("italic")}
+                >
+                  I
+                </button>
+                <button
+                  className="btn btn-light"
+                  onMouseDown={e => e.preventDefault()}
+                  onClick={() => {
+                    const url = prompt("Enter URL");
+                    if (url) formatText("createLink", url);
+                  }}
+                >
+                  🔗
                 </button>
               </div>
 
               <select
                 className="form-select form-select-sm w-auto"
-                onChange={(e) =>
-                  updateResponse(res.id, "text", res.text + " " + e.target.value)
-                }
+                onChange={(e) => insertVariable(e.target.value)}
               >
                 <option value="">Insert Variable</option>
-                {variables.map((v) => (
-                  <option key={v} value={v}>
-                    {v}
-                  </option>
+                {VARIABLES.map(v => (
+                  <option key={v} value={v}>{v}</option>
                 ))}
               </select>
 
               <select
                 className="form-select form-select-sm w-auto"
                 value={res.type}
-                onChange={(e) =>
-                  updateResponse(res.id, "type", e.target.value)
-                }
+                onChange={(e) => {
+                  const newType = e.target.value;
+
+                  updateResponse(res.id, "type", newType);
+
+                  // 🔹 ADDITION: sync quick reply selection
+                  if (newType === "quick") {
+                    onSelectQuickResponse(res.id);
+                  } else {
+                    onSelectQuickResponse?.(null);
+                  }
+                }}
               >
-                <option value="text">Text Only</option>
-                <option value="quick">Quick Replies</option>
-                <option value="buttons">Buttons</option>
-                <option value="card">Card</option>
+                {RESPONSE_TYPES.map(t => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
+                ))}
               </select>
 
               <div className="form-check form-switch ms-auto">
@@ -153,44 +191,50 @@ const ResponsesTab = () => {
                     updateResponse(res.id, "preview", e.target.checked)
                   }
                 />
-                <label className="form-check-label small">Preview</label>
+                <label className="form-check-label small">
+                  Preview
+                </label>
               </div>
             </div>
 
-            {/* Editor / Preview */}
+            {/* EDITOR / PREVIEW */}
             {!res.preview ? (
-              <textarea
+              <div
+                contentEditable
                 className="form-control mb-2"
-                rows="3"
-                value={res.text}
-                onChange={(e) =>
-                  updateResponse(res.id, "text", e.target.value)
+                style={{ minHeight: "90px" }}
+                suppressContentEditableWarning
+                onInput={(e) =>
+                  updateResponse(res.id, "content", e.currentTarget.innerHTML)
                 }
               />
             ) : (
-              <div
-                className="p-2 rounded-2 mb-2"
-                style={{
-                  background: "var(--cvq-gray-50)",
-                  border: "1px dashed var(--cvq-gray-300)",
-                }}
-              >
-                {res.text || <em className="text-muted">No content</em>}
+              <div className="border rounded p-2 bg-light mb-2">
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: res.content || "<em>No content</em>",
+                  }}
+                />
               </div>
             )}
 
-            {/* Footer */}
+            {/* FOOTER */}
             <div className="d-flex align-items-center gap-2">
-              <label className="small text-secondary">Priority</label>
+              <small className="text-muted">Priority</small>
               <input
-                type="number"
                 className="form-control form-control-sm w-25"
                 value={res.priority}
-                onChange={(e) =>
-                  updateResponse(res.id, "priority", e.target.value)
-                }
+                disabled
               />
             </div>
+
+            {/* QUICK INFO */}
+            {res.type === "quick" && (
+              <div className="small text-primary mt-2">
+                Quick replies linked to response ID:
+                <code className="ms-1">{res.id}</code>
+              </div>
+            )}
           </div>
         ))}
       </div>

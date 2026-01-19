@@ -1,18 +1,16 @@
-/* =====================
-   ROOT (TRANSPARENT BACKGROUND)
-===================== */
+/* ===== ROOT LAYOUT ===== */
 .kb-layout {
   display: grid;
   grid-template-columns: 280px 1fr;
-  min-height: 100vh;          /* 🔥 FIX */
+  min-height: 100vh;
   background: transparent;
   position: relative;
-  overflow: visible;          /* 🔥 FIX */
+  overflow: visible;
+  padding-right: 24px;
+  box-sizing: border-box;
 }
 
-/* =====================
-   SIDEBAR (CURVED CARD)
-===================== */
+/* ===== SIDEBAR ===== */
 .kb-sidebar {
   background: #ffffff;
   border-radius: 18px;
@@ -24,14 +22,16 @@
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
   position: relative;
   z-index: 2;
+  max-height: 460px;
+  overflow-y: auto;
 }
 
 .kb-sidebar .all-articles {
   font-weight: 600;
-  padding: 12px 14px;
-  border-radius: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
   cursor: pointer;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .kb-sidebar .all-articles.active {
@@ -42,8 +42,8 @@
 .kb-sidebar .category-row {
   display: flex;
   justify-content: space-between;
-  padding: 10px 12px;
-  border-radius: 12px;
+  padding: 8px 12px;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 14px;
 }
@@ -67,26 +67,23 @@
   cursor: pointer;
 }
 
-/* =====================
-   CONTENT WRAPPER
-===================== */
+/* ===== CONTENT ===== */
 .kb-content {
   background: #ffffff;
   border-radius: 18px;
   margin: 16px;
-  padding: 16px;
+  padding: 16px 24px 16px 16px;
   display: flex;
   flex-direction: column;
   border: 1px solid #e5e7eb;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
   position: relative;
   z-index: 1;
-  overflow: visible;          /* 🔥 FIX */
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
-/* =====================
-   HEADER BAR
-===================== */
+/* ===== HEADER ===== */
 .articles-header {
   display: flex;
   align-items: center;
@@ -95,35 +92,54 @@
   margin-bottom: 16px;
 }
 
-.articles-header input,
-.articles-header select {
+.articles-header input {
   padding: 10px 14px;
   border-radius: 12px;
   border: 1px solid #d1d5db;
   background: #ffffff;
   font-size: 14px;
-  min-width: 180px;
+  min-width: 220px;
 }
 
-.articles-header .btn.primary {
-  background: #2563eb;
-  color: #ffffff;
+.articles-header select {
+  appearance: none;
+  height: 44px;
+  min-width: 200px;
+  padding: 0 44px 0 16px;
   border-radius: 12px;
-  padding: 10px 18px;
-  border: none;
-  font-weight: 600;
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f172a;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%236b7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 16px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-/* =====================
-   TABLE
-===================== */
+.articles-header select:hover {
+  border-color: #94a3b8;
+}
+
+.articles-header select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+}
+
+/* ===== TABLE ===== */
 .articles-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   background: #ffffff;
-  border-radius: 16px;
+  border-radius: 18px;
   border: 1px solid #e5e7eb;
+  overflow: hidden;
+  margin-right: 8px;
 }
 
 .articles-table thead th {
@@ -139,23 +155,31 @@
   padding: 14px 12px;
   font-size: 14px;
   border-bottom: 1px solid #edf2f7;
+  vertical-align: middle;
 }
 
 .articles-table tbody tr:hover {
-  background: #f9fbff;
+  background: #f8fafc;
 }
 
-/* =====================
-   LINKS & BADGES
-===================== */
-.link-btn {
-  background: none;
-  border: none;
+/* ===== TITLE COLUMN (IMAGE MATCH) ===== */
+.articles-table tbody td:first-child {
+  background: transparent;
+}
+
+.articles-table tbody td:first-child * {
+  all: unset;
   color: #2563eb;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
 }
 
+.articles-table tbody td:first-child *:hover {
+  text-decoration: underline;
+}
+
+/* ===== BADGES ===== */
 .category-badge {
   background: #eef2ff;
   color: #4338ca;
@@ -185,9 +209,7 @@
   color: #374151;
 }
 
-/* =====================
-   ACTION ICONS
-===================== */
+/* ===== ACTIONS ===== */
 .actions {
   display: flex;
   gap: 6px;
@@ -196,7 +218,7 @@
 .actions button {
   border: 1px solid #e5e7eb;
   background: #ffffff;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 6px;
   cursor: pointer;
 }
@@ -209,19 +231,7 @@
   color: #dc2626;
 }
 
-/* =====================
-   PAGE INFO
-===================== */
-.page-info {
-  text-align: center;
-  font-size: 13px;
-  color: #64748b;
-  margin: 18px 0 10px;
-}
-
-/* =====================
-   PAGINATION BAR
-===================== */
+/* ===== PAGINATION ===== */
 .pagination-bar {
   display: flex;
   justify-content: flex-end;
@@ -249,57 +259,7 @@
   cursor: not-allowed;
 }
 
-
-/* =====================
-   ICON BUTTONS (KB STYLE)
-===================== */
-.icon-btn {
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
-  border-radius: 10px;
-  padding: 6px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease;
-}
-
-/* Drag handle */
-.icon-btn.drag {
-  color: #64748b;
-}
-.icon-btn.drag:hover {
-  background: #f1f5f9;
-  color: #334155;
-}
-
-/* Edit */
-.icon-btn.edit {
-  color: #2563eb;
-}
-.icon-btn.edit:hover {
-  background: #eaf2ff;
-}
-
-/* Save */
-.icon-btn.success {
-  color: #15803d;
-}
-.icon-btn.success:hover {
-  background: #dcfce7;
-}
-
-/* Delete */
-.icon-btn.danger {
-  color: #dc2626;
-}
-.icon-btn.danger:hover {
-  background: #fee2e2;
-}
-
-/* Disabled */
-.icon-btn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
+/* ===== SCROLLBAR SAFETY ===== */
+body {
+  scrollbar-gutter: stable;
 }
