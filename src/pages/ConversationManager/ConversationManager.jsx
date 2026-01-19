@@ -664,7 +664,6 @@ const ConversationManager = () => {
                           placeholder="Export"
                           value={Value}
                           options={[
-                            { value: "", label: "Export" },
                             { value: "pdf", label: "Export PDF" },
                             { value: "json", label: "Export JSON" },
                           ]}
