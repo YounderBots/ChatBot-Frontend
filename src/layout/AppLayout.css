@@ -198,7 +198,7 @@
 }
 
 .sidebarHeader:hover {
-  background: rgba(255, 255, 255, 0.863);
+  cursor: pointer;
 }
 .logo-wrapper {
   position: relative;
