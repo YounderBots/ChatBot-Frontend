@@ -35,6 +35,7 @@ const ArticleEditor = ({
   article,
   onCancel,
   onSave,
+  inDialog = false,
 }) => {
   const [activeTab, setActiveTab] = useState(TABS.INFO);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -113,40 +114,46 @@ const ArticleEditor = ({
       </div>
 
       {/* TAB CONTENT */}
-      {activeTab === TABS.INFO && (
-        <ArticleInfoSection
-          form={form}
-          setForm={setForm}
-          errors={errors}
-          categories={categories}
-          setCategories={setCategories}
-          allTags={allTags}
-        />
-      )}
+      <div className="editor-card">
+        {activeTab === TABS.INFO && (
+          <section>
+            <ArticleInfoSection
+              form={form}
+              setForm={setForm}
+              errors={errors}
+              categories={categories}
+              setCategories={setCategories}
+              allTags={allTags}
+            />
+          </section>
+        )}
 
-      {activeTab === TABS.CONTENT && (
-        <>
-          <ArticleContentSection form={form} setForm={setForm} />
-          {errors.content && (
-            <small className="error">{errors.content}</small>
-          )}
-          <RelatedQuestions
-            questions={relatedQuestions}
-            setQuestions={setRelatedQuestions}
-          />
-        </>
-      )}
+        {activeTab === TABS.CONTENT && (
+          <section>
+            <ArticleContentSection form={form} setForm={setForm} />
+            {errors.content && (
+              <small className="error">{errors.content}</small>
+            )}
+            <RelatedQuestions
+              questions={relatedQuestions}
+              setQuestions={setRelatedQuestions}
+            />
+          </section>
+        )}
 
-      {activeTab === TABS.SEO && (
-        <ArticleSEOSection
-          form={form}
-          setForm={setForm}
-          errors={errors}
-        />
-      )}
+        {activeTab === TABS.SEO && (
+          <section>
+            <ArticleSEOSection
+              form={form}
+              setForm={setForm}
+              errors={errors}
+            />
+          </section>
+        )}
+      </div>
 
-      {/* FOOTER (DIALOG CONTROLS) */}
-      <div className="editor-footer">
+      {/* FOOTER */}
+      <div className="editor-actions">
         <button className="btn ghost" onClick={onCancel}>
           Cancel
         </button>
