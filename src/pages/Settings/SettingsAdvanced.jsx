@@ -178,9 +178,8 @@
               value={settings.dataRetentionDays}
               isInvalid={!!dataRetentionError}
               onChange={(e) => {
-                  const value = e.target.value; // keep as string
+                  const value = e.target.value;
 
-                  // Update state first (allows 0, empty, typing)
                   setSettings({
                   ...settings,
                   dataRetentionDays: value,

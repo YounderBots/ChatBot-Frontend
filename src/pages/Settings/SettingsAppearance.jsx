@@ -1,12 +1,16 @@
+import { User } from "lucide-react";
 import React, { useState } from "react";
 import { Card, Row, Col, Form, Button } from "react-bootstrap";
 
 const SettingsAppearance = () => {
  
   const defaultSettings = {
-  primaryColor: "#0d6efd",
-  headerColor: "#f1f3f5",
-  secondaryColor: "#f1f3f5",
+  primaryColor: "#f1f3f5",
+  ConversationBotColor:"#0000FF",
+  ConversationWordColor:"#FFFFFF",
+  UserChatColor:"#f1f3f5",
+  UserWordColor:"#111111",
+  ButtonColor:"#007bff",
   fontFamily: "Sans-serif",
 
   widgetPosition: "bottom-right",
@@ -37,7 +41,7 @@ const handleReset = () => {
 
         <Row className="mb-3">
           <Col md={4}>
-            <Form.Label>Primary Color</Form.Label>
+            <Form.Label>Widget Background Color</Form.Label>
             <Form.Control
               type="color"
               value={settings.primaryColor}
@@ -48,26 +52,60 @@ const handleReset = () => {
           </Col>
 
           <Col md={4}>
-            <Form.Label>Header Color</Form.Label>
+            <Form.Label>BotChat Message Background</Form.Label>
             <Form.Control
               type="color"
-              value={settings.headerColor}
+              value={settings.ConversationBotColor}
               onChange={(e) =>
-                setSettings({ ...settings, headerColor: e.target.value })
+                setSettings({ ...settings, ConversationBotColor: e.target.value })
               }
             />
           </Col>
 
           <Col md={4}>
-            <Form.Label>Secondary Color</Form.Label>
+            <Form.Label>Userchat Message Background</Form.Label>
             <Form.Control
               type="color"
-              value={settings.secondaryColor}
+              value={settings.UserChatColor}
               onChange={(e) =>
-                setSettings({ ...settings, secondaryColor: e.target.value })
+                setSettings({ ...settings, UserChatColor: e.target.value })
               }
             />
           </Col>
+
+          <Col md={4}>
+            <Form.Label>Bot Text Color</Form.Label>
+            <Form.Control
+              type="color"
+              value={settings.ConversationWordColor}
+              onChange={(e) =>
+                setSettings({ ...settings, ConversationWordColor: e.target.value })
+              }
+            />
+          </Col>
+
+          <Col md={4}>
+            <Form.Label>User Text Color</Form.Label>
+            <Form.Control
+              type="color"
+              value={settings.UserWordColor}
+              onChange={(e) =>
+                setSettings({ ...settings, UserWordColor: e.target.value })
+              }
+            />
+          </Col>
+          
+          <Col md={4}>
+            <Form.Label>Button Color</Form.Label>
+            <Form.Control
+              type="color"
+              value={settings.ButtonColor}
+              onChange={(e) =>
+                setSettings({ ...settings, ButtonColor: e.target.value })
+              }
+            />
+          </Col>
+
         </Row>
 
         <Row className="mb-4">
@@ -102,7 +140,7 @@ const handleReset = () => {
         </Row>
 
 
-        <Row className="mb-3">
+        {/* <Row className="mb-3">
           <Col md={6}>
             <Form.Label>Widget Position</Form.Label>
             <Form.Check
@@ -139,7 +177,7 @@ const handleReset = () => {
               <option value="large">Large</option>
             </Form.Select>
           </Col>
-        </Row>
+        </Row> */}
 
         <hr />
 
@@ -248,56 +286,107 @@ const handleReset = () => {
         {/* PREVIEW */}
         <h6 className="text-primary mb-3">Preview</h6>
 
-     <div
-      style={{
-        background: settings.secondaryColor,
-        width:
-          settings.widgetSize === "small"
-            ? "220px"
-            : settings.widgetSize === "large"
-            ? "320px"
-            : "260px",
-        borderRadius: "14px",
-        fontFamily: settings.fontFamily,
-        position: "relative",
-        boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
-        overflow: "hidden",
-      }}
-    >
-      <div
-        style={{
-          background: settings.primaryColor,
-          color: settings.headerColor,
-          padding: "10px 12px",
-          fontWeight: "600",
-          fontSize: "14px",
-        }}
-      >
-        {settings.chatBubbleText}
-      </div>
+        <div
+          style={{
+            width:"400px",
+            borderRadius: "16px",
+            fontFamily: settings.fontFamily,
+            boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+            overflow: "hidden",
+            background: settings.primaryColor,
+            position: "relative",
+          }}
+        >
+          <div style={{ padding: "12px" }}>
+            <div style={{ textAlign: "right", marginBottom: "10px" }}>
+              <span
+                style={{
+                  background: settings.ConversationBotColor,
+                  color: settings.ConversationWordColor,
+                  padding: "6px 12px",
+                  borderRadius: "16px",
+                  fontSize: "12px",
+                  display: "inline-block",
+                }}
+              >
+                Hello
+              </span>
+            </div>
 
-      <div style={{ padding: "12px", color: "#000" }}>
-        <div style={{ fontSize: "13px" }}>
-          Hello! How can I help you?
+            <div
+              style={{
+                background: settings.UserChatColor,
+                borderRadius: "12px",
+                padding: "10px",
+                fontSize: "12px",
+                color: settings.UserWordColor,
+                boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+              }}
+            >
+              <p style={{ marginBottom: "10px" }}>
+                Our team will get back to you soon.
+              </p>
+
+              <div style={{ display: "flex", gap: "14px", flexWrap: "wrap" }}>
+                {["Track Order", "Pricing", "Talk to Agent"].map((text) => (
+                  <button
+                    key={text}
+                    style={{
+                      color: settings.ButtonColor,
+                      fontSize: "12px",
+                      cursor: "pointer",
+                      fontWeight: 500,
+                      border: "none",
+                      borderRadius: "20px",
+                      padding: "6px 14px",
+                    }}
+                  >
+                    {text}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              padding: "8px",
+              background: "settings.primaryColor",
+              borderTop: "1px solid #dee2e6",
+            }}
+          >
+            <input
+              disabled
+              placeholder="Type a message..."
+              style={{
+                flex: 1,
+                border: "1px solid #ced4da",
+                borderRadius: "20px",
+                padding: "6px 12px",
+                fontSize: "12px",
+                outline: "none",
+              }}
+            />
+            <button
+              style={{
+                marginLeft: "6px",
+                background: "blue",
+                color: "#fff",
+                border: "none",
+                borderRadius: "20px",
+                padding: "6px 14px",
+                fontSize: "12px",
+                cursor: "pointer",
+              }}
+            >
+              Send
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div
-        style={{
-          position: "absolute",
-          bottom: "-18px",
-          right: settings.widgetPosition === "bottom-right" ? "0" : "auto",
-          left: settings.widgetPosition === "bottom-left" ? "0" : "auto",
-          fontSize: "10px",
-          color: "#6c757d",
-          textTransform: "capitalize",
-        }}
-      >
-        {settings.widgetPosition.replace("-", " ")}
-      </div>
-    </div>
 
-        <div className="mt-3">
+        <div className="mt-4">
           <Button size="sm" variant="danger"  onClick={handleReset}>
             Reset to Default
           </Button>

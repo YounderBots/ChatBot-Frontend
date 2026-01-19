@@ -214,7 +214,7 @@ const triggerWebhook = (index) => {
                 />
 
                 <Button
-                    variant="outline-secondary"
+                    variant="primary"
                     onClick={() => {
                     navigator.clipboard.writeText(settings.apiEndpoint);
                     alert("API Endpoint copied!");
@@ -305,7 +305,8 @@ const triggerWebhook = (index) => {
         <hr />
 
         {/* THIRD PARTY */}
-        <h6 className="text-primary mb-3">Slack</h6>
+        <h6 className="text-primary mb-3">Third Party Integration</h6>
+        <span>Slack</span>
 
         <Row className="align-items-center mb-3">
           <Col md={4}>
@@ -346,9 +347,9 @@ const triggerWebhook = (index) => {
 
 
     {/* SETTINGS */}
-    <h6 className="text-primary mb-3">Email (SMTP)</h6>
+    <span className="mb-3">Email (SMTP)</span>
 
-    <Row className="align-items-center mb-3">
+    <Row className="align-items-center mb-4">
       <Col md={4}>
         <strong>Status:</strong>{" "}
         <span className={smtp.configured ? "text-success" : "text-danger"}>
@@ -432,16 +433,16 @@ const triggerWebhook = (index) => {
     </Row>
 
     <Button
+      className="mb-3"
       size="sm"
       variant="primary"
       onClick={() => alert("SMTP connection successful")}
     >
       Test Connection
     </Button>
-    <hr/>
 
         <Row>
-        <h6 className="text-primary mb-3">CRM</h6>
+        <p className="mb-3">CRM</p>
 
         <Row className="mb-3">
           <Col md={6}>
@@ -458,20 +459,18 @@ const triggerWebhook = (index) => {
               <option value="Zoho">Zoho</option>
             </Form.Select>
           </Col>
-        </Row>
 
-        <Row className="mb-3">
-          <Col md={6}>
-            <Form.Label>API Credentials</Form.Label>
-            <Form.Control
-              type="password"
-              placeholder="API Key / Token"
-              value={crm.apiKey}
-              onChange={(e) =>
-                setCrm({ ...crm, apiKey: e.target.value })
-              }
-            />
-          </Col>
+        <Col md={6}>
+          <Form.Label>API Credentials</Form.Label>
+          <Form.Control
+            type="password"
+            placeholder="API Key / Token"
+            value={crm.apiKey}
+            onChange={(e) =>
+              setCrm({ ...crm, apiKey: e.target.value })
+            }
+          />
+        </Col>
         </Row>
       <Row className="mb-4">
         <Col md={6} className="d-flex align-items-center gap-2">
