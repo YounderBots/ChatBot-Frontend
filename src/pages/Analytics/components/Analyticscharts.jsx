@@ -1,5 +1,5 @@
-import React, { useState, useRef } from "react";
-import { Card, Row, Col, Form, Button, } from "react-bootstrap";
+import React, { useState, useRef, useMemo } from "react";
+import { Card, Row, Col, Form, Button, Dropdown, } from "react-bootstrap";
 import {
     LineChart,
     Line,
@@ -16,6 +16,7 @@ import {
     FunnelChart,
     Funnel,
     LabelList,
+    CartesianGrid,
 
 } from "recharts";
 import html2canvas from "html2canvas";
@@ -25,14 +26,58 @@ const defaultSort = {
     direction: "desc",
 };
 
-const conversationTrendData = [
-    { time: "Mon", total: 420, resolved: 310, escalated: 70, failed: 40 },
-    { time: "Tue", total: 520, resolved: 390, escalated: 80, failed: 50 },
-    { time: "Wed", total: 610, resolved: 470, escalated: 90, failed: 50 },
-    { time: "Thu", total: 680, resolved: 540, escalated: 80, failed: 60 },
-    { time: "Fri", total: 720, resolved: 580, escalated: 90, failed: 50 },
-    { time: "Sat", total: 420, resolved: 310, escalated: 70, failed: 40 },
+const rawConversationData = [
+    // -------- Jan 1 (Thu) --------
+    { timestamp: "2026-01-01T09:10:00", total: 5, resolved: 4, escalated: 1, failed: 0 },
+    { timestamp: "2026-01-01T10:20:00", total: 8, resolved: 6, escalated: 1, failed: 1 },
+    { timestamp: "2026-01-01T11:45:00", total: 12, resolved: 10, escalated: 1, failed: 1 },
+    { timestamp: "2026-01-01T14:30:00", total: 15, resolved: 13, escalated: 1, failed: 1 },
+
+    // -------- Jan 2 (Fri) --------
+    { timestamp: "2026-01-02T09:05:00", total: 10, resolved: 8, escalated: 1, failed: 1 },
+    { timestamp: "2026-01-02T11:00:00", total: 12, resolved: 10, escalated: 1, failed: 1 },
+    { timestamp: "2026-01-02T15:20:00", total: 18, resolved: 16, escalated: 1, failed: 1 },
+
+    // -------- Jan 3 (Sat) --------
+    { timestamp: "2026-01-03T10:15:00", total: 14, resolved: 12, escalated: 1, failed: 1 },
+    { timestamp: "2026-01-03T13:40:00", total: 16, resolved: 14, escalated: 1, failed: 1 },
+
+    // -------- Jan 4 (Sun) --------
+    { timestamp: "2026-01-04T11:30:00", total: 9, resolved: 7, escalated: 1, failed: 1 },
+
+    // -------- Jan 5 (Mon) --------
+    { timestamp: "2026-01-05T09:00:00", total: 20, resolved: 18, escalated: 1, failed: 1 },
+    { timestamp: "2026-01-05T11:30:00", total: 22, resolved: 20, escalated: 1, failed: 1 },
+    { timestamp: "2026-01-05T16:45:00", total: 25, resolved: 22, escalated: 2, failed: 1 },
+
+    // -------- Jan 6 (Tue) --------
+    { timestamp: "2026-01-06T09:20:00", total: 18, resolved: 16, escalated: 1, failed: 1 },
+    { timestamp: "2026-01-06T14:10:00", total: 21, resolved: 19, escalated: 1, failed: 1 },
+
+    // -------- Jan 7 (Wed) --------
+    { timestamp: "2026-01-07T10:00:00", total: 23, resolved: 21, escalated: 1, failed: 1 },
+    { timestamp: "2026-01-07T15:30:00", total: 26, resolved: 23, escalated: 2, failed: 1 },
+
+    // -------- Jan 10 (Sat - Week 2) --------
+    { timestamp: "2026-01-10T11:00:00", total: 30, resolved: 25, escalated: 3, failed: 2 },
+    { timestamp: "2026-01-10T16:00:00", total: 32, resolved: 27, escalated: 3, failed: 2 },
+
+    // -------- Jan 14 (Wed - Week 3) --------
+    { timestamp: "2026-01-14T10:10:00", total: 28, resolved: 24, escalated: 2, failed: 2 },
+    { timestamp: "2026-01-14T14:40:00", total: 30, resolved: 26, escalated: 2, failed: 2 },
+
+    // -------- Jan 18 (Sun - Week 3) --------
+    { timestamp: "2026-01-18T12:00:00", total: 26, resolved: 23, escalated: 2, failed: 1 },
+
+    // -------- Jan 22 (Thu - Week 4) --------
+    { timestamp: "2026-01-22T09:30:00", total: 35, resolved: 30, escalated: 3, failed: 2 },
+    { timestamp: "2026-01-22T16:20:00", total: 38, resolved: 33, escalated: 3, failed: 2 },
+
+    // -------- Jan 27 (Tue - Week 4) --------
+    { timestamp: "2026-01-27T11:15:00", total: 40, resolved: 35, escalated: 3, failed: 2 },
 ];
+
+
 
 const intentData = [
     {
@@ -113,11 +158,29 @@ const heatmapData = {
     Sun: Array.from({ length: 24 }, () => Math.floor(Math.random() * 100)),
 };
 
+
 const AnalyticsCharts = () => {
     const [sortBy, setSortBy] = useState("usage");
     const [sortConfig, setSortConfig] = useState(defaultSort);
     const [tooltip, setTooltip] = React.useState(null);
     const [confidenceFilter, setConfidenceFilter] = useState(null);
+    const [timeView, setTimeView] = useState("hourly");
+    const [visibleLines, setVisibleLines] = useState({
+        total: true,
+        resolved: true,
+        escalated: true,
+        failed: true,
+    });
+
+
+    const handleLegendClick = (e) => {
+        const key = e.dataKey;
+
+        setVisibleLines(prev => ({
+            ...prev,
+            [key]: !prev[key],
+        }));
+    };
 
     const sortedIntentData = [...intentData]
         .sort((a, b) => {
@@ -180,7 +243,80 @@ const AnalyticsCharts = () => {
     };
     const chartRef = useRef(null);
 
+    const getWeekOfMonth = (date) => {
+        const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+        return Math.ceil((date.getDate() + firstDay) / 7);
+    };
 
+    const getDayName = (date) =>
+        date.toLocaleDateString("en-US", { weekday: "short" });
+
+    const getDailyData = (data) => {
+        const result = {};
+
+        data.forEach(item => {
+            const date = new Date(item.timestamp);
+            const day = getDayName(date); // Mon, Tue...
+
+            if (!result[day]) {
+                result[day] = { time: day, total: 0, resolved: 0, escalated: 0, failed: 0 };
+            }
+
+            result[day].total += item.total;
+            result[day].resolved += item.resolved;
+            result[day].escalated += item.escalated;
+            result[day].failed += item.failed;
+        });
+
+        return Object.values(result);
+    };
+
+    const getWeeklyData = (data) => {
+        const result = {};
+
+        data.forEach(item => {
+            const date = new Date(item.timestamp);
+            const week = `Week ${getWeekOfMonth(date)}`;
+
+            if (!result[week]) {
+                result[week] = { time: week, total: 0, resolved: 0, escalated: 0, failed: 0 };
+            }
+
+            result[week].total += item.total;
+            result[week].resolved += item.resolved;
+            result[week].escalated += item.escalated;
+            result[week].failed += item.failed;
+        });
+
+        return Object.values(result);
+    };
+
+    const getHourlyData = (data) => {
+        const result = {};
+
+        data.forEach(item => {
+            const date = new Date(item.timestamp);
+            const hour = `${date.getHours()}:00`;
+
+            if (!result[hour]) {
+                result[hour] = { time: hour, total: 0, resolved: 0, escalated: 0, failed: 0 };
+            }
+
+            result[hour].total += item.total;
+            result[hour].resolved += item.resolved;
+            result[hour].escalated += item.escalated;
+            result[hour].failed += item.failed;
+        });
+
+        return Object.values(result);
+    };
+
+    const chartData = useMemo(() => {
+        if (timeView === "hourly") return getHourlyData(rawConversationData);
+        if (timeView === "daily") return getDailyData(rawConversationData);
+        if (timeView === "weekly") return getWeeklyData(rawConversationData);
+        return [];
+    }, [timeView, rawConversationData]);
 
     return (
         <div className="g-2 p-100" >
@@ -189,53 +325,122 @@ const AnalyticsCharts = () => {
                 <Col md={12}>
                     <Card className="rounded-4 shadow-sm mt-2 analytics-card">
                         <Card.Body className="analytics-chart-body">
-                            {/* Header */}
-                            <div className="analytics-chart-header">
+
+                            {/* ---------- Header ---------- */}
+                            <div className="analytics-chart-header d-flex justify-content-between align-items-center">
                                 <h6 className="fw-semibold mb-0">
                                     Conversation Volume Trend
                                 </h6>
 
-                                <Button
-                                    size="sm"
-                                    variant="outline-secondary"
-                                    className="border border-secondary"
-                                    onClick={exportPNG}
-                                    disabled={!chartRef.current}
-                                >
-                                    Export PNG
-                                </Button>
+                                <div className="d-flex flex-wrap justify-content-between align-items-center p-2 gap-2 mb-3">
+                                    {/* Time Selector */}
+                                    <Dropdown>
+                                        <Dropdown.Toggle
+                                            size="sm"
+                                            variant="primary"
+                                        >
+                                            {timeView.charAt(0).toUpperCase() + timeView.slice(1)}
+                                        </Dropdown.Toggle>
+
+                                        <Dropdown.Menu>
+                                            <Dropdown.Item onClick={() => setTimeView("hourly")}>
+                                                Hourly
+                                            </Dropdown.Item>
+                                            <Dropdown.Item onClick={() => setTimeView("daily")}>
+                                                Daily
+                                            </Dropdown.Item>
+                                            <Dropdown.Item onClick={() => setTimeView("weekly")}>
+                                                Weekly
+                                            </Dropdown.Item>
+                                        </Dropdown.Menu>
+                                    </Dropdown>
+
+                                    {/* Export */}
+                                    <Button
+                                        size="sm"
+                                        variant="primary"
+                                        onClick={exportPNG}
+                                    >
+                                        Export PNG
+                                    </Button>
+                                </div>
                             </div>
 
-                            {/* Chart */}
-                            <div ref={chartRef} className="analytics-chart-container">
+                            {/* ---------- Chart ---------- */}
+                            <div ref={chartRef} className="analytics-chart-container mt-3">
                                 <ResponsiveContainer width="100%" height={420}>
                                     <LineChart
-                                        data={conversationTrendData}
-                                        margin={{ top: 10, right: 20, left: 10, bottom: 55 }}
+                                        data={chartData}
+                                        margin={{ top: 10, right: 20, left: 10, bottom: 50 }}
                                     >
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#e9ecef" />
                                         <XAxis dataKey="time" />
                                         <YAxis />
-                                        <Tooltip />
+                                        <Tooltip cursor={{ stroke: "#adb5bd", strokeWidth: 1 }} />
                                         <Legend
                                             verticalAlign="bottom"
-                                            height={40}
+                                            height={36}
                                             iconSize={8}
+                                            onClick={handleLegendClick}
                                         />
 
-                                        <Line dataKey="total" stroke="#0d6efd" strokeWidth={2} dot={false} />
-                                        <Line dataKey="resolved" stroke="#198754" strokeWidth={2} dot={false} />
-                                        <Line dataKey="escalated" stroke="#fd7e14" strokeWidth={2} dot={false} />
-                                        <Line dataKey="failed" stroke="#dc3545" strokeWidth={2} dot={false} />
+                                        {visibleLines.total && (
+                                            <Line
+                                                type="monotone"
+                                                dataKey="total"
+                                                stroke="#0d6efd"
+                                                strokeWidth={2}
+                                                dot={false}
+                                                activeDot={{ r: 5 }}
+                                            />
+                                        )}
+
+                                        {visibleLines.resolved && (
+                                            <Line
+                                                type="monotone"
+                                                dataKey="resolved"
+                                                stroke="#198754"
+                                                strokeWidth={2}
+                                                dot={false}
+                                                activeDot={{ r: 5 }}
+                                            />
+                                        )}
+
+                                        {visibleLines.escalated && (
+                                            <Line
+                                                type="monotone"
+                                                dataKey="escalated"
+                                                stroke="#fd7e14"
+                                                strokeWidth={2}
+                                                dot={false}
+                                                activeDot={{ r: 5 }}
+                                            />
+                                        )}
+
+                                        {visibleLines.failed && (
+                                            <Line
+                                                type="monotone"
+                                                dataKey="failed"
+                                                stroke="#dc3545"
+                                                strokeWidth={2}
+                                                dot={false}
+                                                activeDot={{ r: 5 }}
+                                            />
+                                        )}
                                     </LineChart>
                                 </ResponsiveContainer>
+
                             </div>
+
                         </Card.Body>
                     </Card>
-                </Col >
+                </Col>
+
+
 
                 {/* ================== CHART 2 (6 COL) ================== */}
                 <Col md={6}>
-                    <Card className="rounded-4 shadow-sm analytics-card">
+                    <Card className="rounded-4 shadow-sm analytics-card mt-2">
                         <Card.Body>
                             {/* Header */}
                             <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
@@ -279,7 +484,7 @@ const AnalyticsCharts = () => {
 
                 {/* ================== CHART 3 (6 COL) ================== */}
                 <Col md={6}>
-                    <Card className="rounded-4 shadow-sm analytics-card">
+                    <Card className="rounded-4 shadow-sm analytics-card mt-2">
                         <Card.Body className="analytics-card-body">
 
                             <h6 className="fw-semibold mb-3 analytics-card-title">
@@ -323,59 +528,75 @@ const AnalyticsCharts = () => {
 
                 {/* ================== CHART 4 (12 COL) ================== */}
                 <Col md={12}>
-                    <Card className="rounded-4 shadow-sm analytics-card">
-                        <Card.Body className="analytics-card-body">
+                    <Card className="rounded-4 shadow-sm analytics-card mt-2">
+                        <Card.Body className="analytics-card-body mt-2">
 
                             <h6 className="analytics-card-title">
                                 Sentiment Analysis
                             </h6>
 
-                            <div className="analytics-chart-container">
+                            <div className="analytics-chart-container mt-2">
                                 <ResponsiveContainer width="100%" height={320}>
                                     <AreaChart
                                         data={sentimentData}
                                         stackOffset="expand"
+                                        margin={{ top: 10, right: 20, left: 10, bottom: 30 }}
                                     >
+
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#e9ecef" />
                                         <XAxis dataKey="day" />
                                         <YAxis
                                             tickFormatter={(v) => `${Math.round(v * 100)}%`}
                                         />
+
                                         <Tooltip
-                                            formatter={(value) =>
-                                                `${Math.round(value * 100)}%`
-                                            }
+                                            shared
+                                            cursor={{ stroke: "#adb5bd", strokeWidth: 1 }}
+                                            formatter={(value) => `${Math.round(value * 100)}%`}
                                         />
-                                        <Legend />
+                                        
+                                        <Legend
+                                            verticalAlign="bottom"
+                                            align="center"
+                                            height={40}
+                                        />
 
                                         <Area
+                                            type="monotone"
                                             dataKey="positive"
                                             stackId="1"
                                             stroke="#198754"
                                             fill="#198754"
+                                            fillOpacity={0.85}
                                         />
                                         <Area
+                                            type="monotone"
                                             dataKey="neutral"
                                             stackId="1"
                                             stroke="#adb5bd"
                                             fill="#adb5bd"
+                                            fillOpacity={0.85}
                                         />
                                         <Area
+                                            type="monotone"
                                             dataKey="negative"
                                             stackId="1"
                                             stroke="#dc3545"
                                             fill="#dc3545"
+                                            fillOpacity={0.85}
                                         />
                                     </AreaChart>
+
                                 </ResponsiveContainer>
                             </div>
-
                         </Card.Body>
                     </Card>
                 </Col>
 
+
                 {/* ================== CHART 5 (6 COL) ================== */}
                 <Col md={12}>
-                    <Card className="rounded-4 shadow-sm analytics-card">
+                    <Card className="rounded-4 shadow-sm analytics-card mt-2">
                         <Card.Body>
 
                             <h6 className="fw-semibold mb-3">
@@ -444,7 +665,7 @@ const AnalyticsCharts = () => {
 
                 {/* ================== CHART 6 (6 COL) ================== */}
                 <Col md={12}>
-                    <Card className="rounded-4 shadow-sm analytics-card">
+                    <Card className="rounded-4 shadow-sm analytics-card mt-2">
                         <Card.Body>
                             <h6 className="fw-semibold mb-3"> User Journey Funnel </h6>
                             <ResponsiveContainer width="100%" height={360}>
