@@ -203,9 +203,8 @@ const IntentManager = () => {
                     </div>
 
                     <button
-                        className="btn btn-primary d-inline-flex align-items-center fw-semibold "
+                        className="btn btn-primary d-inline-flex align-items-center fw-semibold add-intent-btn"
                         onClick={handleAdd}
-                        style={{ borderRadius: '8px', fontSize: '11px',whiteSpace: 'nowrap' }}
                     >
                         <i className="bi bi-plus-lg me-1"></i>   Add Intent
                     </button>
