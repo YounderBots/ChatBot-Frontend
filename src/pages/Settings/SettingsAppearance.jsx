@@ -288,7 +288,9 @@ const handleReset = () => {
 
         <div
           style={{
-            width:"400px",
+            width:"100%",
+            maxWidth: "400px",
+            margin: "0 auto",
             borderRadius: "16px",
             fontFamily: settings.fontFamily,
             boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
@@ -352,7 +354,7 @@ const handleReset = () => {
             style={{
               display: "flex",
               padding: "8px",
-              background: "settings.primaryColor",
+              background: settings.primaryColor,
               borderTop: "1px solid #dee2e6",
             }}
           >
@@ -361,6 +363,7 @@ const handleReset = () => {
               placeholder="Type a message..."
               style={{
                 flex: 1,
+                minWidth: "0",
                 border: "1px solid #ced4da",
                 borderRadius: "20px",
                 padding: "6px 12px",
