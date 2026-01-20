@@ -16,8 +16,8 @@ const IntentDashboard = () => {
             tabContent: <IntentContainer />,
           },
           {
-            tabTitle: "Categorie",
-            tabKey: "Categorie",
+            tabTitle: "Category",
+            tabKey: "Category",
             tabContent: <CategoryContainer />,
           },
         ],
