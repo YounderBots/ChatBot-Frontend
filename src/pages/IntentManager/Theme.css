@@ -61,7 +61,8 @@
 }
 .add-intent-btn {
   border-radius: 8px;
-  font-size: 11px;
+  font-size: 12px;
+  padding: 6px 14px; 
   white-space: nowrap;
 }
 
@@ -122,7 +123,7 @@
     background-color: var(--cvq-gray-50) !important;
     color: var(--cvq-gray-600) !important;
     font-weight: 600;
-    font-size: 13px;
+    font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     border-bottom: none !important;
@@ -132,7 +133,7 @@
 .table td {
     border-bottom: 1px solid var(--cvq-gray-100) !important;
     color: var(--cvq-text);
-    font-size: 15px;
+    font-size: 14px;
     letter-spacing: 0.5px;
     padding: 16px !important;
     vertical-align: middle;
@@ -310,3 +311,4 @@
     padding: 0 16px;
     border-radius: 8px;
 }
+

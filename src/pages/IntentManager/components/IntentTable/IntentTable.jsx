@@ -41,7 +41,7 @@ const getPageNumbers = () => {
 
             <div className="table-responsive overflow-hidden rounded-top-4">
                 <table className="table table-hover mb-0">
-                    <thead className="table-light sticky-top">
+                    <thead className="table-light sticky-top intent-table">
                         <tr>
                             <th style={{ width: '40px' }}>
                                  <input
