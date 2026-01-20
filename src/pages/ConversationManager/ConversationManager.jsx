@@ -645,7 +645,7 @@ const ConversationManager = () => {
               {selectedConversation ? (
                 <>
 
-                  <div className="bg-light p-2 border-bottom d-flex justify-content-between flex-wrap gap-2">
+                  <div className="bg-light p-2 border-bottom d-flex justify-content-between flex-wrap gap-2 rounded-top-1">
                     <div>
                       <h6 className="mb-1">{selectedConversation.user}</h6>
                       <small className="text-muted">
@@ -747,7 +747,7 @@ const ConversationManager = () => {
                       </div>
                     ))}
                   </div>
-                  <div className="border-top bg-light p-2 small">
+                  <div className="border-top bg-light p-2 small rounded-bottom-1">
                     <h6 className="mb-1">Analytics</h6>
                     <div className="d-flex flex-wrap gap-3">
                       <span>Sentiment: {selectedConversation.sentiment}</span>
