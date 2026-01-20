@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import { Card, Row, Col, Form, Button, Modal, Badge, Table, } from "react-bootstrap";
-import { FaSortUp, FaSortDown, FaFileCsv, FaEye } from "react-icons/fa";
+import { FaSortUp, FaSortDown, } from "react-icons/fa";
 import '../Analytics.css'
 
 const intentData = [
@@ -153,11 +153,11 @@ const AnalyticsTables = () => {
                             <div className="d-flex justify-content-between align-items-center h-100">
                                 <h5 className="mb-0">Intent Performance</h5>
 
-                                <div className="d-flex gap-2">
+                                <div className="d-flex flex-wrap justify-content-between align-items-center p-2 gap-2 mb-3">
                                     <Button
                                         size="sm"
-                                        variant="outline-secondary"
-                                        className="border border-secondary"
+                                        variant="primary"
+                                        
                                         onClick={() => setShowFilterModal(true)}
                                     >
                                         Apply Filter
@@ -165,8 +165,8 @@ const AnalyticsTables = () => {
 
                                     <Button
                                         size="sm"
-                                        variant="outline-secondary"
-                                        className="border border-secondary"
+                                        variant="primary"
+                                     
                                         onClick={exportCSV}
                                     >
                                         Export CSV
@@ -216,8 +216,7 @@ const AnalyticsTables = () => {
                                                 <td>
                                                     <Button
                                                         size="sm"
-                                                        variant="outline-secondary"
-                                                        className="border border-secondary"
+                                                        variant="primary"
                                                         onClick={() => handleViewDetails(row)}
                                                     >
                                                         View
@@ -290,8 +289,7 @@ const AnalyticsTables = () => {
                     <Modal.Footer>
                         <Button
                             size="sm"
-                            variant="outline-danger"
-                            className="px-3 border border-danger"
+                            variant="danger"
                             onClick={() => setShowFilterModal(false)}
                         >
                             Cancel
@@ -299,8 +297,7 @@ const AnalyticsTables = () => {
 
                         <Button
                             size="sm"
-                            variant="outline-success"
-                            className="px-3 border border-success"
+                            variant="success"
                             onClick={applyTableFilter}
                         >
                             Apply
@@ -349,8 +346,7 @@ const AnalyticsTables = () => {
                     <Modal.Footer>
                         <Button
                             size="sm"
-                            variant="outline-danger"
-                            className="px-3 border border-danger"
+                            variant="danger"
                             onClick={() => setSelectedIntent(null)}
                         >
                             Close
@@ -359,7 +355,7 @@ const AnalyticsTables = () => {
                 </Modal>
 
                 <Col md={12}>
-                    <Card className="rounded-4 shadow-sm analytics-card">
+                    <Card className="rounded-4 shadow-sm mt-2 analytics-card">
                         <Card.Body className="analytics-card-body">
                             <h5 className="mb-3">User Engagement</h5>
 
@@ -404,8 +400,7 @@ const AnalyticsTables = () => {
                                             <td>
                                                 <Button
                                                     size="sm"
-                                                    variant="outline-secondary"
-                                                    className=" border border-secondary"
+                                                    variant="primary"
                                                     onClick={() => {
                                                         setSelectedSession(row);
                                                         setShowSessionModal(true);
@@ -449,8 +444,7 @@ const AnalyticsTables = () => {
                     <Modal.Footer>
                         <Button
                             size="sm"
-                            variant="outline-danger"
-                            className="px-3 border border-danger"
+                            variant="danger"
                             onClick={() => setShowSessionModal(false)}
                         >
                             Close

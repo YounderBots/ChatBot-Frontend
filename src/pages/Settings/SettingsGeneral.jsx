@@ -293,13 +293,14 @@ const copyToAllDays = (sourceIndex) => {
           </Row>
           
         ))}
-        <Button
-        size="sm"
-        variant="primary"
-        onClick={() => copyToAllDays(0)}
-      >
-        Copy to all days
-      </Button>
+          <Button
+          size="sm"
+          variant="primary"
+          className="mt-3"
+          onClick={() => copyToAllDays(0)}
+        >
+          Copy to all days
+        </Button>
 
 
         <hr />

@@ -439,7 +439,7 @@
                 : "Not saved yet"}
             </Col>
 
-            <Col md={6} xs={12} className="text-end">
+            <Col md={6} xs={12} className="text-md-end text-start">
               <Button
                 variant="secondary"
                 className="me-2"
