@@ -1,102 +1,94 @@
-/* ================= PAGE WRAPPER ================= */
+/* ================= KB MANAGER RESET & FLUIDITY ================= */
 .kb-page-wrapper {
   background: #ffffff;
   border-radius: 20px;
-  max-width: 1400px;
-  margin: 16px auto;
-  padding: 28px;
+  margin: 16px;
+  padding: 24px;
   min-height: calc(100vh - 32px);
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
 
-  /* Page-level scrolling */
-  overflow-x: hidden;
+  /* Prevent whole-page accidental scroll, let internal slide happen */
+  overflow: hidden;
+  box-sizing: border-box;
+  position: relative;
 }
 
 /* ================= ROOT LAYOUT ================= */
 .kb-layout {
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
-  align-items: start;
+  grid-template-columns: 260px 1fr;
+  grid-template-rows: auto auto auto;
+  grid-template-areas:
+    "sidebar header"
+    "sidebar table"
+    ". pagination";
   width: 100%;
-  gap: 0;
+  column-gap: 20px;
+  row-gap: 20px;
+  align-items: start;
 }
 
-/* ================= SIDEBAR ================= */
+/* Main content for articles */
+.kb-main,
+.articles-panel {
+  display: contents;
+  /* Promotes children to grid items */
+}
+
+/* Sidebar spans only the Header and Table rows */
 .kb-sidebar {
+  grid-area: sidebar;
   background: #ffffff;
   border-radius: 18px;
   padding: 16px;
-  margin: 16px;
   border: 1px solid #e5e7eb;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-
+  width: 260px;
   display: flex;
   flex-direction: column;
+  transition: all 0.3s ease;
   align-self: stretch;
+  /* Match height of Header + Table */
 }
 
-/* All Articles */
-.kb-sidebar .all-articles {
-  font-weight: 600;
-  padding: 10px 14px;
+/* Custom Scrollbar Styling (Chrome/Edge/Safari) */
+/* Reusing the same scrollbar class if needed elsewhere */
+.kb-scrollbar::-webkit-scrollbar {
+  height: 8px;
+}
+
+.kb-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
   border-radius: 10px;
-  cursor: pointer;
-  margin-bottom: 10px;
 }
 
-.kb-sidebar .all-articles.active {
-  background: #eaf2ff;
-  color: #2563eb;
-}
-
-/* Category rows */
-.kb-sidebar .category-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 12px;
+.kb-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
   border-radius: 10px;
-  cursor: pointer;
-  font-size: 14px;
+  border: 2px solid #f1f5f9;
 }
 
-.kb-sidebar .category-row:hover {
-  background: #f8fafc;
+.kb-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #0f3c73;
 }
 
-.kb-sidebar .count {
-  color: #64748b;
-  font-size: 12px;
-}
-
-/* Manage Categories button */
-.manage-btn {
-  margin-top: auto;
-  padding: 10px;
-  border-radius: 12px;
-  border: 1px solid #d1d5db;
-  background: #ffffff;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-/* ================= CONTENT ================= */
 .articles-panel {
-  margin: 16px;
   display: flex;
   flex-direction: column;
-
-  /* 🔥 FIX: NO INTERNAL SCROLL */
-  overflow: visible;
-  padding-right: 0;
+  gap: 20px;
+  width: 100%;
 }
 
 /* ================= HEADER ================= */
 .articles-header {
+  grid-area: header;
   display: flex;
   align-items: center;
-  gap: 12px;
-  justify-content: flex-end;
-  margin-bottom: 16px;
+  gap: 16px;
+  width: 100%;
+  margin-bottom: 0 !important;
+  /* Managed by grid gap */
+  flex-wrap: wrap;
 }
 
 .articles-header input {
@@ -105,12 +97,14 @@
   border: 1px solid #d1d5db;
   background: #ffffff;
   font-size: 14px;
-  min-width: 220px;
+  flex: 2;
+  min-width: 180px;
 }
 
 .articles-header select {
   appearance: none;
   height: 44px;
+  flex: 1;
   min-width: 200px;
   padding: 0 44px 0 16px;
   border-radius: 12px;
@@ -124,21 +118,27 @@
   background-position: right 16px center;
 }
 
-/* ================= TABLE CARD (HEIGHT SOURCE) ================= */
+.articles-header button.primary {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
 .kb-table-card {
+  grid-area: table;
   background: #ffffff;
   border-radius: 18px;
   border: 1px solid #e5e7eb;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  align-self: stretch;
-
+  width: 100%;
+  overflow: visible;
 }
 
-/* ================= TABLE ================= */
 .articles-table {
   width: 100%;
   border-collapse: separate;
@@ -152,27 +152,28 @@
   padding: 14px 12px;
   text-align: left;
   border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
 }
 
 .articles-table tbody td {
   padding: 14px 12px;
   font-size: 14px;
-  border-bottom: 1px solid #edf2f7;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .articles-table tbody tr:hover {
   background: #f8fafc;
 }
 
-/* Title column */
-.articles-table tbody td:first-child * {
+/* Title link */
+.articles-table .link-btn {
   all: unset;
   color: #2563eb;
   font-weight: 500;
   cursor: pointer;
 }
 
-.articles-table tbody td:first-child *:hover {
+.articles-table .link-btn:hover {
   text-decoration: underline;
 }
 
@@ -189,6 +190,7 @@
   padding: 6px 12px;
   border-radius: 999px;
   font-size: 12px;
+  display: inline-block;
 }
 
 .status.published {
@@ -218,22 +220,83 @@
   border-radius: 10px;
   padding: 6px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
 }
 
 .actions button:hover {
   background: #eef2ff;
+  border-color: #2563eb;
+  color: #2563eb;
 }
 
 .actions button.danger {
   color: #dc2626;
+  border-color: #fee2e2;
+  background: #fff5f5;
+}
+
+.actions button.danger:hover {
+  background: #fef2f2;
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+/* Category rows (Sidebar) */
+.kb-sidebar .all-articles,
+.kb-sidebar .category-row {
+  font-weight: 500;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #4b5563;
+  transition: all 0.2s;
+}
+
+.kb-sidebar .active {
+  background: #eaf2ff;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.kb-sidebar .category-row:hover:not(.active) {
+  background: #f8fafc;
+}
+
+.kb-sidebar .count {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.manage-btn {
+  margin-top: auto;
+  /* Push to bottom of sidebar */
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  font-weight: 500;
+  cursor: pointer;
 }
 
 /* ================= PAGINATION ================= */
 .pagination-bar {
+  grid-area: pagination;
   display: flex;
-  justify-content: flex-end;
-  gap: 6px;
-  margin-top: 20px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 8px;
 }
 
 .pagination-bar button {
@@ -244,6 +307,10 @@
   background: #0f3c73;
   color: #ffffff;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
 }
 
 .pagination-bar button.active {
@@ -257,70 +324,144 @@
 
 /* ================= RESPONSIVE ================= */
 
-/* Large tablets */
-@media (max-width: 1200px) {
+/* ================= RESPONSIVE ================= */
+
+/* Stacking point (Laptop screens with sidebar) */
+@media (max-width: 1280px) {
   .kb-layout {
-    grid-template-columns: 240px 1fr;
+    display: flex;
+    flex-direction: column;
   }
 
-  .articles-header input,
-  .articles-header select {
-    min-width: 160px;
+  .kb-main,
+  .articles-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    min-width: 0;
+    /* Ensures container doesn't exceed screen width */
+  }
+
+  .kb-sidebar {
+    width: 100%;
+    margin-bottom: 24px;
+    height: auto;
+  }
+
+  /* Only the table card slides horizontally */
+  .kb-table-card {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: scroll;
+    /* ALWAYS show for sliding access */
+    overflow-y: hidden;
+    padding-bottom: 6px;
+    /* Extra space to prevent bar from covering text */
+    margin-bottom: 12px;
+  }
+
+  /* Force table to be wider than the card to trigger scroll */
+  .articles-table {
+    min-width: 1100px;
+    margin-bottom: 0;
+  }
+
+  /* High-Contrast Scrollbar for Sliding */
+  .kb-table-card::-webkit-scrollbar {
+    height: 12px;
+    /* Thicker for visibility */
+    display: block !important;
+  }
+
+  .kb-table-card::-webkit-scrollbar-track {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+  }
+
+  .kb-table-card::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+    /* Darker gray for better visibility */
+    border-radius: 10px;
+    border: 3px solid #f8fafc;
+    /* Inset effect */
+  }
+
+  .kb-table-card::-webkit-scrollbar-thumb:hover {
+    background: #0f3c73;
+    /* Brand Blue on hover */
+  }
+
+  /* Firefox Support */
+  .kb-table-card {
+    scrollbar-width: auto;
+    scrollbar-color: #94a3b8 #f8fafc;
   }
 }
 
-/* Tablets */
+/* Tablets & Smaller */
 @media (max-width: 992px) {
-  .kb-layout {
-    grid-template-columns: 1fr;
+  .kb-page-wrapper {
+    margin: 8px;
+    padding: 16px;
+    border-radius: 16px;
   }
 
   .articles-header {
-    display: flex;
-    flex-wrap: nowrap;
     gap: 10px;
   }
 
   .articles-header input {
-    flex: 2;
-    min-width: 0;
+    flex: 1 1 100%;
+    /* Search takes full width on wrap */
   }
 
   .articles-header select {
     flex: 1;
-    min-width: 0;
-  }
-
-  .articles-header button {
-    flex: 0.8;
-    white-space: nowrap;
+    min-width: 140px;
   }
 }
 
 /* Mobile */
 @media (max-width: 768px) {
-  .kb-sidebar,
-  .articles-panel {
-    margin: 12px;
+  .kb-page-wrapper {
+    margin: 4px;
+    padding: 12px;
   }
 
   .articles-header {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 8px;
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  .articles-header input {
-    flex: 2;
-    min-width: 0;
-  }
-
-  .articles-header select {
-    flex: 1;
-    min-width: 0;
-  }
-
+  .articles-header select,
   .articles-header button {
-    flex: 0.9;
+    width: 100%;
+  }
+
+  .pagination-bar {
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .articles-table {
+    min-width: 1000px;
+  }
+}
+
+@media (max-width: 576px) {
+  .kb-page-wrapper {
+    margin: 0;
+    border-radius: 0;
+    padding: 10px;
+  }
+
+  .articles-table {
+    min-width: 1000px;
+    /* Keep consistent sliding width for mobile */
   }
 }

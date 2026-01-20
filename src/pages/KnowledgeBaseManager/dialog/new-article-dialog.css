@@ -167,7 +167,7 @@
   background: #ffffff;
   color: #2563eb;
   font-weight: 600;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
 /* Editor toolbar */
@@ -357,6 +357,7 @@
   background: transparent;
   color: #475569;
 }
+
 /* ===============================
    DIALOG OVERLAY
 ================================ */
@@ -419,45 +420,50 @@
 }
 
 /* ===============================
-   TABS – RECTANGULAR PILLS
+   TABS – RECTANGULAR PILLS (MATCHING INTENT MANAGER)
 ================================ */
 
 .editor-tabs {
   display: flex;
-  gap: 10px;
+  gap: 6px;
   margin-bottom: 20px;
   border-bottom: none;
+  background: #f8fafc;
+  padding: 8px;
+  border-radius: 12px;
 }
 
 .editor-tabs button {
   height: 38px;
-  padding: 0 22px;
+  padding: 8px 16px;
   font-size: 14px;
   line-height: 1;
   border: none;
   background: transparent;
   cursor: pointer;
-  color: #192941;          /* unchanged */
-  border-radius: 8px;      /* 🔥 rectangle with curved corners */
-  font-weight: 500;
+  color: #6b7280;
+  border-radius: 10px;
+  font-weight: 600;
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: all 0.25s ease;
 }
 
 /* ACTIVE TAB */
 .editor-tabs button.active {
-  background: #273656;     /* unchanged */
-  color: #e8eaef;          /* unchanged */
+  background: linear-gradient(135deg, #165d9c, #0f3d6e);
+  color: #ffffff !important;
   font-weight: 600;
+  box-shadow: 0 4px 12px rgba(22, 93, 156, 0.35);
 }
 
 /* Hover */
 .editor-tabs button:hover:not(.active) {
-  background: #f1f5f9;
+  background: #e7f1ff;
+  color: #0f3d6e;
 }
 
 /* ===============================
@@ -568,7 +574,7 @@
   background: #ffffff;
   color: #2563eb;
   font-weight: 600;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
 /* Editor toolbar */
@@ -697,7 +703,7 @@
 }
 
 /* Individual control cards */
-.seo-grid > div {
+.seo-grid>div {
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
@@ -745,7 +751,8 @@
 .editor-actions {
   display: flex;
   align-items: center;
-  justify-content: space-between; /* left + right */
+  justify-content: space-between;
+  /* left + right */
   margin-top: 28px;
   padding-top: 16px;
   border-top: 1px solid #e5e7eb;
@@ -781,7 +788,7 @@
 }
 
 /* RIGHT: Cancel + Save */
-.editor-actions > div:last-child {
+.editor-actions>div:last-child {
   display: flex;
   align-items: center;
   gap: 14px;
@@ -802,13 +809,14 @@
   font-weight: 600;
   border-radius: 10px;
 }
+
 /* ======================================================
    ✅ SEO & SETTINGS – BUTTON ALIGNMENT (ACTUAL FIX)
 ====================================================== */
 
 /* Target the SEO section footer area */
-.seo-section + .editor-actions,
-.seo-section ~ .editor-actions {
+.seo-section+.editor-actions,
+.seo-section~.editor-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -858,6 +866,7 @@
   font-weight: 600;
   border-radius: 10px;
 }
+
 /* ===============================
    SAVE & CANCEL BUTTON COLORS
    (Dialog only)
@@ -865,8 +874,10 @@
 
 /* Cancel button */
 .editor-actions .btn.ghost {
-  background: #dddddd;        /* light gray */
-  color: #334155;             /* dark text */
+  background: #dddddd;
+  /* light gray */
+  color: #334155;
+  /* dark text */
   border: 1px solid #cbd5e1;
 }
 
@@ -876,7 +887,8 @@
 
 /* Save button */
 .editor-actions .btn.primary {
-  background: #2563eb;        /* solid blue */
+  background: #2563eb;
+  /* solid blue */
   color: #ffffff;
 }
 

@@ -227,29 +227,34 @@ export default function ArticlesPanel({ activeCategory = "All" }) {
         {/* ================= PAGINATION (OUTSIDE TABLE) ================= */}
         {totalPages > 1 && (
           <div className="pagination-bar">
-            <button
-              disabled={page === 1}
-              onClick={() => setPage((p) => p - 1)}
-            >
-              Prev
-            </button>
-
-            {visiblePages.map((p) => (
+            <span className="page-info">
+              Page {page} of {totalPages}
+            </span>
+            <div className="pagination-controls">
               <button
-                key={p}
-                className={p === page ? "active" : ""}
-                onClick={() => setPage(p)}
+                disabled={page === 1}
+                onClick={() => setPage((p) => p - 1)}
               >
-                {p}
+                Prev
               </button>
-            ))}
 
-            <button
-              disabled={page === totalPages}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              Next
-            </button>
+              {visiblePages.map((p) => (
+                <button
+                  key={p}
+                  className={p === page ? "active" : ""}
+                  onClick={() => setPage(p)}
+                >
+                  {p}
+                </button>
+              ))}
+
+              <button
+                disabled={page === totalPages}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Next
+              </button>
+            </div>
           </div>
         )}
       </section>

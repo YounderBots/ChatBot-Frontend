@@ -15,20 +15,17 @@ const RenderMenu = ({ isExpanded, isMobile, activeMenu, setActiveMenu }) => {
 
   return (
     <div
-      className={`d-flex w-100 flex-column ${
-        isMobile ? "" : "h-75"
-      } justify-content-around gap-2 py-2 ${
-        !isMobile && !isExpanded ? "align-items-center" : ""
-      }`}
+      className={`d-flex w-100 flex-column ${isMobile ? "" : "h-75"
+        } justify-content-around gap-2 py-2 ${!isMobile && !isExpanded ? "align-items-center" : ""
+        }`}
     >
       {menuList.map((menu) => {
         const Icon = menu.icon;
         return (
           <div
             key={menu.name}
-            className={`d-flex align-items-center cursorPointer sidebar-item ${
-              activeMenu === menu.name ? "active" : ""
-            }`}
+            className={`d-flex align-items-center cursorPointer sidebar-item ${activeMenu === menu.name ? "active" : ""
+              }`}
             onClick={() => {
               navigate(menu.path);
               setActiveMenu(menu.name);
