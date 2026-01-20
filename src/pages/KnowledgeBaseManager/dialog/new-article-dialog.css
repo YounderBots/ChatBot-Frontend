@@ -868,3 +868,76 @@
   font-weight: 600;
   border-radius: 10px;
 }
+/* ===============================
+   SAVE & CANCEL BUTTON COLORS
+   (Dialog only)
+================================ */
+
+/* Cancel button */
+.editor-actions .btn.ghost {
+  background: #dddddd;        /* light gray */
+  color: #334155;             /* dark text */
+  border: 1px solid #cbd5e1;
+}
+
+.editor-actions .btn.ghost:hover {
+  background: #e2e8f0;
+}
+
+/* Save button */
+.editor-actions .btn.primary {
+  background: #2563eb;        /* solid blue */
+  color: #ffffff;
+}
+
+.editor-actions .btn.primary:hover {
+  background: #1d4ed8;
+}
+/* ===============================
+   MANAGE CATEGORIES – ICON STYLE
+   (Matches Actions column UI)
+================================ */
+
+.mc-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #0f172a; /* black icons */
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.mc-icon:hover {
+  background: #f8fafc;
+}
+
+/* Delete (red) */
+.mc-icon.danger {
+  color: #ef4444;
+}
+
+.mc-icon.danger:hover {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+/* Save (check icon) */
+.mc-icon.success {
+  color: #16a34a;
+}
+
+.mc-icon.success:hover {
+  background: #ecfdf5;
+  border-color: #bbf7d0;
+}
+
+/* Disabled delete */
+.mc-icon:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

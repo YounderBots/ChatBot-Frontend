@@ -164,73 +164,71 @@ export default function ArticlesPanel({ activeCategory = "All" }) {
           </button>
         </div>
 
-        {/* TABLE */}
-        <table className="articles-table">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Category</th>
-              <th>Status</th>
-              <th>Views</th>
-              <th>Last Updated</th>
-              <th>Author</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
+       {/* TABLE */}
+<div className="articles-table-wrapper">
+  <table className="articles-table">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Category</th>
+        <th>Status</th>
+        <th>Views</th>
+        <th>Last Updated</th>
+        <th>Author</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
 
-          <tbody>
-            {paginated.map((a) => (
-              <tr key={a.id}>
-                <td>
-                  <button
-                    className="link-btn"
-                    onClick={() => handleEdit(a)}
-                  >
-                    {a.title}
-                  </button>
-                </td>
-                <td>
-                  <span className="category-badge">{a.category}</span>
-                </td>
-                <td>
-                  <span className={`status ${a.status.toLowerCase()}`}>
-                    {a.status}
-                  </span>
-                </td>
-                <td>{a.views}</td>
-                <td>{a.updatedAt}</td>
-                <td>{a.author}</td>
-                <td className="actions">
-                  <button onClick={() => handleEdit(a)}>
-                    <Edit size={16} />
-                  </button>
-                  <button onClick={() => handleDuplicate(a)}>
-                    <Copy size={16} />
-                  </button>
-                  <button
-                    className="danger"
-                    onClick={() => handleDelete(a.id)}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </td>
-              </tr>
-            ))}
+    <tbody>
+      {paginated.map((a) => (
+        <tr key={a.id}>
+          <td>
+            <button
+              className="link-btn"
+              onClick={() => handleEdit(a)}
+            >
+              {a.title}
+            </button>
+          </td>
+          <td>
+            <span className="category-badge">{a.category}</span>
+          </td>
+          <td>
+            <span className={`status ${a.status.toLowerCase()}`}>
+              {a.status}
+            </span>
+          </td>
+          <td>{a.views}</td>
+          <td>{a.updatedAt}</td>
+          <td>{a.author}</td>
+          <td className="actions">
+            <button onClick={() => handleEdit(a)}>
+              <Edit size={16} />
+            </button>
+            <button onClick={() => handleDuplicate(a)}>
+              <Copy size={16} />
+            </button>
+            <button
+              className="danger"
+              onClick={() => handleDelete(a.id)}
+            >
+              <Trash2 size={16} />
+            </button>
+          </td>
+        </tr>
+      ))}
 
-            {paginated.length === 0 && (
-              <tr>
-                <td colSpan={7} style={{ textAlign: "center" }}>
-                  No articles found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      {paginated.length === 0 && (
+        <tr>
+          <td colSpan={7} style={{ textAlign: "center" }}>
+            No articles found
+          </td>
+        </tr>
+      )}
+    </tbody>
+  </table>
+</div>
 
-        {/* PAGE INFO */}
-        <div className="page-info">
-          Page {page} of {totalPages}
-        </div>
 
         {/* PAGINATION: Prev | 1 | 2 | 3 | Next */}
         {totalPages > 1 && (
