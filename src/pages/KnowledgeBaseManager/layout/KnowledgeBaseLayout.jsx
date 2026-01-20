@@ -20,55 +20,58 @@ export default function KnowledgeBaseLayout() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [manageOpen, setManageOpen] = useState(false);
 
-  const totalCount = categories.reduce(
-    (sum, c) => sum + c.count,
-    0
-  );
+  const totalCount = categories.reduce((sum, c) => sum + c.count, 0);
 
   /* ================= RENDER ================= */
   return (
-    <div className="kb-layout">
-      {/* ================= SIDEBAR ================= */}
-      <aside className="kb-sidebar">
-        {/* All Articles */}
-        <div
-          className={`all-articles ${
-            activeCategory === "All" ? "active" : ""
-          }`}
-          onClick={() => setActiveCategory("All")}
-        >
-          All Articles <span className="count">({totalCount})</span>
-        </div>
-
-        {/* Categories */}
-        {categories.map((c) => (
+    <div className="kb-page-wrapper">
+      {/* ================= GRID LAYOUT ================= */}
+      <div className="kb-layout">
+        {/* ================= SIDEBAR ================= */}
+        <aside className="kb-sidebar">
+          {/* All Articles */}
           <div
-            key={c.name}
-            className={`category-row ${
-              activeCategory === c.name ? "active" : ""
+            className={`all-articles ${
+              activeCategory === "All" ? "active" : ""
             }`}
-            onClick={() => setActiveCategory(c.name)}
+            onClick={() => setActiveCategory("All")}
           >
-            <span>{c.name}</span>
-            <span className="count">{c.count}</span>
+            All Articles <span className="count">({totalCount})</span>
           </div>
-        ))}
 
-        {/* Manage Categories */}
-        <button
-          className="manage-btn"
-          onClick={() => setManageOpen(true)}
-        >
-          Manage Categories
-        </button>
-      </aside>
+          {/* Categories */}
+          {categories.map((c) => (
+            <div
+              key={c.name}
+              className={`category-row ${
+                activeCategory === c.name ? "active" : ""
+              }`}
+              onClick={() => setActiveCategory(c.name)}
+            >
+              <span>{c.name}</span>
+              <span className="count">{c.count}</span>
+            </div>
+          ))}
 
-      {/* ================= CONTENT ================= */}
-      <ArticlesPanel
-        activeCategory={activeCategory}
-        onNewArticle={() => navigate("/articles/new")}
-        onEdit={(a) => navigate(`/articles/${a.id}/edit`)}
-      />
+          {/* Manage Categories */}
+          <button
+            className="manage-btn"
+            onClick={() => setManageOpen(true)}
+          >
+            Manage Categories
+          </button>
+        </aside>
+
+        {/* ================= MAIN CONTENT ================= */}
+        {/* 🔥 Wrapper ensures correct height sync with sidebar */}
+        <div className="kb-main">
+          <ArticlesPanel
+            activeCategory={activeCategory}
+            onNewArticle={() => navigate("/articles/new")}
+            onEdit={(a) => navigate(`/articles/${a.id}/edit`)}
+          />
+        </div>
+      </div>
 
       {/* ================= MODAL ================= */}
       {manageOpen && (

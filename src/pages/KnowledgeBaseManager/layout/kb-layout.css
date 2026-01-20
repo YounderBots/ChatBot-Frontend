@@ -1,31 +1,41 @@
-/* ===== ROOT LAYOUT ===== */
-.kb-layout {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  min-height: 100vh;
-  background: transparent;
-  position: relative;
-  overflow: visible;
-  padding-right: 24px;
-  box-sizing: border-box;
+/* ================= PAGE WRAPPER ================= */
+.kb-page-wrapper {
+  background: #ffffff;
+  border-radius: 20px;
+  max-width: 1400px;
+  margin: 16px auto;
+  padding: 28px;
+  min-height: calc(100vh - 32px);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+
+  /* Page-level scrolling */
+  overflow-x: hidden;
 }
 
-/* ===== SIDEBAR ===== */
+/* ================= ROOT LAYOUT ================= */
+.kb-layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  align-items: start;
+  width: 100%;
+  gap: 0;
+}
+
+/* ================= SIDEBAR ================= */
 .kb-sidebar {
   background: #ffffff;
   border-radius: 18px;
   padding: 16px;
   margin: 16px;
-  display: flex;
-  flex-direction: column;
   border: 1px solid #e5e7eb;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-  position: relative;
-  z-index: 2;
-  max-height: 460px;
-  overflow-y: auto;
+
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
 }
 
+/* All Articles */
 .kb-sidebar .all-articles {
   font-weight: 600;
   padding: 10px 14px;
@@ -39,6 +49,7 @@
   color: #2563eb;
 }
 
+/* Category rows */
 .kb-sidebar .category-row {
   display: flex;
   justify-content: space-between;
@@ -57,6 +68,7 @@
   font-size: 12px;
 }
 
+/* Manage Categories button */
 .manage-btn {
   margin-top: auto;
   padding: 10px;
@@ -67,23 +79,18 @@
   cursor: pointer;
 }
 
-/* ===== CONTENT ===== */
-.kb-content {
-  background: #ffffff;
-  border-radius: 18px;
+/* ================= CONTENT ================= */
+.articles-panel {
   margin: 16px;
-  padding: 16px 24px 16px 16px;
   display: flex;
   flex-direction: column;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-  position: relative;
-  z-index: 1;
-  overflow: hidden;
-  box-sizing: border-box;
+
+  /* 🔥 FIX: NO INTERNAL SCROLL */
+  overflow: visible;
+  padding-right: 0;
 }
 
-/* ===== HEADER ===== */
+/* ================= HEADER ================= */
 .articles-header {
   display: flex;
   align-items: center;
@@ -111,43 +118,39 @@
   background-color: #ffffff;
   font-size: 14px;
   font-weight: 500;
-  color: #0f172a;
   cursor: pointer;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%236b7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 16px center;
-  background-size: 16px;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.articles-header select:hover {
-  border-color: #94a3b8;
+/* ================= TABLE CARD (HEIGHT SOURCE) ================= */
+.kb-table-card {
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  align-self: stretch;
+
 }
 
-.articles-header select:focus {
-  outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
-}
-
-/* ===== TABLE ===== */
+/* ================= TABLE ================= */
 .articles-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  background: #ffffff;
-  border-radius: 18px;
-  border: 1px solid #e5e7eb;
-  overflow: hidden;
-  margin-right: 8px;
 }
 
 .articles-table thead th {
   background: #f8fafc;
   font-size: 13px;
   color: #475569;
-  text-align: left;
   padding: 14px 12px;
+  text-align: left;
   border-bottom: 1px solid #e5e7eb;
 }
 
@@ -155,22 +158,16 @@
   padding: 14px 12px;
   font-size: 14px;
   border-bottom: 1px solid #edf2f7;
-  vertical-align: middle;
 }
 
 .articles-table tbody tr:hover {
   background: #f8fafc;
 }
 
-/* ===== TITLE COLUMN (IMAGE MATCH) ===== */
-.articles-table tbody td:first-child {
-  background: transparent;
-}
-
+/* Title column */
 .articles-table tbody td:first-child * {
   all: unset;
   color: #2563eb;
-  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
 }
@@ -179,7 +176,7 @@
   text-decoration: underline;
 }
 
-/* ===== BADGES ===== */
+/* ================= BADGES ================= */
 .category-badge {
   background: #eef2ff;
   color: #4338ca;
@@ -209,7 +206,7 @@
   color: #374151;
 }
 
-/* ===== ACTIONS ===== */
+/* ================= ACTIONS ================= */
 .actions {
   display: flex;
   gap: 6px;
@@ -231,7 +228,7 @@
   color: #dc2626;
 }
 
-/* ===== PAGINATION ===== */
+/* ================= PAGINATION ================= */
 .pagination-bar {
   display: flex;
   justify-content: flex-end;
@@ -242,7 +239,6 @@
 .pagination-bar button {
   min-width: 44px;
   height: 36px;
-  padding: 0 14px;
   border-radius: 8px;
   border: none;
   background: #0f3c73;
@@ -259,15 +255,9 @@
   cursor: not-allowed;
 }
 
-/* ===== SCROLLBAR SAFETY ===== */
-body {
-  scrollbar-gutter: stable;
-}
-/* =========================
-   RESPONSIVE LAYOUT
-========================= */
+/* ================= RESPONSIVE ================= */
 
-/* ---------- Large tablets & small laptops ---------- */
+/* Large tablets */
 @media (max-width: 1200px) {
   .kb-layout {
     grid-template-columns: 240px 1fr;
@@ -275,63 +265,48 @@ body {
 
   .articles-header input,
   .articles-header select {
-    min-width: 180px;
+    min-width: 160px;
   }
 }
 
-/* ---------- Tablets ---------- */
-/* ---------- Tablets & Responsive Screens ---------- */
+/* Tablets */
 @media (max-width: 992px) {
-
   .kb-layout {
     grid-template-columns: 1fr;
   }
 
   .articles-header {
     display: flex;
-    flex-wrap: nowrap;          /* 🔥 force horizontal */
-    align-items: center;
+    flex-wrap: nowrap;
     gap: 10px;
   }
 
-  /* Search bar */
   .articles-header input {
     flex: 2;
-    min-width: 0;               /* 🔥 allow shrinking */
-    height: 44px;
+    min-width: 0;
   }
 
-  /* Dropdowns */
   .articles-header select {
     flex: 1;
-    min-width: 0;               /* 🔥 critical */
-    height: 44px;
+    min-width: 0;
   }
 
-  /* Button moves to next row */
-  .articles-header .btn,
   .articles-header button {
-    width: 100%;
-    margin-top: 10px;
-    height: 46px;
+    flex: 0.8;
+    white-space: nowrap;
   }
 }
 
-/* ---------- Mobile (KEEP HORIZONTAL) ---------- */
+/* Mobile */
 @media (max-width: 768px) {
-
-  .kb-layout {
-    padding-right: 0;
-  }
-
-  .kb-content {
+  .kb-sidebar,
+  .articles-panel {
     margin: 12px;
-    padding: 14px;
   }
 
   .articles-header {
     display: flex;
-    flex-wrap: nowrap;          /* 🔥 STILL horizontal */
+    flex-wrap: nowrap;
     gap: 8px;
   }
 
@@ -344,37 +319,8 @@ body {
     flex: 1;
     min-width: 0;
   }
-}
 
-/* ===== FILTER BAR SIZE BALANCE FIX ===== */
-
-.articles-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: nowrap;
-}
-
-/* 🔹 Make all 3 filters equal & bigger */
-.articles-header input,
-.articles-header select {
-  flex: 1.2;        /* equal + slightly wider */
-  min-width: 0;
-  height: 44px;
-}
-
-/* 🔹 Reduce New Article button size */
-.articles-header .btn,
-.articles-header button {
-  flex: 0.7;        /* smaller than filters */
-  height: 44px;
-  margin-top: 0;
-  white-space: nowrap;
-}
-
-/* ===== Responsive safety (keeps horizontal) ===== */
-@media (max-width: 992px) {
-  .articles-header {
-    flex-wrap: nowrap;
+  .articles-header button {
+    flex: 0.9;
   }
 }
