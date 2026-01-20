@@ -2,7 +2,7 @@ import { createPortal } from "react-dom";
 import {
   X,
   Trash2,
-  Edit2,
+  Pencil,
   Check,
   GripVertical,
 } from "lucide-react";
@@ -62,189 +62,220 @@ export default function ManageCategoriesDialog({
     setDragIndex(null);
   };
 
-  /* ================= UI ================= */
   return createPortal(
-    <div
-      onClick={onClose}
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(15,23,42,0.45)",
-        zIndex: 100000,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
+    <>
+      {/* ================= ICON CSS ================= */}
+      <style>
+        {`
+          .mc-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #0f172a;
+            transition: background 0.15s ease, border-color 0.15s ease;
+          }
+
+          .mc-icon:hover {
+            background: #f8fafc;
+          }
+
+          .mc-icon.danger {
+            color: #ef4444;
+          }
+
+          .mc-icon.danger:hover {
+            background: #fef2f2;
+            border-color: #fecaca;
+          }
+
+          .mc-icon.success {
+            color: #16a34a;
+          }
+
+          .mc-icon.success:hover {
+            background: #ecfdf5;
+            border-color: #bbf7d0;
+          }
+
+          .mc-icon:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+          }
+        `}
+      </style>
+
       <div
-        onClick={(e) => e.stopPropagation()}
+        onClick={onClose}
         style={{
-          width: 480,
-          background: "#ffffff",
-          borderRadius: 18,
-          padding: 20,
-          boxShadow: "0 30px 80px rgba(15,23,42,0.35)",
-          border: "1px solid #e5e7eb",
+          position: "fixed",
+          inset: 0,
+          background: "rgba(15,23,42,0.45)",
+          zIndex: 100000,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
-        {/* HEADER */}
         <div
+          onClick={(e) => e.stopPropagation()}
           style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 12,
+            width: 480,
+            background: "#ffffff",
+            borderRadius: 18,
+            padding: 20,
+            boxShadow: "0 30px 80px rgba(15,23,42,0.35)",
+            border: "1px solid #e5e7eb",
           }}
         >
-          <h2 style={{ margin: 0, fontSize: 18 }}>
-            Manage Categories
-          </h2>
-          <button className="icon-btn" onClick={onClose}>
-            <X size={18} />
-          </button>
-        </div>
-
-        <hr style={{ borderColor: "#e5e7eb" }} />
-
-        {/* CATEGORY LIST */}
-        <div style={{ marginTop: 12 }}>
-          {categories.map((c, i) => (
-            <div
-              key={i}
-              draggable
-              onDragStart={() => onDragStart(i)}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={() => onDrop(i)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                padding: "10px 12px",
-                borderRadius: 12,
-                border: "1px solid #e5e7eb",
-                marginBottom: 8,
-                background:
-                  dragIndex === i ? "#eaf2ff" : "#f8fafc",
-              }}
-            >
-              {/* DRAG HANDLE */}
-              <span
-                title="Drag to reorder"
-                style={{
-                  cursor: "grab",
-                  color: "#64748b",
-                }}
-              >
-                <GripVertical size={16} />
-              </span>
-
-              {/* NAME */}
-              {editingIndex === i ? (
-                <input
-                  value={editingValue}
-                  onChange={(e) =>
-                    setEditingValue(e.target.value)
-                  }
-                  style={{
-                    flex: 1,
-                    padding: 6,
-                    borderRadius: 8,
-                    border: "1px solid #d1d5db",
-                  }}
-                />
-              ) : (
-                <span style={{ flex: 1 }}>{c.name}</span>
-              )}
-
-              {/* COUNT */}
-              <span
-                style={{
-                  fontSize: 12,
-                  color: "#64748b",
-                  minWidth: 28,
-                  textAlign: "right",
-                }}
-              >
-                {c.count}
-              </span>
-
-              {/* EDIT / SAVE */}
-              {editingIndex === i ? (
-                <button
-                  className="icon-btn success"
-                  onClick={() => saveEdit(i)}
-                >
-                  <Check size={14} />
-                </button>
-              ) : (
-                <button
-                  className="icon-btn"
-                  title="Rename"
-                  onClick={() => startEdit(i, c.name)}
-                >
-                  <Edit2 size={14} />
-                </button>
-              )}
-
-              {/* DELETE */}
-              <button
-                className="icon-btn danger"
-                title={
-                  c.count > 0
-                    ? "Cannot delete category with articles"
-                    : "Delete"
-                }
-                disabled={c.count > 0}
-                onClick={() => handleDelete(i)}
-                style={{
-                  opacity: c.count > 0 ? 0.4 : 1,
-                  cursor:
-                    c.count > 0
-                      ? "not-allowed"
-                      : "pointer",
-                }}
-              >
-                <Trash2 size={14} />
-              </button>
-            </div>
-          ))}
-        </div>
-
-        {/* ADD CATEGORY */}
-        <div
-          style={{
-            display: "flex",
-            gap: 8,
-            marginTop: 16,
-          }}
-        >
-          <input
-            placeholder="New category"
-            value={newCategory}
-            onChange={(e) => setNewCategory(e.target.value)}
+          {/* HEADER */}
+          <div
             style={{
-              flex: 1,
-              padding: 10,
-              borderRadius: 12,
-              border: "1px solid #d1d5db",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 12,
             }}
-          />
-          <button
-            style={{
-              background: "#2563eb",
-              color: "#ffffff",
-              padding: "10px 16px",
-              borderRadius: 12,
-              border: "none",
-              fontWeight: 600,
-            }}
-            onClick={handleAdd}
           >
-            Add
-          </button>
+            <h2 style={{ margin: 0, fontSize: 18 }}>
+              Manage Categories
+            </h2>
+            <button className="mc-icon" onClick={onClose}>
+              <X size={16} />
+            </button>
+          </div>
+
+          <hr style={{ borderColor: "#e5e7eb" }} />
+
+          {/* CATEGORY LIST */}
+          <div style={{ marginTop: 12 }}>
+            {categories.map((c, i) => (
+              <div
+                key={i}
+                draggable
+                onDragStart={() => onDragStart(i)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => onDrop(i)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "10px 12px",
+                  borderRadius: 12,
+                  border: "1px solid #e5e7eb",
+                  marginBottom: 8,
+                  background:
+                    dragIndex === i ? "#eaf2ff" : "#f8fafc",
+                }}
+              >
+                {/* DRAG */}
+                <GripVertical size={16} color="#64748b" />
+
+                {/* NAME */}
+                {editingIndex === i ? (
+                  <input
+                    value={editingValue}
+                    onChange={(e) =>
+                      setEditingValue(e.target.value)
+                    }
+                    style={{
+                      flex: 1,
+                      padding: 6,
+                      borderRadius: 8,
+                      border: "1px solid #d1d5db",
+                    }}
+                  />
+                ) : (
+                  <span style={{ flex: 1 }}>{c.name}</span>
+                )}
+
+                {/* COUNT */}
+                <span
+                  style={{
+                    fontSize: 12,
+                    color: "#64748b",
+                    minWidth: 28,
+                    textAlign: "right",
+                  }}
+                >
+                  {c.count}
+                </span>
+
+                {/* EDIT / SAVE */}
+                {editingIndex === i ? (
+                  <button
+                    className="mc-icon success"
+                    onClick={() => saveEdit(i)}
+                  >
+                    <Check size={16} />
+                  </button>
+                ) : (
+                  <button
+                    className="mc-icon"
+                    onClick={() => startEdit(i, c.name)}
+                  >
+                    <Pencil size={16} />
+                  </button>
+                )}
+
+                {/* DELETE */}
+                <button
+                  className="mc-icon danger"
+                  disabled={c.count > 0}
+                  onClick={() => handleDelete(i)}
+                  title={
+                    c.count > 0
+                      ? "Cannot delete category with articles"
+                      : "Delete"
+                  }
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* ADD CATEGORY */}
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              marginTop: 16,
+            }}
+          >
+            <input
+              placeholder="New category"
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              style={{
+                flex: 1,
+                padding: 10,
+                borderRadius: 12,
+                border: "1px solid #d1d5db",
+              }}
+            />
+            <button
+              style={{
+                background: "#2563eb",
+                color: "#ffffff",
+                padding: "10px 16px",
+                borderRadius: 12,
+                border: "none",
+                fontWeight: 600,
+              }}
+              onClick={handleAdd}
+            >
+              Add
+            </button>
+          </div>
         </div>
       </div>
-    </div>,
+    </>,
     document.body
   );
 }

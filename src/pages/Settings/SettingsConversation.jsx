@@ -243,7 +243,7 @@ const removeKeyword = (index) => {
             <hr/>
             <Row>
               <h6 className="text-primary">Escalation Keywords</h6>
-              <Col md={4} className="mb-2">
+              <Col xs={12} md={4} className="mb-2">
               <Button
                   size="sm"
                   variant="primary"
@@ -253,10 +253,11 @@ const removeKeyword = (index) => {
                   Add Keyword
                 </Button>
               </Col>
+            </Row>
 
                 {settings.escalationKeywords.map((item, index) => (
                   <Row key={index} className="align-items-center mb-2">
-                    <Col md={4}>{item.label}</Col>
+                    <Col xs={12} md={4}>{item.label}</Col>
 
                     <Col md={4}>
                       <Form.Select
@@ -272,7 +273,7 @@ const removeKeyword = (index) => {
                       </Form.Select>
                     </Col>
 
-                    <Col md={2}>
+                    <Col xs={12} md={2}>
                       <Button
                         size="sm"
                         variant="danger"
@@ -284,7 +285,6 @@ const removeKeyword = (index) => {
                   </Row>
                 ))}
 
-            </Row>
           </>
         )}
         <Modal

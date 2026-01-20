@@ -195,7 +195,7 @@ const triggerWebhook = (index) => {
 
             <Button
               size="sm"
-              variant="danger"
+              variant="primary"
               onClick={regenerateApiKey}
             >
               Regenerate
@@ -249,7 +249,7 @@ const triggerWebhook = (index) => {
         {/* WEBHOOKS */}
         <h6 className="text-primary mb-3">Webhooks</h6>
 
-        <Table bordered hover size="sm">
+        <Table responsive bordered hover size="sm">
           <thead>
             <tr>
               <th>Name</th>
@@ -269,25 +269,27 @@ const triggerWebhook = (index) => {
                 <td>{wh.active ? "Active" : "Inactive"}</td>
                  <td>{wh.lastTriggered}</td>
                 <td>
-                 <Button
-                    size="sm"
-                    variant="primary"
-                    className="me-2"
-                    onClick={() => openEditModal(index)}
-                 >
-                    <FaEdit />
-                 </Button>
+                  <div className="d-flex gap-2 flex-wrap">
                   <Button
-                    size="sm"
-                    variant="danger"
-                    onClick={() => {
-                      const updated = [...settings.webhooks];
-                      updated.splice(index, 1);
-                      setSettings({ ...settings, webhooks: updated });
-                    }}
+                      size="sm"
+                      variant="primary"
+                      className="me-2"
+                      onClick={() => openEditModal(index)}
                   >
-                    <FaTrash/>
+                      <FaEdit />
                   </Button>
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      onClick={() => {
+                        const updated = [...settings.webhooks];
+                        updated.splice(index, 1);
+                        setSettings({ ...settings, webhooks: updated });
+                      }}
+                    >
+                      <FaTrash/>
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -485,7 +487,7 @@ const triggerWebhook = (index) => {
 
         </Row>
 
-         <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+         <Modal show={showModal} onHide={() => setShowModal(false)} centered scrollable>
           <Modal.Header closeButton>
             <Modal.Title>Add Webhook</Modal.Title>
           </Modal.Header>
@@ -620,6 +622,7 @@ const triggerWebhook = (index) => {
         show={showEditModal}
         onHide={() => setShowEditModal(false)}
         centered
+        scrollable
         >
         <Modal.Header closeButton>
             <Modal.Title>Edit Webhook</Modal.Title>

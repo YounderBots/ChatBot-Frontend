@@ -60,32 +60,6 @@
 }
 
 /* ===============================
-   TABS
-================================ */
-.editor-tabs {
-  display: flex;
-  gap: 6px;
-  border-bottom: 1px solid #e5e7eb;
-  margin-bottom: 20px;
-}
-
-.editor-tabs button {
-  padding: 10px 16px;
-  font-size: 14px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  color: #475569;
-  border-bottom: 2px solid transparent;
-}
-
-.editor-tabs button.active {
-  color: #2563eb;
-  font-weight: 600;
-  border-bottom-color: #2563eb;
-}
-
-/* ===============================
    COMMON CARD
 ================================ */
 .editor-card section {
@@ -445,29 +419,45 @@
 }
 
 /* ===============================
-   TABS
+   TABS – RECTANGULAR PILLS
 ================================ */
+
 .editor-tabs {
   display: flex;
-  gap: 6px;
-  border-bottom: 1px solid #e5e7eb;
+  gap: 10px;
   margin-bottom: 20px;
+  border-bottom: none;
 }
 
 .editor-tabs button {
-  padding: 10px 16px;
+  height: 38px;
+  padding: 0 22px;
   font-size: 14px;
+  line-height: 1;
   border: none;
   background: transparent;
   cursor: pointer;
-  color: #475569;
-  border-bottom: 2px solid transparent;
+  color: #192941;          /* unchanged */
+  border-radius: 8px;      /* 🔥 rectangle with curved corners */
+  font-weight: 500;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
+/* ACTIVE TAB */
 .editor-tabs button.active {
-  color: #2563eb;
+  background: #273656;     /* unchanged */
+  color: #e8eaef;          /* unchanged */
   font-weight: 600;
-  border-bottom-color: #2563eb;
+}
+
+/* Hover */
+.editor-tabs button:hover:not(.active) {
+  background: #f1f5f9;
 }
 
 /* ===============================
@@ -867,4 +857,29 @@
   font-size: 14px;
   font-weight: 600;
   border-radius: 10px;
+}
+/* ===============================
+   SAVE & CANCEL BUTTON COLORS
+   (Dialog only)
+================================ */
+
+/* Cancel button */
+.editor-actions .btn.ghost {
+  background: #dddddd;        /* light gray */
+  color: #334155;             /* dark text */
+  border: 1px solid #cbd5e1;
+}
+
+.editor-actions .btn.ghost:hover {
+  background: #e2e8f0;
+}
+
+/* Save button */
+.editor-actions .btn.primary {
+  background: #2563eb;        /* solid blue */
+  color: #ffffff;
+}
+
+.editor-actions .btn.primary:hover {
+  background: #1d4ed8;
 }

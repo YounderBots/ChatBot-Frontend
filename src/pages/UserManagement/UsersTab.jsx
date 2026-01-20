@@ -132,6 +132,8 @@ export default function UsersTab() {
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [sortBy, setSortBy] = useState(""); // AZ | ZA
+
 
   const [form, setForm] = useState({
     avatar: null,
@@ -155,7 +157,13 @@ export default function UsersTab() {
       (filter === "Active" && u.status) ||
       (filter === "Inactive" && !u.status);
     return matchesSearch && matchesFilter;
-  });
+  })
+    .sort((a, b) => {
+      if (sortBy === "AZ") {
+        return a.name.localeCompare(b.name);
+      }
+      return b.name.localeCompare(a.name);
+    });
 
   // const openAddUser = () => {
   //   setEditingUser(null);
@@ -269,7 +277,7 @@ export default function UsersTab() {
                 <Search className="searchIcon" size={14} />
                 <Form.Control
                   size="sm"
-                  placeholder="Search users"
+                  placeholder="    Search users"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="ps-4"
@@ -280,6 +288,18 @@ export default function UsersTab() {
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
               </Form.Select>
+              <Form.Select
+                size="sm"
+                className="w-auto"
+                value={sortBy}
+                
+                onChange={(e) => setSortBy(e.target.value)}
+              >
+                <option>Sort By Name</option>
+                <option value="AZ">Ascending</option>
+                <option value="ZA">Descending</option>
+              </Form.Select>
+
               <Button size="sm" className="primaryBtn" onClick={openAddUser}>
                 <Plus size={14} /> Add User
               </Button>
@@ -391,10 +411,10 @@ export default function UsersTab() {
                       justifyContent: "center",
                       fontSize: 24,
                       color: "#64748b",
-                      
+
                     }}
                   >
-                    
+
                   </div>
                 )}
               </div>

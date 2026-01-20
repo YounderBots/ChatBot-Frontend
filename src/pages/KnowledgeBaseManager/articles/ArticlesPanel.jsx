@@ -54,19 +54,15 @@ export default function ArticlesPanel({ activeCategory = "All" }) {
           (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
         );
         break;
-
       case "az":
         data.sort((a, b) => a.title.localeCompare(b.title));
         break;
-
       case "views":
         data.sort((a, b) => b.views - a.views);
         break;
-
       case "helpful":
         data.sort((a, b) => b.helpful - a.helpful);
         break;
-
       default:
         break;
     }
@@ -115,7 +111,7 @@ export default function ArticlesPanel({ activeCategory = "All" }) {
   return (
     <>
       <section className="articles-panel">
-        {/* HEADER */}
+        {/* ================= HEADER ================= */}
         <div className="articles-header">
           <input
             placeholder="Search articles..."
@@ -139,7 +135,6 @@ export default function ArticlesPanel({ activeCategory = "All" }) {
             <option value="Archived">Archived</option>
           </select>
 
-          {/* ✅ FIXED: COMPLETE SORT DROPDOWN */}
           <select
             value={sort}
             onChange={(e) => {
@@ -164,75 +159,72 @@ export default function ArticlesPanel({ activeCategory = "All" }) {
           </button>
         </div>
 
-        {/* TABLE */}
-        <table className="articles-table">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Category</th>
-              <th>Status</th>
-              <th>Views</th>
-              <th>Last Updated</th>
-              <th>Author</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {paginated.map((a) => (
-              <tr key={a.id}>
-                <td>
-                  <button
-                    className="link-btn"
-                    onClick={() => handleEdit(a)}
-                  >
-                    {a.title}
-                  </button>
-                </td>
-                <td>
-                  <span className="category-badge">{a.category}</span>
-                </td>
-                <td>
-                  <span className={`status ${a.status.toLowerCase()}`}>
-                    {a.status}
-                  </span>
-                </td>
-                <td>{a.views}</td>
-                <td>{a.updatedAt}</td>
-                <td>{a.author}</td>
-                <td className="actions">
-                  <button onClick={() => handleEdit(a)}>
-                    <Edit size={16} />
-                  </button>
-                  <button onClick={() => handleDuplicate(a)}>
-                    <Copy size={16} />
-                  </button>
-                  <button
-                    className="danger"
-                    onClick={() => handleDelete(a.id)}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </td>
-              </tr>
-            ))}
-
-            {paginated.length === 0 && (
+        {/* ================= TABLE (HEIGHT SOURCE) ================= */}
+        <div className="kb-table-card">
+          <table className="articles-table">
+            <thead>
               <tr>
-                <td colSpan={7} style={{ textAlign: "center" }}>
-                  No articles found
-                </td>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Views</th>
+                <th>Last Updated</th>
+                <th>Author</th>
+                <th>Actions</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
 
-        {/* PAGE INFO */}
-        <div className="page-info">
-          Page {page} of {totalPages}
+            <tbody>
+              {paginated.map((a) => (
+                <tr key={a.id}>
+                  <td>
+                    <button
+                      className="link-btn"
+                      onClick={() => handleEdit(a)}
+                    >
+                      {a.title}
+                    </button>
+                  </td>
+                  <td>
+                    <span className="category-badge">{a.category}</span>
+                  </td>
+                  <td>
+                    <span className={`status ${a.status.toLowerCase()}`}>
+                      {a.status}
+                    </span>
+                  </td>
+                  <td>{a.views}</td>
+                  <td>{a.updatedAt}</td>
+                  <td>{a.author}</td>
+                  <td className="actions">
+                    <button onClick={() => handleEdit(a)}>
+                      <Edit size={16} />
+                    </button>
+                    <button onClick={() => handleDuplicate(a)}>
+                      <Copy size={16} />
+                    </button>
+                    <button
+                      className="danger"
+                      onClick={() => handleDelete(a.id)}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+
+              {paginated.length === 0 && (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: "center" }}>
+                    No articles found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
 
-        {/* PAGINATION: Prev | 1 | 2 | 3 | Next */}
+        {/* ================= PAGINATION (OUTSIDE TABLE) ================= */}
         {totalPages > 1 && (
           <div className="pagination-bar">
             <button
@@ -262,7 +254,7 @@ export default function ArticlesPanel({ activeCategory = "All" }) {
         )}
       </section>
 
-      {/* MODAL */}
+      {/* ================= MODAL ================= */}
       {dialogOpen && (
         <NewArticleDialog
           article={editingArticle}

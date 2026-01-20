@@ -1,6 +1,7 @@
 import ArticleEditor from "../editor/ArticleEditor";
 import "./new-article-dialog.css";
 
+
 const NewArticleDialog = ({ onClose, article }) => {
   const handleSave = (data) => {
     console.log("ARTICLE PAYLOAD", data);
