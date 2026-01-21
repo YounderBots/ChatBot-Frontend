@@ -285,30 +285,23 @@
 .seo-section {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
 }
 
 .seo-block {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  padding: 20px;
-  border-radius: 12px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  transition: all 0.2s ease;
-}
-
-.seo-block:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  gap: 8px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  box-shadow: none;
 }
 
 .seo-block label {
   font-size: 14px;
   font-weight: 600;
-  color: #334155;
+  color: #0f172a;
   margin-bottom: 2px;
 }
 
@@ -316,13 +309,16 @@
 .seo-block select,
 .seo-block input {
   padding: 12px 14px;
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid #d1d5db;
   font-size: 14px;
   background: #ffffff;
+  width: 100%;
 }
 
-.seo-block textarea:focus {
+.seo-block textarea:focus,
+.seo-block input:focus,
+.seo-block select:focus {
   outline: none;
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
@@ -333,20 +329,39 @@
   justify-content: space-between;
   font-size: 12px;
   color: #64748b;
+  margin-top: 4px;
 }
 
 .seo-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 18px;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
 }
 
+/* Featured Image Special Styling */
 .image-upload-box {
-  border: 2px dashed #c7d2fe;
-  padding: 20px;
+  border: 2px dashed #cbd5e1;
+  padding: 30px 20px;
   border-radius: 10px;
   text-align: center;
   background: #f8fafc;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.image-upload-box:hover {
+  border-color: #2563eb;
+  background: #f1f5f9;
+}
+
+.image-upload-box strong {
+  color: #0f172a;
 }
 
 /* ===============================
@@ -378,67 +393,6 @@
 .btn.ghost {
   background: transparent;
   color: #475569;
-}
-
-/* ===============================
-   DIALOG OVERLAY
-================================ */
-.kb-dialog-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.55);
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* ===============================
-   DIALOG CONTAINER
-================================ */
-.kb-dialog {
-  background: #ffffff;
-  width: 92%;
-  max-width: 1100px;
-  height: 90vh;
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  overflow: hidden;
-}
-
-/* ===============================
-   HEADER
-================================ */
-.kb-dialog-header {
-  padding: 16px 24px;
-  border-bottom: 1px solid #e5e7eb;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.kb-dialog-header h3 {
-  font-size: 18px;
-  font-weight: 600;
-  color: #0f172a;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-/* ===============================
-   BODY
-================================ */
-.kb-dialog-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 24px;
 }
 
 /* ===============================
@@ -488,226 +442,6 @@
   color: #0f3d6e;
 }
 
-/* ===============================
-   COMMON CARD
-================================ */
-.editor-card section {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 20px;
-}
-
-/* ===============================
-   ARTICLE INFO (UNCHANGED)
-================================ */
-.article-info-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 18px;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.field input,
-.field select {
-  padding: 10px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 14px;
-}
-
-.field-meta {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  color: #64748b;
-}
-
-/* ===============================
-   TAGS
-================================ */
-.tag-input-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  padding: 6px;
-}
-
-.tag-chip {
-  background: #e0e7ff;
-  color: #1e3a8a;
-  padding: 4px 10px;
-  border-radius: 14px;
-  font-size: 12px;
-}
-
-.tag-chip button {
-  border: none;
-  background: none;
-  cursor: pointer;
-}
-
-/* ===============================
-   CONTENT SECTION
-================================ */
-.content-section {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-/* Header */
-.content-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.content-header h4 {
-  font-size: 16px;
-  font-weight: 600;
-}
-
-/* Toggle */
-.content-toggle {
-  display: flex;
-  background: #f1f5f9;
-  padding: 4px;
-  border-radius: 8px;
-}
-
-.content-toggle button {
-  padding: 6px 14px;
-  border: none;
-  background: transparent;
-  font-size: 13px;
-  cursor: pointer;
-  border-radius: 6px;
-}
-
-.content-toggle button.active {
-  background: #ffffff;
-  color: #2563eb;
-  font-weight: 600;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-}
-
-/* Editor toolbar */
-.editor-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  background: #f8fafc;
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-}
-
-.editor-toolbar button {
-  min-width: 36px;
-  height: 34px;
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
-  background: #ffffff;
-  cursor: pointer;
-}
-
-.editor-toolbar button:hover {
-  background: #e0e7ff;
-}
-
-/* Editor */
-.tiptap-editor {
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  min-height: 260px;
-  padding: 12px;
-}
-
-/* Preview */
-.content-preview {
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  padding: 16px;
-  background: #f9fafb;
-}
-
-/* Footer */
-.content-footer {
-  text-align: right;
-  font-size: 12px;
-  color: #64748b;
-}
-
-/* ===============================
-   ⭐ RELATED QUESTIONS (ENHANCED)
-================================ */
-.related-questions {
-  margin-top: 20px;
-  padding: 16px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  background: #f9fafb;
-}
-
-.related-questions h4 {
-  font-size: 15px;
-  font-weight: 600;
-  color: #0f172a;
-  margin-bottom: 6px;
-}
-
-.related-questions p {
-  font-size: 13px;
-  color: #64748b;
-  margin-bottom: 12px;
-}
-
-/* Question item */
-.related-question-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  padding: 10px 12px;
-  border-radius: 8px;
-  margin-bottom: 8px;
-}
-
-.related-question-item input {
-  flex: 1;
-  border: none;
-  font-size: 14px;
-}
-
-.related-question-item input:focus {
-  outline: none;
-}
-
-/* Add button */
-.add-question-btn {
-  margin-top: 10px;
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: 1px dashed #2563eb;
-  background: #eef2ff;
-  color: #2563eb;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.add-question-btn:hover {
-  background: #e0e7ff;
-}
-
 /* ======================================================
    ⭐ SEO & SETTINGS – FOOTER / STATUS AREA (ENHANCED)
    Applies ONLY to SEO & Settings section
@@ -721,54 +455,72 @@
 /* ---- Status / Featured / Publish row ---- */
 .seo-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  align-items: stretch;
+  grid-template-columns: 1.2fr 1fr 1.2fr;
+  gap: 24px;
+  align-items: flex-start;
+  margin-top: 10px;
 }
 
-/* Individual control cards */
-.seo-grid>div,
-.checkbox {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 16px 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+/* Push checkbox down to align with inputs */
+.featured-checkbox-wrapper {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  min-height: 95px;
-  margin: 0 !important;
-  /* Forces removal of any external align-bottom margins */
 }
 
-/* Specific for checkbox card to keep it horizontal but centered */
+.featured-checkbox-wrapper .checkbox {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  /* Matches height of adjacent inputs */
+  padding-bottom: 0 !important;
+}
+
+/* Individual control fields */
+.seo-grid>div {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: auto;
+}
+
+/* Checkbox specific */
 .checkbox {
   flex-direction: row !important;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  padding-bottom: 12px;
+  /* Align visually with labeled inputs */
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 .checkbox input[type="checkbox"] {
   width: 18px;
   height: 18px;
   cursor: pointer;
+  accent-color: #2563eb;
 }
 
 .checkbox span {
   font-size: 14px;
   font-weight: 500;
-  color: #334155;
+  color: #0f172a;
 }
 
 /* Labels */
 .seo-grid label {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  color: #64748b;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+  color: #0f172a;
+  margin-bottom: 0;
+  text-transform: none;
+  letter-spacing: normal;
 }
 
 /* Inputs refinement ONLY for SEO section */
@@ -811,127 +563,62 @@
 }
 
 /* ======================================================
-   ✅ SEO & SETTINGS – FINAL BUTTON ALIGNMENT (FIXED)
+   ✅ FOOTER ACTION ALIGNMENT (UNIFIED)
 ====================================================== */
 
-/* Footer bar */
 .editor-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  /* left + right */
-  margin-top: 28px;
-  padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
-}
-
-/* LEFT: Preview + Delete */
-.editor-actions .seo-actions {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-/* Preview */
-.editor-actions .seo-actions button:first-child {
-  background: none;
-  border: none;
-  padding: 0;
-  font-size: 14px;
-  color: #2563eb;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-/* Delete */
-.editor-actions .seo-actions button:last-child {
-  background: none;
-  border: none;
-  padding: 0;
-  font-size: 14px;
-  color: #dc2626;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-/* RIGHT: Cancel + Save */
-.editor-actions>div:last-child {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-/* Cancel */
-.editor-actions .btn.ghost {
-  padding: 10px 14px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #475569;
-}
-
-/* Save (Primary CTA) */
-.editor-actions .btn.primary {
-  padding: 10px 24px;
-  font-size: 14px;
-  font-weight: 600;
-  border-radius: 10px;
-}
-
-/* ======================================================
-   ✅ SEO & SETTINGS – BUTTON ALIGNMENT (ACTUAL FIX)
-====================================================== */
-
-/* Target the SEO section footer area */
-.seo-section+.editor-actions,
-.seo-section~.editor-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 16px;
+  padding-top: 20px;
   margin-top: 24px;
   border-top: 1px solid #e5e7eb;
 }
 
-/* LEFT SIDE: Preview + Delete (first two buttons) */
-.editor-actions button:nth-child(1),
-.editor-actions button:nth-child(2) {
+/* LEFT SIDE: Preview + Delete */
+.seo-actions-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-link {
   background: none;
   border: none;
-  padding: 0;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-/* Preview */
-.editor-actions button:nth-child(1) {
   color: #2563eb;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 12px;
+  text-decoration: none;
 }
 
-/* Delete */
-.editor-actions button:nth-child(2) {
+.btn-link:hover {
+  text-decoration: underline;
+}
+
+.btn-delete {
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
   color: #dc2626;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-delete:hover {
+  background: #fee2e2;
+  border-color: #fecaca;
 }
 
 /* RIGHT SIDE: Cancel + Save */
-.editor-actions button:nth-last-child(2),
-.editor-actions button:nth-last-child(1) {
-  margin-left: 12px;
-}
-
-/* Cancel */
-.editor-actions .btn.ghost {
-  padding: 10px 14px;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-/* Save */
-.editor-actions .btn.primary {
-  padding: 10px 24px;
-  font-size: 14px;
-  font-weight: 600;
-  border-radius: 10px;
+.main-actions-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
 /* ===============================
@@ -961,4 +648,120 @@
 
 .editor-actions .btn.primary:hover {
   background: #1d4ed8;
+}
+
+/* ======================================================
+   📱 RESPONSIVENESS (MOBILE & TABLET)
+====================================================== */
+
+@media (max-width: 992px) {
+  .kb-dialog {
+    width: 96%;
+    height: 95vh;
+  }
+
+  .seo-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .featured-checkbox-wrapper {
+    padding-top: 0;
+  }
+
+  .featured-checkbox-wrapper label {
+    display: none;
+    /* Remove phantom label on stacked layout */
+  }
+}
+
+@media (max-width: 768px) {
+  .kb-dialog-header {
+    padding: 12px 16px;
+  }
+
+  .kb-dialog-body {
+    padding: 16px;
+  }
+
+  .editor-tabs {
+    overflow-x: auto;
+    padding: 6px;
+    gap: 4px;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .editor-tabs button {
+    flex: none;
+    /* Stop forcing equal width to allow scrolling */
+    padding: 6px 12px;
+    font-size: 13px;
+    min-width: 100px;
+  }
+
+  .article-info-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .content-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .content-toggle {
+    width: 100%;
+  }
+
+  .content-toggle button {
+    flex: 1;
+  }
+
+  .editor-actions {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+    padding: 16px;
+  }
+
+  .seo-actions-wrapper,
+  .main-actions-wrapper {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .main-actions-wrapper .btn {
+    flex: 1;
+  }
+
+  .editor-card section {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .kb-dialog-header h3 {
+    font-size: 16px;
+  }
+
+  .editor-toolbar {
+    padding: 4px;
+    gap: 4px;
+  }
+
+  .editor-toolbar button {
+    min-width: 32px;
+    height: 32px;
+  }
+
+  .btn {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .btn-delete {
+    padding: 8px 12px;
+  }
 }

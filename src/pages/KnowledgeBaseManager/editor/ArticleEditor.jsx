@@ -35,6 +35,7 @@ const ArticleEditor = ({
   article,
   onCancel,
   onSave,
+  onDelete,
   inDialog = false,
 }) => {
   const [activeTab, setActiveTab] = useState(TABS.INFO);
@@ -89,8 +90,14 @@ const ArticleEditor = ({
     });
   };
 
+  const handleDelete = () => {
+    if (window.confirm("Are you sure you want to delete this article?")) {
+      onDelete?.(form.id || article?.id);
+    }
+  };
+
   return (
-    <div className="article-editor-body">
+    <div className={`article-editor-body tab-${activeTab}`}>
       {/* TABS */}
       <div className="editor-tabs">
         <button
@@ -150,12 +157,24 @@ const ArticleEditor = ({
 
       {/* FOOTER */}
       <div className="editor-actions">
-        <button className="btn ghost" onClick={onCancel}>
-          Cancel
-        </button>
-        <button className="btn primary" onClick={handlePublish}>
-          Save
-        </button>
+        <div className="seo-actions-wrapper">
+          {activeTab === TABS.SEO && (
+            <>
+              <button type="button" className="btn-delete" onClick={handleDelete}>
+                Delete Article
+              </button>
+              <button type="button" className="btn-link">Preview</button>
+            </>
+          )}
+        </div>
+        <div className="main-actions-wrapper">
+          <button className="btn ghost" onClick={onCancel}>
+            Cancel
+          </button>
+          <button className="btn primary" onClick={handlePublish}>
+            Save
+          </button>
+        </div>
       </div>
     </div>
   );

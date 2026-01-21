@@ -23,6 +23,10 @@ const NewArticleDialog = ({ onClose, article }) => {
             article={article}
             onCancel={onClose}
             onSave={handleSave}
+            onDelete={(id) => {
+              console.log("DELETE ARTICLE", id);
+              onClose();
+            }}
           />
         </div>
       </div>

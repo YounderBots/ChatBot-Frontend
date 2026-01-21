@@ -41,8 +41,6 @@ const ArticleSEOSection = ({
 
   return (
     <section className="seo-section">
-      <h4>SEO & Settings</h4>
-
       {/* META DESCRIPTION */}
       <div className="seo-block">
         <label>Meta Description</label>
@@ -106,7 +104,7 @@ const ArticleSEOSection = ({
 
       {/* STATUS / SETTINGS */}
       <div className="seo-grid">
-        <div>
+        <div className="seo-block">
           <label>Status</label>
           <select
             value={form.status}
@@ -120,18 +118,21 @@ const ArticleSEOSection = ({
           </select>
         </div>
 
-        <div className="checkbox">
-          <input
-            type="checkbox"
-            checked={form.featured}
-            onChange={(e) =>
-              setForm({ ...form, featured: e.target.checked })
-            }
-          />
-          <span>Featured Article</span>
+        <div className="seo-block featured-checkbox-wrapper">
+          <label>&nbsp;</label>
+          <div className="checkbox">
+            <input
+              type="checkbox"
+              checked={form.featured}
+              onChange={(e) =>
+                setForm({ ...form, featured: e.target.checked })
+              }
+            />
+            <span>Featured Article</span>
+          </div>
         </div>
 
-        <div>
+        <div className="seo-block">
           <label>Publish Date</label>
           <input
             type="date"
@@ -142,25 +143,6 @@ const ArticleSEOSection = ({
           />
           <small>Schedule future publish</small>
         </div>
-      </div>
-
-      {/* SECONDARY ACTIONS */}
-      <div className="seo-actions">
-        <button
-          type="button"
-          className="btn ghost"
-          onClick={onPreview}
-        >
-          Preview
-        </button>
-
-        <button
-          type="button"
-          className="btn danger"
-          onClick={onDelete}
-        >
-          Delete Article
-        </button>
       </div>
     </section>
   );
