@@ -4,8 +4,50 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  background: linear-gradient(135deg, #6ec6ff, #9ad9ff);
 }
+
+.login-layout {
+  width: 1150px;
+  height: 620px;
+  display: flex;
+  border-radius: 22px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 40px 90px rgba(0,0,0,0.25);
+}
+.login-left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.login-right {
+  flex: 1;
+  padding: 4rem;
+  background: linear-gradient(135deg, #5dade2, #85c1e9);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.login-right h1 {
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.login-right p {
+  font-size: 1.2rem;
+  opacity: 0.95;
+  margin-bottom: 2rem;
+}
+
+.chatbot-illustration {
+  max-width: 100%;
+}
+
 
 .login-card {
   width: 100%;
@@ -23,17 +65,18 @@
 }
 
 .form-label {
-  font-size: 0.95rem;
-  font-weight: 500;
+  font-size: 1.05rem;
+  font-weight: 600;
 }
 
 .form-control {
-  border-radius: 12px;
+  border-radius: 14px;
   border: 1px solid var(--cvq-gray-300);
-  padding: 0.75rem 0.9rem;   
-  font-size: 0.95rem;
-  padding-right: 2.5rem;
+  padding: 0.9rem 1rem;
+  font-size: 1.1rem;   
+  padding-right: 3rem;
 }
+
 
 .form-control:focus {
   border-color: var(--cvq-blue-500);
@@ -49,15 +92,15 @@
   top: 70%;
   right: 1rem;              /* spacing from right edge */
   transform: translateY(-50%);
-  color: var(--cvq-gray-600);
+  color: #6c8cff;
   cursor: pointer;
-  z-index: 2;               /* ensures icon stays above input */
+                /* ensures icon stays above input */
 }
 
 
 .password-toggle svg {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
 }
 
 .forgot-link {
