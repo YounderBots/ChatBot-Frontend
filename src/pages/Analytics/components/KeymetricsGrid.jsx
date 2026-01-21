@@ -1,922 +1,449 @@
-import React, { useState, useEffect } from "react";
-import '../Analytics.css'
-import { Card, Row, Col, Button, Modal, } from "react-bootstrap";
+import React, { useState, useCallback } from "react";
+import '../Analytics.css';
+import { Card, Row, Col, Button, Modal, Form, } from "react-bootstrap";
 import {
-    LineChart,
-    Line,
-    PieChart,
-    Pie,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
-    Cell
+    LineChart, Line, PieChart, Pie, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell
 } from "recharts";
+import AnalyticsFilter from "./AnalyticsFilter";
 
-const INTENT_COLORS = [
-    "#0d6efd", // blue
-    "#198754", // green
-    "#fd7e14", // orange
-    "#dc3545", // red
-    "#6f42c1", // purple
-    "#20c997", // teal
-    "#ffc107", // yellow
-    "#0dcaf0", // cyan
-    "#adb5bd", // gray
-    "#343a40", // dark
-];
-
+const INTENT_COLORS = ["#0d6efd", "#198754", "#fd7e14", "#dc3545", "#6f42c1"];
 
 const KeymetricsGird = () => {
+    // ============================================================
+    // STATE MANAGEMENT
+    // ============================================================
+    const [filters, setFilters] = useState({
+        preset: "Today",
+        startDate: new Date().toISOString().split("T")[0],
+        endDate: new Date().toISOString().split("T")[0],
+        compareRange: null
+    });
     const [showDrillModal, setShowDrillModal] = useState(false);
     const [drillMetric, setDrillMetric] = useState(null);
-    const [filters, setFilters] = useState(null);
 
-    useEffect(() => {
-        const today = new Date().toISOString().split("T")[0];
-        setFilters({ startDate: today, endDate: today });
+    // ============================================================
+    // DATA INITIALIZATION
+    // ============================================================
+    const [usersData] = useState(() => {
+        const today = new Date();
+        return Array.from({ length: 365 }, (_, i) => {
+            const date = new Date(today);
+            date.setDate(today.getDate() - i);
+            return {
+                date: date.toISOString().split('T')[0],
+                newUsers: 50 + Math.floor(Math.random() * 100),
+                returningUsers: 30 + Math.floor(Math.random() * 70)
+            };
+        });
+    });
+
+    const [conversationsData] = useState(() => {
+        const today = new Date();
+        return Array.from({ length: 365 }, (_, i) => {
+            const date = new Date(today);
+            date.setDate(today.getDate() - i);
+            return {
+                date: date.toISOString().split('T')[0],
+                count: Math.floor(100 + Math.random() * 300)
+            };
+        });
+    });
+
+    const [hourlyData] = useState(() => {
+        const today = new Date().toISOString().split('T')[0];
+        return Array.from({ length: 24 }, (_, h) => {
+            const date = new Date(today);
+            date.setHours(h, 0, 0, 0);
+            return {
+                timestamp: date.toISOString(),
+                date: today,
+                count: Math.floor(20 + Math.random() * 80),
+                hour: h
+            };
+        });
+    });
+
+    // ============================================================
+    // UTILITY FUNCTIONS
+    // ============================================================
+    const filterDataByDate = useCallback((data, startDate, endDate) => {
+        if (!startDate || !endDate) return [];
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        return data.filter(item => {
+            const itemDate = new Date(item.date || item.timestamp);
+            itemDate.setHours(12, 0, 0, 0);
+            return itemDate >= start && itemDate <= end;
+        });
     }, []);
 
-    /* ================= HELPERS ================= */
-
-    const filterByDate = (data = [], startDate, endDate) => {
-        if (!startDate || !endDate) return [];
-
-        const s = new Date(startDate);
-        s.setHours(0, 0, 0, 0);
-
-        const e = new Date(endDate);
-        e.setHours(23, 59, 59, 999);
-
-        return data.filter(d => {
-            const x = new Date(d.date);
-            x.setHours(12, 0, 0, 0);
-            return x >= s && x <= e;
-        });
+    // ============================================================
+    // EVENT HANDLERS
+    // ============================================================
+    const handleApplyFilter = (payload) => {
+        setFilters(payload);
     };
-
-
-    const sumCounts = (arr = []) =>
-        arr.reduce((a, b) => a + (b.count || 0), 0);
-
-    const getPreviousRange = (startDate, endDate) => {
-        if (!startDate || !endDate) return null;
-
-        const s = new Date(startDate);
-        const e = new Date(endDate);
-
-        if (isNaN(s.getTime()) || isNaN(e.getTime())) {
-            return null;
-        }
-
-        const days =
-            Math.round((e.getTime() - s.getTime()) / 86400000) + 1;
-
-        const prevEnd = new Date(s);
-        prevEnd.setDate(s.getDate() - 1);
-
-        const prevStart = new Date(prevEnd);
-        prevStart.setDate(prevEnd.getDate() - days + 1);
-
-        return {
-            startDate: prevStart.toISOString().split("T")[0],
-            endDate: prevEnd.toISOString().split("T")[0],
-        };
-    };
-
-
-    /* ================= DATA ================= */
-
-    const today = new Date();
-    const DUMMY_USERS = Array.from({ length: 10 }, (_, i) => {
-        const d = new Date(today);
-        d.setDate(today.getDate() - i);
-        return {
-            date: d.toISOString().split("T")[0],
-            newUsers: 100 + i * 20,
-            returningUsers: 80 + i * 10,
-        };
-    });
-
-    const previousRange = filters
-        ? getPreviousRange(filters.startDate, filters.endDate)
-        : null;
-
-    /* ================= RANGE LOGIC ================= */
-
-    const getRangeDays = (startDate, endDate) => {
-        const s = new Date(startDate);
-        const e = new Date(endDate);
-        return Math.ceil((e - s) / 86400000) + 1;
-    };
-
-    const rangeDays = filters
-        ? getRangeDays(filters.startDate, filters.endDate)
-        : 0;
-
-    const isTimestampView = rangeDays < 2;
-
-    const DUMMY_CONVERSATIONS_DAILY = Array.from({ length: 60 }, (_, i) => {
-        const d = new Date(today);
-        d.setDate(today.getDate() - i);
-        return {
-            date: d.toISOString().split("T")[0],
-            count: Math.floor(50 + Math.random() * 150),
-        };
-    });
-
-    const hourlyBaseDate = filters
-        ? new Date(filters.startDate)
-        : new Date();
-
-    const DUMMY_CONVERSATIONS_HOURLY = Array.from({ length: 24 }, (_, h) => {
-        const d = new Date(hourlyBaseDate);
-        d.setHours(h, 0, 0, 0);
-
-        return {
-            timestamp: d.toISOString(),
-            count: Math.floor(5 + Math.random() * 20),
-        };
-    });
-
-    const conversationChartData = isTimestampView
-        ? DUMMY_CONVERSATIONS_HOURLY
-        : DUMMY_CONVERSATIONS_DAILY;
-
-    const filterConversations = (data, startDate, endDate) => {
-        if (!startDate || !endDate) return [];
-
-        const s = new Date(startDate);
-        s.setHours(0, 0, 0, 0);
-
-        const e = new Date(endDate);
-        e.setHours(23, 59, 59, 999);
-
-        return data.filter(d => {
-            const x = new Date(d.timestamp || d.date);
-            return x >= s && x <= e;
-        });
-    };
-
-    /* ---------- CURRENT USERS ---------- */
-
-    const currentUsers = filters
-        ? filterByDate(DUMMY_USERS, filters.startDate, filters.endDate)
-        : [];
-
-    const currentNewUsers = currentUsers.reduce(
-        (sum, u) => sum + (u.newUsers || 0),
-        0
-    );
-
-    const currentReturningUsers = currentUsers.reduce(
-        (sum, u) => sum + (u.returningUsers || 0),
-        0
-    );
-
-    const currentTotalUsers =
-        currentNewUsers + currentReturningUsers;
-
-    /* ✅ REQUIRED FLAG */
-    const hasUserData = currentTotalUsers > 0;  
-
-    /* ---------- PREVIOUS USERS (AUTO COMPARE) ---------- */
-
-    const previousUsers = previousRange
-        ? filterByDate(
-            DUMMY_USERS,
-            previousRange.startDate,
-            previousRange.endDate
-        )
-        : [];
-
-    const previousTotalUsers = previousUsers.reduce(
-        (sum, u) =>
-            sum + (u.newUsers || 0) + (u.returningUsers || 0),
-        0
-    );
-
-    /* ---------- USER TREND ---------- */
-
-    const userTrendPercent =
-        previousTotalUsers > 0
-            ? (
-                ((currentTotalUsers - previousTotalUsers) /
-                    previousTotalUsers) *
-                100
-            ).toFixed(1)
-            : 0;
-
-    const isUserIncrease =
-        currentTotalUsers >= previousTotalUsers;
-
-    /* ---------- SAFE % ---------- */
-
-    const safePercent = (value, total) =>
-        total > 0 ? Math.round((value / total) * 100) : 0;
-
-    /* ---------- PIE DATA ---------- */
-
-    const uniqueUsersData = hasUserData
-        ? [
-            { name: "New Users", value: currentNewUsers },
-            { name: "Returning Users", value: currentReturningUsers },
-        ]
-        : [];
 
     const handleDrillDown = (metric) => {
         setDrillMetric(metric);
         setShowDrillModal(true);
     };
 
-    /* ================= CONVERSATIONS ================= */
-    /* 1️⃣ CURRENT CONVERSATIONS */
-    const currentConversations = filters
-        ? filterConversations(
-            conversationChartData,
-            filters.startDate,
-            filters.endDate
-        )
+    // ============================================================
+    // FILTERED DATA COMPUTATION
+    // ============================================================
+    const currentUsers = filterDataByDate(usersData, filters.startDate, filters.endDate);
+    const previousUsers = filters.compareRange
+        ? filterDataByDate(usersData, filters.compareRange.startDate, filters.compareRange.endDate)
         : [];
 
-    /* 2️⃣ PREVIOUS CONVERSATIONS */
-    const previousConversations = previousRange
-        ? filterConversations(
-            conversationChartData,
-            previousRange.startDate,
-            previousRange.endDate
-        )
+    const currentConversations = filterDataByDate(conversationsData, filters.startDate, filters.endDate);
+    const previousConversations = filters.compareRange
+        ? filterDataByDate(conversationsData, filters.compareRange.startDate, filters.compareRange.endDate)
         : [];
 
-    /* 3️⃣ TOTALS (NUMBERS) */
-    const currentTotalConversations = sumCounts(currentConversations);
-    const previousTotalConversations = sumCounts(previousConversations);
+    // ============================================================
+    // AGGREGATED METRICS
+    // ============================================================
+    const currentTotalUsers = currentUsers.reduce((sum, u) => sum + u.newUsers + u.returningUsers, 0);
+    const currentNewUsers = currentUsers.reduce((sum, u) => sum + u.newUsers, 0);
+    const currentReturningUsers = currentUsers.reduce((sum, u) => sum + u.returningUsers, 0);
+    const previousTotalUsers = previousUsers.reduce((sum, u) => sum + u.newUsers + u.returningUsers, 0);
 
-    /* 4️⃣ FLAGS */
-    const hasConversationData =
-        currentTotalConversations > 0 ||
-        previousTotalConversations > 0;
+    const currentTotalConversations = currentConversations.reduce((sum, c) => sum + c.count, 0);
+    const previousTotalConversations = previousConversations.reduce((sum, c) => sum + c.count, 0);
 
-    /* 5️⃣ SPARKLINE (USES ARRAYS) */
-    const conversationSparkData =
-        currentConversations.length > 0
-            ? currentConversations.map(d => ({ v: d.count }))
-            : previousConversations.map(d => ({ v: d.count }));
+    const userTrend = previousTotalUsers > 0
+        ? (((currentTotalUsers - previousTotalUsers) / previousTotalUsers) * 100).toFixed(1)
+        : "0";
+    const convTrend = previousTotalConversations > 0
+        ? (((currentTotalConversations - previousTotalConversations) / previousTotalConversations) * 100).toFixed(1)
+        : "0";
 
-    /* 6️⃣ TREND (USES TOTALS) */
-    const conversationTrendPercent =
-        previousTotalConversations > 0
-            ? (
-                ((currentTotalConversations - previousTotalConversations) /
-                    previousTotalConversations) *
-                100
-            ).toFixed(1)
-            : 0;
+    // ============================================================
+    // CHART DATA PREPARATION
+    // ============================================================
+    const rangeDays = filters.startDate && filters.endDate
+        ? Math.ceil((new Date(filters.endDate) - new Date(filters.startDate)) / (1000 * 60 * 60 * 24))
+        : 0;
 
-    // simulate messages per conversation (4–8 messages)
-    const currentTotalMessages = currentConversations.reduce(
-        (sum, c) => sum + c.count * (4 + Math.random() * 4),
-        0
-    );
+    let sparkData = [];
+    if (filters.preset === "Today") {
+        sparkData = Array.from({ length: 24 }, (_, hour) => ({
+            hour,
+            v: Math.floor(20 + Math.random() * 60)
+        }));
+    } else if (filters.preset === "Yesterday") {
+        sparkData = Array.from({ length: 24 }, (_, hour) => ({
+            hour,
+            v: Math.floor(15 + Math.random() * 70)
+        }));
+    } else {
+        sparkData = currentConversations.slice(-7).map((c, i) => ({
+            day: i + 1,
+            v: c.count
+        }));
+    }
 
-    const previousTotalMessages = previousConversations.reduce(
-        (sum, c) => sum + c.count * (4 + Math.random() * 4),
-        0
-    );
-    /* ---------- TREND DIRECTION FLAGS ---------- */
-    const currentAvgMessages =
-        currentTotalConversations > 0
-            ? (currentTotalMessages / currentTotalConversations).toFixed(1)
-            : "—";
+    const uniqueUsersData = currentTotalUsers > 0 ? [
+        { name: "New Users", value: Math.round((currentNewUsers / currentTotalUsers) * 100) },
+        { name: "Returning Users", value: Math.round((currentReturningUsers / currentTotalUsers) * 100) }
+    ] : [{ name: "New Users", value: 0 }, { name: "Returning Users", value: 0 }];
 
-    const previousAvgMessages =
-        previousTotalConversations > 0
-            ? (previousTotalMessages / previousTotalConversations).toFixed(1)
-            : "—";
+    const drillDownData = currentConversations.length > 1 ? currentConversations.slice(-30) : [];
 
-    const hasConversationForAvg =
-        currentTotalConversations > 0 &&
-        previousTotalConversations > 0;
+    // ============================================================
+    // MESSAGE METRICS
+    // ============================================================
+    const currentTotalMessages = currentConversations.reduce((sum, c) => sum + c.count * (4 + Math.random() * 3), 0);
+    const previousTotalMessages = previousConversations.reduce((sum, c) => sum + c.count * (4 + Math.random() * 3), 0);
+    const avgMessages = currentTotalConversations > 0 ? (currentTotalMessages / currentTotalConversations).toFixed(1) : '—';
+    const avgMessagesTrend = previousTotalConversations > 0
+        ? (((currentTotalMessages / currentTotalConversations) - (previousTotalMessages / previousTotalConversations)) * 100).toFixed(1)
+        : "0";
 
-    const avgIsIncrease =
-        Number(currentAvgMessages) > Number(previousAvgMessages);
+    // ============================================================
+    // RESOLUTION METRICS
+    // ============================================================
+    const resolutionData = [
+        { name: "Resolved", value: Math.round(currentTotalConversations * Math.random()) },
+        { name: "Unresolved", value: Math.round(currentTotalConversations * Math.random()) }
+    ];
 
-    const avgIsDecrease =
-        Number(currentAvgMessages) < Number(previousAvgMessages);
+    const totalResolved = resolutionData[0]?.value || 0;
+    const totalUnresolved = resolutionData[1]?.value || 0;
+    const totalConversations = totalResolved + totalUnresolved;
+    const resolutionPercentage = totalConversations > 0
+        ? Math.round((totalResolved / totalConversations) * 100) + '%'
+        : '0%';
 
-    const avgIsNoChange =
-        Number(currentAvgMessages) === Number(previousAvgMessages);
+    // ============================================================
+    // RESPONSE TIME METRICS
+    // ============================================================
+    const responseDist = currentTotalConversations > 0 ? [
+        { name: "<1s", value: Math.round(currentTotalConversations * Math.random()) },
+        { name: "1-3s", value: Math.round(currentTotalConversations * Math.random()) },
+        { name: ">3s", value: Math.round(currentTotalConversations * Math.random()) }
+    ] : [];
 
-    const avgChangePercent =
-        hasConversationForAvg
-            ? (
-                ((currentAvgMessages - previousAvgMessages) /
-                    previousAvgMessages) *
-                100
-            ).toFixed(1)
-            : 0;
+    const totalResponses = responseDist.reduce((sum, item) => sum + item.value, 0);
 
+    const weightedSum = responseDist.reduce((sum, item, index) => {
+        const timeValue = index === 0 ? 0.5 : index === 1 ? 2 : 5;
+        return sum + (item.value * timeValue);
+    }, 0);
 
-    // sparkline data
-    const avgMessagesTrend = conversationSparkData.map(d => ({
-        v: d.v / Math.max(1, currentTotalConversations),
-    }));
+    const avgResponseTime = totalResponses > 0
+        ? (weightedSum / totalResponses).toFixed(1) + 's'
+        : '0s';
 
-    /* ---------- RESOLUTION RATE LOGIC ---------- */
-
-    // current period
-    const resolvedCurrent =
-        currentTotalConversations > 0
-            ? Math.round(currentTotalConversations * 0.84) // temp dummy logic
-            : 0;
-
-    const unresolvedCurrent =
-        currentTotalConversations - resolvedCurrent;
-
-    // previous period
-    const resolvedPrevious =
-        previousTotalConversations > 0
-            ? Math.round(previousTotalConversations * 0.78) // temp dummy logic
-            : 0;
-
-
-    const isIncrease =
-        currentTotalConversations > previousTotalConversations;
-
-    const isDecrease =
-        currentTotalConversations < previousTotalConversations;
-
-    const isNoChange =
-        currentTotalConversations === previousTotalConversations;
-
-    const resolutionRate = currentTotalConversations > 0
-        ? Math.round((resolvedCurrent / currentTotalConversations) * 100)
-        : null;
-
-    const previousResolutionRate = previousTotalConversations > 0
-        ? Math.round((resolvedPrevious / previousTotalConversations) * 100)
-        : null;
-
-    const resolutionTrendPercent =
-        previousResolutionRate !== null
-            ? (resolutionRate - previousResolutionRate).toFixed(1)
-            : 0;
-
-    const resolutionIncrease =
-        previousResolutionRate !== null &&
-        resolutionRate > previousResolutionRate;
-
-    const resolutionDecrease =
-        previousResolutionRate !== null &&
-        resolutionRate < previousResolutionRate;
-
-    const resolutionNoChange =
-        previousResolutionRate !== null &&
-        resolutionRate === previousResolutionRate;
-
-    const resolutionData =
-        currentTotalConversations > 0
-            ? [
-                { name: "Resolved", value: resolvedCurrent },
-                { name: "Unresolved", value: unresolvedCurrent },
-            ]
-            : [];
-
-    // simulate response time per conversation (seconds)
-    const currentTotalResponseTime = currentConversations.reduce(
-        (sum, c) => sum + c.count * (0.8 + Math.random() * 1.2),
-        0
-    );
-
-    const previousTotalResponseTime = previousConversations.reduce(
-        (sum, c) => sum + c.count * (1.0 + Math.random() * 1.5),
-        0
-    );
-
-    const currentAvgResponseTime =
-        currentTotalConversations > 0
-            ? (currentTotalResponseTime / currentTotalConversations).toFixed(2)
-            : "—";
-
-    const previousAvgResponseTime =
-        previousTotalConversations > 0
-            ? (previousTotalResponseTime / previousTotalConversations).toFixed(2)
-            : "—";
-
-    const responseIsFaster =
-        Number(currentAvgResponseTime) < Number(previousAvgResponseTime);
-
-    const responseIsSlower =
-        Number(currentAvgResponseTime) > Number(previousAvgResponseTime);
-
-    const responseNoChange =
-        Number(currentAvgResponseTime) === Number(previousAvgResponseTime);
-
-    const responseStatus =
-        currentAvgResponseTime === "—"
-            ? "No data"
-            : Number(currentAvgResponseTime) < 1
-                ? "Fast"
-                : Number(currentAvgResponseTime) < 2
-                    ? "Normal"
-                    : "Slow";
-
-                    const responseDist =
-    currentTotalConversations > 0
-        ? [
-              { name: "< 1s", value: Math.round(currentTotalConversations * 0.45) },
-              { name: "1-2s", value: Math.round(currentTotalConversations * 0.35) },
-              { name: "> 2s", value: Math.round(currentTotalConversations * 0.20) },
-          ]
-        : [];
+    const slowPercentage = responseDist.find(item => item.name === ">3s")?.value / totalResponses || 0;
+    const responseStatus = slowPercentage < 0.3 ? 'Fast' : slowPercentage > 0.5 ? 'Slow' : 'Medium';
+    const statusClass = slowPercentage < 0.3 ? 'text-success' : slowPercentage > 0.5 ? 'text-danger' : 'text-warning';
+    const statusColor = slowPercentage < 0.3 ? '#198754' : slowPercentage > 0.5 ? '#dc3545' : '#fd7e14';
 
 
     return (
-        <div className="g-3 h-100">
-            <Row className="g-2">
+        <div className="g-2 h-100">
 
-                {/* TOTAL CONVERSATIONS */}                
-                <Col md={4}>
-                    <Card
-                        className="rounded-4 shadow-sm mt-2 analytics-card h-100 cursor-pointer"
-                        onClick={() => handleDrillDown("total_conversations")}
-                    >
-                        <Card.Body>
+            <Row className="g-3">
+                <Col md={12}>
+                    <AnalyticsFilter onApply={handleApplyFilter} />
+                </Col>
 
-                            {/* TITLE */}
-                            <div className="text-muted small">
-                                Total Conversations
+                {/* TOTAL CONVERSATIONS */}
+                <Col lg={4} sm={6}>
+                    <Card className="rounded-4 shadow-sm analytics-card h-100 cursor-pointer"
+                        onClick={() => handleDrillDown("total_conversations")}>
+                        <Card.Body className="d-flex flex-column">
+                            <div className="text-muted small mb-2">Total Conversations</div>
+                            <h3 className="fw-bold flex-grow-1">{currentTotalConversations.toLocaleString()}</h3>
+                            <div className={`small fw-semibold ${parseFloat(convTrend) >= 0 ? "text-success" : "text-danger"}`}>
+                                {parseFloat(convTrend) >= 0 ? "▲" : "▼"} {Math.abs(parseFloat(convTrend))}% vs previous
                             </div>
-
-                            {/* LARGE NUMBER */}
-                            <h3 className="fw-bold mt-2">
-                                {hasConversationData
-                                    ? currentTotalConversations.toLocaleString()
-                                    : "--"}
-                            </h3>
-
-                            {/* TREND VS PREVIOUS */}
-                            {hasConversationData && (
-                                <div
-                                    className={`small fw-semibold p-2 mb-4 ${isIncrease
-                                        ? "text-success"
-                                        : isDecrease
-                                            ? "text-danger"
-                                            : "text-muted"
-                                        }`}
-                                >
-                                    {isIncrease && "▲ "}
-                                    {isDecrease && "▼ "}
-                                    {isNoChange && "— "}
-                                    {Math.abs(conversationTrendPercent)}% vs previous period
-                                </div>
-                            )}
-
-                            {/* SPARKLINE */}
-                            {conversationSparkData.length > 0 ? (
-                                <ResponsiveContainer width="100%" height={80}>
-                                    <LineChart data={conversationSparkData}>
+                            {sparkData.length > 0 && (
+                                <ResponsiveContainer height={100} className="mt-2">
+                                    <LineChart data={sparkData}>
+                                        <defs>
+                                            <linearGradient id="sparkGradient" x1="0" y1="0" x2="1" y2="1">
+                                                <stop offset="0%" stopColor={parseFloat(convTrend) >= 0 ? "#198754" : "#dc3545"} stopOpacity={0.8} />
+                                                <stop offset="100%" stopColor={parseFloat(convTrend) >= 0 ? "#198754" : "#dc3545"} stopOpacity={0} />
+                                            </linearGradient>
+                                        </defs>
                                         <Line
                                             dataKey="v"
-                                            stroke={
-                                                isIncrease
-                                                    ? "#198754"
-                                                    : isDecrease
-                                                        ? "#dc3545"
-                                                        : "#6c757d"
-                                            }
-                                            strokeWidth={2}
+                                            stroke={parseFloat(convTrend) >= 0 ? "#198754" : "#dc3545"}
+                                            strokeWidth={2.5}
                                             dot={false}
+                                            strokeLinecap="round"
                                         />
                                     </LineChart>
                                 </ResponsiveContainer>
-                            ) : (
-                                <div
-                                    className="d-flex align-items-center justify-content-center text-muted"
-                                    style={{ height: 80 }}
-                                >
-                                    No data available
-                                </div>
                             )}
-
                         </Card.Body>
                     </Card>
                 </Col>
-
-
-                <Modal
-                    show={showDrillModal}
-                    onHide={() => setShowDrillModal(false)}
-                    size="lg"
-                    centered
-                >
-                    <Modal.Header closeButton>
-                        <Modal.Title>
-                            Total Conversations – Drill Down
-                        </Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        {/* SUMMARY */}
-                        <Row className="mb-3 text-center text-md-start">
-                            <Col xs={12} md={4} className="mb-2 mb-md-0">
-                                <div className="text-muted small">Current Period</div>
-                                <h5 className="fw-bold">
-                                    {currentTotalConversations.toLocaleString()}
-                                </h5>
-                            </Col>
-
-                            <Col xs={12} md={4} className="mb-2 mb-md-0">
-                                <div className="text-muted small">Previous Period</div>
-                                <h5 className="fw-bold">
-                                    {previousTotalConversations > 0
-                                        ? previousTotalConversations.toLocaleString()
-                                        : "—"}
-                                </h5>
-                            </Col>
-                            <Col xs={12} md={4}>
-                                <div className="text-muted small">Change</div>
-                                <h5
-                                    className={`fw-bold ${isIncrease
-                                        ? "text-success"
-                                        : isDecrease
-                                            ? "text-danger"
-                                            : "text-muted"
-                                        }`}
-                                >
-                                    {isIncrease && "▲ "}
-                                    {isDecrease && "▼ "}
-                                    {isNoChange && "— "}
-                                    {Math.abs(conversationTrendPercent)}%
-                                </h5>
-                            </Col>
-                        </Row>
-
-                        {/* DRILL-DOWN CHART */}
-                        <ResponsiveContainer width="100%" height={300}>
-                            <LineChart
-                                data={currentConversations.map(d => ({
-                                    x: d.timestamp || d.date,
-                                    total: d.count,
-                                }))}
-                            >
-                                <XAxis
-                                    dataKey="x"
-                                    tickFormatter={(v) =>
-                                        isTimestampView
-                                            ? new Date(v).toLocaleTimeString([], {
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                            })
-                                            : v
-                                    }
-                                />
-                                <YAxis />
-                                <Tooltip
-                                    labelFormatter={(v) =>
-                                        isTimestampView
-                                            ? new Date(v).toLocaleString()
-                                            : v
-                                    }
-                                />
-                                <Line
-                                    dataKey="total"
-                                    stroke="#0d6efd"
-                                    strokeWidth={2}
-                                    dot={false}
-                                />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </Modal.Body>
-
-                    <Modal.Footer>
-                        <Button
-                            size="sm"
-                            variant="secondary"
-                            onClick={() => setShowDrillModal(false)}
-                        >
-                            Close
-                        </Button>
-                    </Modal.Footer>
-                </Modal>
-
 
                 {/* UNIQUE USERS */}
-                <Col md={4}>
-                    <Card className="rounded-4 shadow-sm mt-2 analytics-card h-100">
-                        <Card.Body>
+                <Col lg={4} sm={6}>
+                    <Card className="rounded-4 shadow-sm analytics-card h-100">
+                        <Card.Body className="d-flex flex-column">
+                            <div className="text-muted small mb-2">Unique Users</div>
+                            <h3 className="fw-bold flex-grow-1">{currentTotalUsers.toLocaleString()}</h3>
+                            {currentTotalUsers > 0 && (
+                                <div className="small text-muted mb-2">
+                                    New <strong>{Math.round((currentNewUsers / currentTotalUsers) * 100)}%</strong> ·
+                                    Returning <strong>{Math.round((currentReturningUsers / currentTotalUsers) * 100)}%</strong>
+                                </div>
+                            )}
+                            <div className={`small fw-semibold mb-2 ${parseFloat(userTrend) >= 0 ? "text-success" : "text-danger"}`}>
+                                {parseFloat(userTrend) >= 0 ? "▲" : "▼"} {Math.abs(parseFloat(userTrend))}% vs previous
+                            </div>
+                            <ResponsiveContainer height={100}>
+                                <PieChart>
+                                    <Pie data={uniqueUsersData} dataKey="value" nameKey="name" innerRadius={25} outerRadius={40}>
+                                        {uniqueUsersData.map((_, i) => <Cell key={i} fill={INTENT_COLORS[i % 5]} />)}
+                                    </Pie>
+                                    <Tooltip />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </Card.Body>
+                    </Card>
+                </Col>
 
-                            <div className="text-muted small">Unique Users</div>
+                {/* AVG MESSAGES - FIXED comparison to previous */}
+                <Col lg={4} sm={6}>
+                    <Card className="rounded-4 shadow-sm analytics-card h-100">
+                        <Card.Body className="d-flex flex-column">
+                            <div className="text-muted small mb-2">Avg Messages/Conv</div>
+                            <h3 className="fw-bold flex-grow-1">{avgMessages}</h3>
+                            <div className={`small fw-semibold ${parseFloat(avgMessagesTrend) >= 0 ? "text-success" : "text-danger"}`}>
+                                {parseFloat(avgMessagesTrend) >= 0 ? "▲" : "▼"} {Math.abs(parseFloat(avgMessagesTrend))}% vs previous
+                            </div>
+                            <ResponsiveContainer height={100}>
+                                <LineChart data={sparkData.slice(-5)}>
+                                    <Line dataKey="v" stroke="#198754" strokeWidth={2} dot={false} />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </Card.Body>
+                    </Card>
+                </Col>
 
-                            {/* TOTAL */}
-                            <h3 className="fw-bold mt-2">
-                                {hasUserData ? currentTotalUsers.toLocaleString() : "--"}
+                {/* RESOLUTION RATE - FIXED always 84% */}
+                <Col lg={4} sm={6}>
+                    <Card className="rounded-4 shadow-sm analytics-card h-100">
+                        <Card.Body className="d-flex flex-column">
+                            <div className="text-muted small mb-2">Resolution Rate</div>
+                            <h3 className={`fw-bold mb-2 ${totalResolved / totalConversations > 0.8 ? 'text-success' : 'text-warning'}`}>
+                                {resolutionPercentage}
                             </h3>
-
-                            {/* SPLIT */}
-                            {hasUserData ? (
-                                <div className="small text-muted mb-1">
-                                    New <strong>{safePercent(currentNewUsers, currentTotalUsers)}%</strong>
-                                    {" · "}
-                                    Returning <strong>
-                                        {safePercent(currentReturningUsers, currentTotalUsers)}%
-                                    </strong>
-                                </div>
-                            ) : (
-                                <div className="small text-muted mb-1">
-                                    No user data available
-                                </div>
-                            )}
-
-                            {/* ✅ ALWAYS COMPARE */}
-                            {hasUserData && previousTotalUsers > 0 && (
-                                <div
-                                    className={`small fw-semibold mb-2 ${isUserIncrease ? "text-success" : "text-danger"
-                                        }`}
-                                >
-                                    {isUserIncrease ? "▲" : "▼"}{" "}
-                                    {Math.abs(userTrendPercent)}% vs previous period
-                                </div>
-                            )}
-
-                            {/* PIE */}
-                            <div className="pie-chart-wrapper">
-                                {hasUserData ? (
-                                    <ResponsiveContainer width="100%" height={120}>
+                            <Row className="align-items-center g-2 flex-grow-1">
+                                <Col xs={6}>
+                                    <ResponsiveContainer height={90}>
                                         <PieChart>
                                             <Pie
-                                                data={uniqueUsersData}
+                                                data={resolutionData}
                                                 dataKey="value"
-                                                nameKey="name"
-                                                innerRadius={30}
-                                                outerRadius={45}
-                                                paddingAngle={2}
+                                                innerRadius={22}
+                                                outerRadius={32}
+                                                startAngle={90}
+                                                endAngle={-270}
+                                                stroke="none"
                                             >
-                                                {uniqueUsersData.map((_, index) => (
-                                                    <Cell
-                                                        key={`cell-${index}`}
-                                                        fill={INTENT_COLORS[index]}
-                                                    />
+                                                {INTENT_COLORS.map((color, i) => (
+                                                    <Cell key={`resolution-${i}`} fill={color} />
                                                 ))}
                                             </Pie>
-                                            <Tooltip />
+                                            <Tooltip
+                                                formatter={(value) => [value.toLocaleString(), 'Conversations']}
+                                                labelFormatter={() => ''}
+                                            />
                                         </PieChart>
                                     </ResponsiveContainer>
-                                ) : (
-                                    <div
-                                        className="d-flex align-items-center justify-content-center text-muted"
-                                        style={{ height: 120 }}
-                                    >
-                                        No data available
+                                </Col>
+                                <Col xs={6} className="ps-3">
+                                    <div className="small text-muted">
+                                        Resolved: <strong className="text-success">{totalResolved.toLocaleString()}</strong>
                                     </div>
-                                )}
-                            </div>
-                        </Card.Body>
-                    </Card>
-                </Col>
-
-                {/* AVG MESSAGES */}
-                <Col md={4}>
-                    <Card className="rounded-4 shadow-sm mt-2 analytics-card h-100">
-                        <Card.Body>
-
-                            <div className="text-muted small">
-                                Avg Messages / Conversation
-                            </div>
-
-                            <h3 className="fw-bold mt-2">
-                                {currentAvgMessages}
-                            </h3>
-
-                            {hasConversationForAvg ? (
-                                <div
-                                    className={`small fw-semibold ${avgIsIncrease
-                                        ? "text-success"
-                                        : avgIsDecrease
-                                            ? "text-danger"
-                                            : "text-muted"
-                                        }`}
-                                >
-                                    {avgIsIncrease && "▲ "}
-                                    {avgIsDecrease && "▼ "}
-                                    {avgIsNoChange && "— "}
-                                    {Math.abs(avgChangePercent)}% vs previous period
-                                </div>
-                            ) : (
-                                <div className="small fw-semibold text-muted">
-                                    No previous data
-                                </div>
-                            )}
-
-                            {avgMessagesTrend.length > 0 ? (
-                                <ResponsiveContainer width="100%" height={120}>
-                                    <LineChart data={avgMessagesTrend}>
-                                        <Line
-                                            dataKey="v"
-                                            stroke={
-                                                avgIsIncrease
-                                                    ? "#198754"
-                                                    : avgIsDecrease
-                                                        ? "#dc3545"
-                                                        : "#6c757d"
-                                            }
-                                            strokeWidth={2}
-                                            dot={false}
-                                        />
-                                    </LineChart>
-                                </ResponsiveContainer>
-                            ) : (
-                                <div
-                                    className="d-flex align-items-center justify-content-center text-muted"
-                                    style={{ height: 120 }}
-                                >
-                                    No data available
-                                </div>
-                            )}
-
-                        </Card.Body>
-                    </Card>
-                </Col>
-
-                {/* RESOLUTION RATE */}
-                <Col md={4}>
-                    <Card className="rounded-4 shadow-sm mt-2 analytics-card h-100">
-                        <Card.Body>
-
-                            {/* TITLE */}
-                            <div className="text-muted small">
-                                Resolution Rate
-                            </div>
-
-                            {/* BIG NUMBER */}
-                            <h3 className="fw-bold mt-2">
-                                {resolutionRate !== null ? `${resolutionRate}%` : "—"}
-                            </h3>
-
-                            {/* TREND */}
-                            {previousResolutionRate !== null ? (
-                                <div
-                                    className={`small fw-semibold ${resolutionIncrease
-                                        ? "text-success"
-                                        : resolutionDecrease
-                                            ? "text-danger"
-                                            : "text-muted"
-                                        }`}
-                                >
-                                    {resolutionIncrease && "▲ "}
-                                    {resolutionDecrease && "▼ "}
-                                    {resolutionNoChange && "— "}
-                                    {Math.abs(resolutionTrendPercent)}% vs previous period
-                                </div>
-                            ) : (
-                                <div className="small fw-semibold text-muted">
-                                    No previous data
-                                </div>
-                            )}
-
-                            {/* DONUT */}
-                            {resolutionData.length > 0 ? (
-                                <Row className="align-items-center mt-2">
-                                    <Col xs={5} style={{ height: 90 }}>
-                                        <ResponsiveContainer width="100%" height={120}>
-                                            <PieChart>
-                                                <Pie
-                                                    data={resolutionData}
-                                                    dataKey="value"
-                                                    innerRadius={28}
-                                                    outerRadius={40}
-                                                    startAngle={90}
-                                                    endAngle={-270}
-                                                >
-                                                    {resolutionData.map((_, index) => (
-                                                        <Cell
-                                                            key={`cell-${index}`}
-                                                            fill={INTENT_COLORS[index]}
-                                                        />
-                                                    ))}
-                                                </Pie>
-                                                <Tooltip />
-                                            </PieChart>
-                                        </ResponsiveContainer>
-                                    </Col>
-
-                                    <Col xs={7}>
-                                        <div className="small text-muted">
-                                            Resolved: {resolvedCurrent}
-                                        </div>
-                                        <div className="small text-muted">
-                                            Unresolved: {unresolvedCurrent}
-                                        </div>
-                                    </Col>
-                                </Row>
-                            ) : (
-                                <div className="small text-muted mt-3">
-                                    No data available
-                                </div>
-                            )}
-
+                                    <div className="small text-muted">
+                                        Unresolved: <strong className="text-danger">{totalUnresolved.toLocaleString()}</strong>
+                                    </div>
+                                </Col>
+                            </Row>
                         </Card.Body>
                     </Card>
                 </Col>
 
                 {/* AVG RESPONSE TIME */}
-                <Col md={4}>
-                    <Card className="rounded-4 shadow-sm mt-2 analytics-card h-100">
-                        <Card.Body>
-
-                            <div className="text-muted small">
-                                Avg Response Time
-                            </div>
-
-                            <h3
-                                className={`fw-bold mt-2 ${responseIsFaster
-                                    ? "text-success"
-                                    : responseIsSlower
-                                        ? "text-danger"
-                                        : "text-muted"
-                                    }`}
-                            >
-                                {currentAvgResponseTime !== "—"
-                                    ? `${currentAvgResponseTime}s`
-                                    : "—"}
+                <Col lg={4} sm={6}>
+                    <Card className="rounded-4 shadow-sm analytics-card h-100">
+                        <Card.Body className="d-flex flex-column">
+                            <div className="text-muted small mb-2">Avg Response Time</div>
+                            <h3 className="fw-bold flex-grow-1" style={{ color: statusColor }}>
+                                {avgResponseTime}
                             </h3>
-
-                            <div className="small text-muted">
+                            <div className={`small fw-semibold mb-2 ${statusClass}`}>
                                 {responseStatus}
                             </div>
+                            <ResponsiveContainer height={100}>
+                                <PieChart>
+                                    <Pie
+                                        data={responseDist}
+                                        dataKey="value"
+                                        innerRadius={25}
+                                        outerRadius={40}
+                                        stroke="none"
+                                    >
+                                        {responseDist.map((_, i) => (
+                                            <Cell key={`cell-${i}`} fill={INTENT_COLORS[i % INTENT_COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip
+                                        formatter={(value, name) => [value.toLocaleString(), `${name} responses`]}
+                                        labelFormatter={() => ''}
+                                    />
 
-                            {responseDist.length > 0 ? (
-                                <ResponsiveContainer width="100%" height={120}>
-                                    <PieChart>
-                                        <Pie
-                                            data={responseDist}
-                                            dataKey="value"
-                                            innerRadius={30}
-                                            outerRadius={45}
-                                        >
-                                            {responseDist.map((_, index) => (
-                                                <Cell
-                                                    key={`cell-${index}`}
-                                                    fill={INTENT_COLORS[index]}
-                                                />
-                                            ))}
-                                        </Pie>
-                                        <Tooltip />
-                                    </PieChart>
-                                </ResponsiveContainer>
-                            ) : (
-                                <div className="small text-muted mt-3">
-                                    No data available
-                                </div>
-                            )}
-
+                                </PieChart>
+                            </ResponsiveContainer>
                         </Card.Body>
                     </Card>
                 </Col>
 
                 {/* CUSTOMER SATISFACTION */}
-                <Col md={4}>
-                    <Card className="rounded-4 shadow-sm mt-2 analytics-card h-100">
+                <Col lg={4} sm={6}>
+                    <Card className="rounded-4 shadow-sm analytics-card h-100">
                         <Card.Body>
-
-                            <div className="text-muted small">
-                                Customer Satisfaction
-                            </div>
-
-                            <h3 className="fw-bold mt-2">4.5 / 5</h3>
-
-                            <div className="text-warning fs-5">
-                                ★★★★☆
-                            </div>
-
-                            <div className="small text-muted">
-                                3,240 responses
-                            </div>
-
-                            {/* Sentiment breakdown */}
-                            <div className="d-flex flex-wrap justify-content-between gap-3 mt-4">
-                                <div className="text-center flex-fill">
+                            <div className="text-muted small mb-2">Customer Satisfaction</div>
+                            <h3 className="fw-bold">4.5 / 5</h3>
+                            <div className="text-warning fs-5 mb-2">★★★★☆</div>
+                            <div className="small text-muted mb-3">3,240 responses</div>
+                            <div className="d-flex justify-content-between">
+                                <div className="text-center">
                                     <div className="fw-bold text-success">72%</div>
-                                    <small className="text-muted">Positive</small>
+                                    <small>Positive</small>
                                 </div>
-
-                                <div className="text-center flex-fill">
+                                <div className="text-center">
                                     <div className="fw-bold text-secondary">18%</div>
-                                    <small className="text-muted">Neutral</small>
+                                    <small>Neutral</small>
                                 </div>
-
-                                <div className="text-center flex-fill">
+                                <div className="text-center">
                                     <div className="fw-bold text-danger">10%</div>
-                                    <small className="text-muted">Negative</small>
+                                    <small>Negative</small>
                                 </div>
                             </div>
-
                         </Card.Body>
                     </Card>
                 </Col>
             </Row>
+
+            {/* DRILL DOWN MODAL */}
+            <Modal show={showDrillModal} onHide={() => setShowDrillModal(false)} size="lg" centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Total Conversations</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Row className="mb-3 text-center text-md-start">
+                        <Col md={4}>
+                            <div className="text-muted small">Current: {filters.preset}</div>
+                            <h5 className="fw-bold">{currentTotalConversations.toLocaleString()}</h5>
+                        </Col>
+                        <Col md={4}>
+                            <div className="text-muted small">Previous Period</div>
+                            <h5 className="fw-bold">{previousTotalConversations.toLocaleString()}</h5>
+                        </Col>
+                        <Col md={4}>
+                            <div className="text-muted small">Change</div>
+                            <h5 className={`fw-bold ${parseFloat(convTrend) >= 0 ? "text-success" : "text-danger"}`}>
+                                {parseFloat(convTrend) >= 0 ? "▲" : "▼"} {Math.abs(parseFloat(convTrend))}%
+                            </h5>
+                        </Col>
+                    </Row>
+                    {drillDownData.length > 1 ? (
+                        <ResponsiveContainer width="100%" height={300}>
+                            <LineChart data={drillDownData}>
+                                <XAxis dataKey="date" tickFormatter={v => new Date(v).toLocaleDateString()} />
+                                <YAxis />
+                                <Tooltip />
+                                <Line dataKey="count" stroke="#0d6efd" strokeWidth={2} dot={false} />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <div className="text-center py-5">
+                            <h5 className="text-muted">Single day selected</h5>
+                            <p className="small text-muted">Line chart not available for single day view</p>
+                        </div>
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button size="sm" variant="danger" onClick={() => setShowDrillModal(false)}>
+                        Close
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
-    )
-}
+    );
+};
 
-
-export default KeymetricsGird
+export default KeymetricsGird;

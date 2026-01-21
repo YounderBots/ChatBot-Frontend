@@ -150,29 +150,30 @@ const AnalyticsTables = () => {
                 <Col md={12}>
                     <Card className="rounded-4 shadow-sm analytics-card">
                         <Card.Body className="analytics-card-body">
-                            <div className="d-flex justify-content-between align-items-center h-100">
-                                <h5 className="mb-0">Intent Performance</h5>
+                            <div className="d-flex justify-content-end align-items-center h-100">
+                                
+                                <div className="d-flex justify-content-start align-items-center flex-grow-1 me-3">
+                                    <h5 className="mb-0">Intent Performance</h5>
+                                </div>
 
-                                <div className="d-flex flex-wrap justify-content-between align-items-center p-2 gap-2 mb-3">
+                                <div className="d-flex flex-wrap justify-content-end align-items-center p-2 gap-2 mb-3">
                                     <Button
                                         size="sm"
                                         variant="primary"
-                                        
                                         onClick={() => setShowFilterModal(true)}
                                     >
                                         Apply Filter
                                     </Button>
-
                                     <Button
                                         size="sm"
                                         variant="primary"
-                                     
                                         onClick={exportCSV}
                                     >
                                         Export CSV
                                     </Button>
                                 </div>
                             </div>
+
                             <Card.Body className="p-2 ">
                                 <Table responsive hover className="mb-0">
                                     <thead className="table-light">

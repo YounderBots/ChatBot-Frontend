@@ -11,22 +11,45 @@ const AnalyticsReport = () => {
     const [emailTo, setEmailTo] = useState("");
     const [generating, setGenerating] = useState(false);
 
-    const generateReport = () => {
+    const generateReport = async () => {
         setGenerating(true);
 
-        const generated = {
-            reportType,
-            exportFormat,
-            scheduleEnabled,
-            frequency,
-            emailTo,
-        };
+        try {
+            const generated = {
+                reportType,
+                exportFormat,
+                scheduleEnabled,
+                frequency,
+                emailTo,
+            };
 
-        console.log("Generate report:", generated);
+            await new Promise(resolve => setTimeout(resolve, 1200));
 
-        setTimeout(() => {
+            // Proper MIME types for each format
+            const mimeTypes = {
+                'pdf': 'application/pdf',
+                'json': 'application/json',
+                'csv': 'text/csv',
+                'txt': 'text/plain'
+            };
+
+            const mimeType = mimeTypes[exportFormat] || 'text/plain';
+            const content = `Report Type: ${reportType}\nExport Format: ${exportFormat}\nGenerated: ${new Date().toLocaleString()}`;
+            const fileName = `report-${reportType}.${exportFormat}`;
+
+            const link = document.createElement('a');
+            link.href = `data:${mimeType};charset=utf-8,${encodeURIComponent(content)}`;
+            link.download = fileName;
+            link.rel = 'noopener';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+        } catch (error) {
+            console.error('Report generation failed:', error);
+        } finally {
             setGenerating(false);
-        }, 1200);
+        }
     };
 
     return (

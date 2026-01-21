@@ -31,12 +31,12 @@ const AnalyticsMetrics = () => {
                     <Card className="rounded-4 shadow-sm analytics-card">
                         <Card.Body className="analytics-card-body">
                             <h5 className="mb-2">Real-time Metrics</h5>
-                            <Row className="g-3">
+                            <Row className="g-2">
 
                                 {/* Live Users */}
                                 <Col md={3}>
                                     <Card className="h-100 border-0 bg-light">
-                                        <Card.Body>
+                                        <Card.Body className="analytics-card-body d-flex flex-column justify-content-center align-items-center text-center h-100">
                                             <div className="text-muted small">Live Users</div>
                                             <h3 className="fw-bold mt-1">{liveUsers}</h3>
                                             <div className="small text-muted">Updated every 5s</div>
@@ -47,7 +47,7 @@ const AnalyticsMetrics = () => {
                                 {/* Active Conversations */}
                                 <Col md={3}>
                                     <Card className="h-100 border-0 bg-light">
-                                        <Card.Body>
+                                        <Card.Body className="analytics-card-body d-flex flex-column justify-content-center align-items-center text-center h-100">
                                             <div className="text-muted small">Active Conversations</div>
                                             <h3 className="fw-bold mt-1">{activeConversations}</h3>
                                         </Card.Body>
@@ -57,7 +57,7 @@ const AnalyticsMetrics = () => {
                                 {/* Messages per Minute */}
                                 <Col md={3}>
                                     <Card className="h-100 border-0 bg-light">
-                                        <Card.Body>
+                                        <Card.Body className="analytics-card-body d-flex flex-column justify-content-center align-items-center text-center h-100">
                                             <div className="text-muted small">Messages / Minute</div>
                                             <h3 className="fw-bold mt-1">{messagesPerMinute}</h3>
                                         </Card.Body>
@@ -67,7 +67,7 @@ const AnalyticsMetrics = () => {
                                 {/* System Health */}
                                 <Col md={3}>
                                     <Card className="h-100 border-0 bg-light">
-                                        <Card.Body>
+                                        <Card.Body className="analytics-card-body d-flex flex-column justify-content-center align-items-center text-center h-100">
                                             <div className="text-muted small">System Health</div>
                                             <h5
                                                 className={`fw-semibold mt-2 ${systemHealth === "Healthy"

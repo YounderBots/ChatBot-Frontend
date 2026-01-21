@@ -1,5 +1,5 @@
-import React, { useState, useRef, useMemo } from "react";
-import { Card, Row, Col, Form, Button, Dropdown, } from "react-bootstrap";
+import React, { useState, useRef, useEffect } from "react";
+import { Card, Row, Col, Form, Button } from "react-bootstrap";
 import {
     LineChart,
     Line,
@@ -16,68 +16,19 @@ import {
     FunnelChart,
     Funnel,
     LabelList,
-    CartesianGrid,
 
 } from "recharts";
 import html2canvas from "html2canvas";
+import { Tooltip as BootstrapTooltip } from "bootstrap";
 
-const defaultSort = {
-    key: "uses",
-    direction: "desc",
-};
-
-const rawConversationData = [
-    // -------- Jan 1 (Thu) --------
-    { timestamp: "2026-01-01T09:10:00", total: 5, resolved: 4, escalated: 1, failed: 0 },
-    { timestamp: "2026-01-01T10:20:00", total: 8, resolved: 6, escalated: 1, failed: 1 },
-    { timestamp: "2026-01-01T11:45:00", total: 12, resolved: 10, escalated: 1, failed: 1 },
-    { timestamp: "2026-01-01T14:30:00", total: 15, resolved: 13, escalated: 1, failed: 1 },
-
-    // -------- Jan 2 (Fri) --------
-    { timestamp: "2026-01-02T09:05:00", total: 10, resolved: 8, escalated: 1, failed: 1 },
-    { timestamp: "2026-01-02T11:00:00", total: 12, resolved: 10, escalated: 1, failed: 1 },
-    { timestamp: "2026-01-02T15:20:00", total: 18, resolved: 16, escalated: 1, failed: 1 },
-
-    // -------- Jan 3 (Sat) --------
-    { timestamp: "2026-01-03T10:15:00", total: 14, resolved: 12, escalated: 1, failed: 1 },
-    { timestamp: "2026-01-03T13:40:00", total: 16, resolved: 14, escalated: 1, failed: 1 },
-
-    // -------- Jan 4 (Sun) --------
-    { timestamp: "2026-01-04T11:30:00", total: 9, resolved: 7, escalated: 1, failed: 1 },
-
-    // -------- Jan 5 (Mon) --------
-    { timestamp: "2026-01-05T09:00:00", total: 20, resolved: 18, escalated: 1, failed: 1 },
-    { timestamp: "2026-01-05T11:30:00", total: 22, resolved: 20, escalated: 1, failed: 1 },
-    { timestamp: "2026-01-05T16:45:00", total: 25, resolved: 22, escalated: 2, failed: 1 },
-
-    // -------- Jan 6 (Tue) --------
-    { timestamp: "2026-01-06T09:20:00", total: 18, resolved: 16, escalated: 1, failed: 1 },
-    { timestamp: "2026-01-06T14:10:00", total: 21, resolved: 19, escalated: 1, failed: 1 },
-
-    // -------- Jan 7 (Wed) --------
-    { timestamp: "2026-01-07T10:00:00", total: 23, resolved: 21, escalated: 1, failed: 1 },
-    { timestamp: "2026-01-07T15:30:00", total: 26, resolved: 23, escalated: 2, failed: 1 },
-
-    // -------- Jan 10 (Sat - Week 2) --------
-    { timestamp: "2026-01-10T11:00:00", total: 30, resolved: 25, escalated: 3, failed: 2 },
-    { timestamp: "2026-01-10T16:00:00", total: 32, resolved: 27, escalated: 3, failed: 2 },
-
-    // -------- Jan 14 (Wed - Week 3) --------
-    { timestamp: "2026-01-14T10:10:00", total: 28, resolved: 24, escalated: 2, failed: 2 },
-    { timestamp: "2026-01-14T14:40:00", total: 30, resolved: 26, escalated: 2, failed: 2 },
-
-    // -------- Jan 18 (Sun - Week 3) --------
-    { timestamp: "2026-01-18T12:00:00", total: 26, resolved: 23, escalated: 2, failed: 1 },
-
-    // -------- Jan 22 (Thu - Week 4) --------
-    { timestamp: "2026-01-22T09:30:00", total: 35, resolved: 30, escalated: 3, failed: 2 },
-    { timestamp: "2026-01-22T16:20:00", total: 38, resolved: 33, escalated: 3, failed: 2 },
-
-    // -------- Jan 27 (Tue - Week 4) --------
-    { timestamp: "2026-01-27T11:15:00", total: 40, resolved: 35, escalated: 3, failed: 2 },
+const conversationTrendData = [
+    { time: "Mon", total: 420, resolved: 310, escalated: 70, failed: 40 },
+    { time: "Tue", total: 520, resolved: 390, escalated: 80, failed: 50 },
+    { time: "Wed", total: 610, resolved: 470, escalated: 90, failed: 50 },
+    { time: "Thu", total: 680, resolved: 540, escalated: 80, failed: 60 },
+    { time: "Fri", total: 720, resolved: 580, escalated: 90, failed: 50 },
+    { time: "Sat", total: 420, resolved: 310, escalated: 70, failed: 40 },
 ];
-
-
 
 const intentData = [
     {
@@ -158,29 +109,34 @@ const heatmapData = {
     Sun: Array.from({ length: 24 }, () => Math.floor(Math.random() * 100)),
 };
 
-
 const AnalyticsCharts = () => {
     const [sortBy, setSortBy] = useState("usage");
-    const [sortConfig, setSortConfig] = useState(defaultSort);
-    const [tooltip, setTooltip] = React.useState(null);
     const [confidenceFilter, setConfidenceFilter] = useState(null);
-    const [timeView, setTimeView] = useState("hourly");
-    const [visibleLines, setVisibleLines] = useState({
-        total: true,
-        resolved: true,
-        escalated: true,
-        failed: true,
-    });
 
+    useEffect(() => {
+        const tooltipElements = document.querySelectorAll(
+            '[data-bs-toggle="tooltip"]'
+        );
 
-    const handleLegendClick = (e) => {
-        const key = e.dataKey;
+        tooltipElements.forEach(el => {
+            if (el._bsTooltip) return;
 
-        setVisibleLines(prev => ({
-            ...prev,
-            [key]: !prev[key],
-        }));
-    };
+            el._bsTooltip = new BootstrapTooltip(el, {
+                html: true,
+                placement: "top",
+                container: "body",
+                boundary: "window",
+                trigger: window.innerWidth < 768 ? "click" : "hover",
+            });
+        });
+
+        return () => {
+            tooltipElements.forEach(el => {
+                el._bsTooltip?.dispose();
+                el._bsTooltip = null;
+            });
+        };
+    }, []);
 
     const sortedIntentData = [...intentData]
         .sort((a, b) => {
@@ -197,19 +153,6 @@ const AnalyticsCharts = () => {
         if (confidence >= 0.65) return "#fd7e14";
         return "#dc3545";
     };
-
-    const showTooltip = (e, day, hour, count) => {
-        const rect = e.target.getBoundingClientRect();
-        setTooltip({
-            day,
-            hour,
-            count,
-            x: rect.left + rect.width / 2,
-            y: rect.top - 8,
-        });
-    };
-
-    const hideTooltip = () => setTooltip(null);
 
     const exportPNG = async () => {
         if (!chartRef.current) {
@@ -243,203 +186,58 @@ const AnalyticsCharts = () => {
     };
     const chartRef = useRef(null);
 
-    const getWeekOfMonth = (date) => {
-        const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-        return Math.ceil((date.getDate() + firstDay) / 7);
-    };
-
-    const getDayName = (date) =>
-        date.toLocaleDateString("en-US", { weekday: "short" });
-
-    const getDailyData = (data) => {
-        const result = {};
-
-        data.forEach(item => {
-            const date = new Date(item.timestamp);
-            const day = getDayName(date); // Mon, Tue...
-
-            if (!result[day]) {
-                result[day] = { time: day, total: 0, resolved: 0, escalated: 0, failed: 0 };
-            }
-
-            result[day].total += item.total;
-            result[day].resolved += item.resolved;
-            result[day].escalated += item.escalated;
-            result[day].failed += item.failed;
-        });
-
-        return Object.values(result);
-    };
-
-    const getWeeklyData = (data) => {
-        const result = {};
-
-        data.forEach(item => {
-            const date = new Date(item.timestamp);
-            const week = `Week ${getWeekOfMonth(date)}`;
-
-            if (!result[week]) {
-                result[week] = { time: week, total: 0, resolved: 0, escalated: 0, failed: 0 };
-            }
-
-            result[week].total += item.total;
-            result[week].resolved += item.resolved;
-            result[week].escalated += item.escalated;
-            result[week].failed += item.failed;
-        });
-
-        return Object.values(result);
-    };
-
-    const getHourlyData = (data) => {
-        const result = {};
-
-        data.forEach(item => {
-            const date = new Date(item.timestamp);
-            const hour = `${date.getHours()}:00`;
-
-            if (!result[hour]) {
-                result[hour] = { time: hour, total: 0, resolved: 0, escalated: 0, failed: 0 };
-            }
-
-            result[hour].total += item.total;
-            result[hour].resolved += item.resolved;
-            result[hour].escalated += item.escalated;
-            result[hour].failed += item.failed;
-        });
-
-        return Object.values(result);
-    };
-
-    const chartData = useMemo(() => {
-        if (timeView === "hourly") return getHourlyData(rawConversationData);
-        if (timeView === "daily") return getDailyData(rawConversationData);
-        if (timeView === "weekly") return getWeeklyData(rawConversationData);
-        return [];
-    }, [timeView, rawConversationData]);
-
     return (
         <div className="g-2 p-100" >
             {/* ================== CHART 1 (12 COL) ================== */}
             <Row className="g-2">
-                <Col md={12}>
+                <Col sm={12}>
                     <Card className="rounded-4 shadow-sm mt-2 analytics-card">
                         <Card.Body className="analytics-chart-body">
-
-                            {/* ---------- Header ---------- */}
-                            <div className="analytics-chart-header d-flex justify-content-between align-items-center">
+                            {/* Header */}
+                            <div className="analytics-chart-header">
                                 <h6 className="fw-semibold mb-0">
                                     Conversation Volume Trend
                                 </h6>
 
-                                <div className="d-flex flex-wrap justify-content-between align-items-center p-2 gap-2 mb-3">
-                                    {/* Time Selector */}
-                                    <Dropdown>
-                                        <Dropdown.Toggle
-                                            size="sm"
-                                            variant="primary"
-                                        >
-                                            {timeView.charAt(0).toUpperCase() + timeView.slice(1)}
-                                        </Dropdown.Toggle>
-
-                                        <Dropdown.Menu>
-                                            <Dropdown.Item onClick={() => setTimeView("hourly")}>
-                                                Hourly
-                                            </Dropdown.Item>
-                                            <Dropdown.Item onClick={() => setTimeView("daily")}>
-                                                Daily
-                                            </Dropdown.Item>
-                                            <Dropdown.Item onClick={() => setTimeView("weekly")}>
-                                                Weekly
-                                            </Dropdown.Item>
-                                        </Dropdown.Menu>
-                                    </Dropdown>
-
-                                    {/* Export */}
-                                    <Button
-                                        size="sm"
-                                        variant="primary"
-                                        onClick={exportPNG}
-                                    >
-                                        Export PNG
-                                    </Button>
-                                </div>
+                                <Button
+                                    size="sm"
+                                    variant="primary"
+                                    onClick={exportPNG}
+                                    disabled={!chartRef.current}
+                                >
+                                    Export PNG
+                                </Button>
                             </div>
 
-                            {/* ---------- Chart ---------- */}
-                            <div ref={chartRef} className="analytics-chart-container mt-3">
+                            {/* Chart */}
+                            <div ref={chartRef} className="analytics-chart-container">
                                 <ResponsiveContainer width="100%" height={420}>
                                     <LineChart
-                                        data={chartData}
-                                        margin={{ top: 10, right: 20, left: 10, bottom: 50 }}
+                                        data={conversationTrendData}
+                                        margin={{ top: 10, right: 20, left: 10, bottom: 55 }}
                                     >
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#e9ecef" />
                                         <XAxis dataKey="time" />
                                         <YAxis />
-                                        <Tooltip cursor={{ stroke: "#adb5bd", strokeWidth: 1 }} />
+                                        <Tooltip />
                                         <Legend
                                             verticalAlign="bottom"
-                                            height={36}
+                                            height={40}
                                             iconSize={8}
-                                            onClick={handleLegendClick}
                                         />
 
-                                        {visibleLines.total && (
-                                            <Line
-                                                type="monotone"
-                                                dataKey="total"
-                                                stroke="#0d6efd"
-                                                strokeWidth={2}
-                                                dot={false}
-                                                activeDot={{ r: 5 }}
-                                            />
-                                        )}
-
-                                        {visibleLines.resolved && (
-                                            <Line
-                                                type="monotone"
-                                                dataKey="resolved"
-                                                stroke="#198754"
-                                                strokeWidth={2}
-                                                dot={false}
-                                                activeDot={{ r: 5 }}
-                                            />
-                                        )}
-
-                                        {visibleLines.escalated && (
-                                            <Line
-                                                type="monotone"
-                                                dataKey="escalated"
-                                                stroke="#fd7e14"
-                                                strokeWidth={2}
-                                                dot={false}
-                                                activeDot={{ r: 5 }}
-                                            />
-                                        )}
-
-                                        {visibleLines.failed && (
-                                            <Line
-                                                type="monotone"
-                                                dataKey="failed"
-                                                stroke="#dc3545"
-                                                strokeWidth={2}
-                                                dot={false}
-                                                activeDot={{ r: 5 }}
-                                            />
-                                        )}
+                                        <Line dataKey="total" stroke="#0d6efd" strokeWidth={2} dot={false} />
+                                        <Line dataKey="resolved" stroke="#198754" strokeWidth={2} dot={false} />
+                                        <Line dataKey="escalated" stroke="#fd7e14" strokeWidth={2} dot={false} />
+                                        <Line dataKey="failed" stroke="#dc3545" strokeWidth={2} dot={false} />
                                     </LineChart>
                                 </ResponsiveContainer>
-
                             </div>
-
                         </Card.Body>
                     </Card>
-                </Col>
-
-
+                </Col >
 
                 {/* ================== CHART 2 (6 COL) ================== */}
-                <Col md={6}>
+                <Col lg={6} sm={12}>
                     <Card className="rounded-4 shadow-sm analytics-card mt-2">
                         <Card.Body>
                             {/* Header */}
@@ -483,7 +281,7 @@ const AnalyticsCharts = () => {
                 </Col>
 
                 {/* ================== CHART 3 (6 COL) ================== */}
-                <Col md={6}>
+                <Col lg={6} sm={12}>
                     <Card className="rounded-4 shadow-sm analytics-card mt-2">
                         <Card.Body className="analytics-card-body">
 
@@ -493,6 +291,7 @@ const AnalyticsCharts = () => {
 
                             <div className="analytics-chart-container">
                                 <ResponsiveContainer width="100%" height={314}>
+
                                     <BarChart data={confidenceHistogram}>
                                         <XAxis dataKey="range" />
                                         <YAxis />
@@ -527,144 +326,132 @@ const AnalyticsCharts = () => {
                 </Col>
 
                 {/* ================== CHART 4 (12 COL) ================== */}
-                <Col md={12}>
+                <Col sm={12}>
                     <Card className="rounded-4 shadow-sm analytics-card mt-2">
-                        <Card.Body className="analytics-card-body mt-2">
+                        <Card.Body className="analytics-card-body">
 
-                            <h6 className="analytics-card-title">
+                            <h6 className="analytics-card-title mt-2 ">
                                 Sentiment Analysis
                             </h6>
 
-                            <div className="analytics-chart-container mt-2">
+                            <div className="analytics-chart-container">
                                 <ResponsiveContainer width="100%" height={320}>
                                     <AreaChart
                                         data={sentimentData}
                                         stackOffset="expand"
-                                        margin={{ top: 10, right: 20, left: 10, bottom: 30 }}
                                     >
-
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#e9ecef" />
                                         <XAxis dataKey="day" />
                                         <YAxis
                                             tickFormatter={(v) => `${Math.round(v * 100)}%`}
                                         />
-
                                         <Tooltip
-                                            shared
-                                            cursor={{ stroke: "#adb5bd", strokeWidth: 1 }}
-                                            formatter={(value) => `${Math.round(value * 100)}%`}
+                                            formatter={(value) =>
+                                                `${Math.round(value * 100)}%`
+                                            }
                                         />
-                                        
-                                        <Legend
-                                            verticalAlign="bottom"
-                                            align="center"
-                                            height={40}
-                                        />
+                                        <Legend />
 
                                         <Area
-                                            type="monotone"
                                             dataKey="positive"
                                             stackId="1"
                                             stroke="#198754"
                                             fill="#198754"
-                                            fillOpacity={0.85}
                                         />
                                         <Area
-                                            type="monotone"
                                             dataKey="neutral"
                                             stackId="1"
                                             stroke="#adb5bd"
                                             fill="#adb5bd"
-                                            fillOpacity={0.85}
                                         />
                                         <Area
-                                            type="monotone"
                                             dataKey="negative"
                                             stackId="1"
                                             stroke="#dc3545"
                                             fill="#dc3545"
-                                            fillOpacity={0.85}
                                         />
                                     </AreaChart>
-
                                 </ResponsiveContainer>
                             </div>
+
                         </Card.Body>
                     </Card>
                 </Col>
 
-
                 {/* ================== CHART 5 (6 COL) ================== */}
-                <Col md={12}>
-                    <Card className="rounded-4 shadow-sm analytics-card mt-2">
-                        <Card.Body>
+                <Col sm={12}>
+                    <Card className="rounded-4 shadow-sm analytics-card mt-2 ">
+                        <Card.Body className="d-flex flex-column p-3 p-md-4">
 
-                            <h6 className="fw-semibold mb-3">
+                            {/* TITLE */}
+                            <h6 className="fw-semibold mb-3 mb-md-4">
                                 Peak Hours Heatmap
                             </h6>
 
-                            <div className="analytics-heatmap">
+                            {/* HEATMAP LAYOUT */}
+                            <div className="analytics-heatmap-layout flex-grow-1">
+                                {/* DAYS */}
+                                <div className="heatmap-days">
+                                    {days.map((day) => (
+                                        <span key={day}>
+                                            <span className="d-md-none">
+                                                {day.slice(0, 3)}
+                                            </span>
 
-                                {/* Empty corner */}
-                                <div className="heatmap-corner"></div>
+                                            <span className="d-none d-md-inline">
+                                                {day}
+                                            </span>
+                                        </span>
+                                    ))}
+                                </div>
 
-                                {/* HOURS + GRID (SCROLL TOGETHER) */}
-                                <div className="heatmap-scroll">
-
-                                    {/* HOURS */}
-                                    <div className="heatmap-hours">
+                                {/* SCROLLABLE AREA */}
+                                <div className="heatmap-scroll flex-grow-1">
+                                    <div className="heatmap-hours d-md-none">
+                                        {hours.map((h) => (
+                                            <span key={h}>{h}</span>
+                                        ))}
+                                    </div>
+                                    <div className="heatmap-hours d-none d-md-grid">
                                         {hours.map((h) => (
                                             <span key={h}>{h}</span>
                                         ))}
                                     </div>
 
                                     {/* GRID */}
-                                    <div className="heatmap-grid">
+                                    <div className="heatmap-grid w-100 h-100">
                                         {days.map((day) =>
                                             hours.map((hour) => {
-                                                const count = heatmapData[day][hour];
+                                                const count = heatmapData?.[day]?.[hour] ?? 0;
+
                                                 return (
                                                     <div
                                                         key={`${day}-${hour}`}
                                                         className={`heatmap-cell ${getHeatClass(count)}`}
-                                                        onMouseEnter={(e) =>
-                                                            showTooltip(e, day, hour, count)
-                                                        }
-                                                        onMouseLeave={hideTooltip}
+                                                        data-bs-toggle="tooltip"
+                                                        data-bs-placement="top"
+                                                        data-bs-html="true"
+                                                        data-bs-title={`
+                                            <strong>${day}</strong><br/>
+                                            <strong>Time:</strong> ${hour}:00<br/>
+                                            <strong>Count:</strong> ${count}
+                                        `}
                                                     />
                                                 );
                                             })
                                         )}
                                     </div>
-                                </div>
 
-                                {/* DAYS */}
-                                <div className="heatmap-days">
-                                    {days.map((day) => (
-                                        <span key={day}>{day}</span>
-                                    ))}
                                 </div>
                             </div>
-
-                            {/* TOOLTIP */}
-                            {tooltip && (
-                                <div
-                                    className="heatmap-tooltip"
-                                    style={{ left: tooltip.x, top: tooltip.y }}
-                                >
-                                    <strong>{tooltip.day}</strong><br />
-                                    <strong>Time: </strong>{tooltip.hour}:00<br />
-                                    <strong>Count: </strong>{tooltip.count}<br />
-                                </div>
-                            )}
 
                         </Card.Body>
                     </Card>
                 </Col>
 
 
+
                 {/* ================== CHART 6 (6 COL) ================== */}
-                <Col md={12}>
+                <Col sm={12}>
                     <Card className="rounded-4 shadow-sm analytics-card mt-2">
                         <Card.Body>
                             <h6 className="fw-semibold mb-3"> User Journey Funnel </h6>
@@ -675,8 +462,8 @@ const AnalyticsCharts = () => {
                                         Funnel data={FunnelData} dataKey="value" isAnimationActive={false} >
                                         <LabelList
                                             dataKey="stage"
-                                            position="right"
-                                            fill="#495057"
+                                            position="center"
+                                            fill="#ffffffff"
                                         />
                                     </Funnel>
                                 </FunnelChart>
