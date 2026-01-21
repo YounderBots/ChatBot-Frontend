@@ -112,6 +112,7 @@ const heatmapData = {
 const AnalyticsCharts = () => {
     const [sortBy, setSortBy] = useState("usage");
     const [confidenceFilter, setConfidenceFilter] = useState(null);
+    const [exporting, setExporting] = useState(false);
 
     useEffect(() => {
         const tooltipElements = document.querySelectorAll(
@@ -154,11 +155,14 @@ const AnalyticsCharts = () => {
         return "#dc3545";
     };
 
+
     const exportPNG = async () => {
         if (!chartRef.current) {
             console.error("Export failed: chartRef is null");
             return;
         }
+
+        setExporting(true);
 
         try {
             const canvas = await html2canvas(chartRef.current, {
@@ -172,8 +176,11 @@ const AnalyticsCharts = () => {
             link.click();
         } catch (err) {
             console.error("Export error:", err);
+        } finally {
+            setExporting(false);
         }
     };
+
 
     const handleConfidenceFilter = (range) => {
         setConfidenceFilter(range);
@@ -198,14 +205,13 @@ const AnalyticsCharts = () => {
                                 <h6 className="fw-semibold mb-0">
                                     Conversation Volume Trend
                                 </h6>
-
                                 <Button
                                     size="sm"
                                     variant="primary"
                                     onClick={exportPNG}
-                                    disabled={!chartRef.current}
+                                    disabled={exporting}
                                 >
-                                    Export PNG
+                                    {exporting ? "Exporting..." : "Export PNG"}
                                 </Button>
                             </div>
 
@@ -282,7 +288,7 @@ const AnalyticsCharts = () => {
 
                 {/* ================== CHART 3 (6 COL) ================== */}
                 <Col lg={6} sm={12}>
-                    <Card className="rounded-4 shadow-sm analytics-card mt-2">
+                    <Card className="rounded-4 shadow-sm analytics-card mt-2" style={{ height: "98%" }}>
                         <Card.Body className="analytics-card-body">
 
                             <h6 className="fw-semibold mb-3 analytics-card-title">
