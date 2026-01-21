@@ -1,0 +1,85 @@
+.login-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 520px;          
+  padding: 3rem 3rem;        
+  border-radius: 20px;
+  border: none;
+  box-shadow: var(--cvq-shadow-lg);
+  background: var(--cvq-white);
+}
+
+.login-logo {
+  height: 60px;          
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.form-control {
+  border-radius: 12px;
+  border: 1px solid var(--cvq-gray-300);
+  padding: 0.75rem 0.9rem;   
+  font-size: 0.95rem;
+  padding-right: 2.5rem;
+}
+
+.form-control:focus {
+  border-color: var(--cvq-blue-500);
+  box-shadow: 0 0 0 0.2rem rgba(30, 123, 217, 0.15);
+}
+
+.mb-3.position-relative {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 70%;
+  right: 1rem;              /* spacing from right edge */
+  transform: translateY(-50%);
+  color: var(--cvq-gray-600);
+  cursor: pointer;
+  z-index: 2;               /* ensures icon stays above input */
+}
+
+
+.password-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+.forgot-link {
+  font-size: 0.9rem;
+  color: var(--cvq-blue-600);
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+
+input[type="password"],
+input[type="text"] {
+  padding-right: 2.5rem; /* leave space for the icon */
+}
+
+/* Remove native browser password reveal icon */
+input[type="password"]::-webkit-password-eye {
+    display: none !important;
+}
+
+input[type="password"]::-ms-reveal {
+    display: none !important;
+}
