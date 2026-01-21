@@ -650,6 +650,26 @@
   background: #1d4ed8;
 }
 
+/* Specific to Article Info tab */
+.article-editor-body.tab-info {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  /* Fill the scrollable area */
+  min-height: 100%;
+}
+
+.info-tab-actions {
+  border-top: none !important;
+  margin-top: auto !important;
+  padding-top: 24px;
+}
+
+.info-tab-actions .main-actions-wrapper {
+  justify-content: flex-end;
+  width: 100%;
+}
+
 /* ======================================================
    📱 RESPONSIVENESS (MOBILE & TABLET)
 ====================================================== */

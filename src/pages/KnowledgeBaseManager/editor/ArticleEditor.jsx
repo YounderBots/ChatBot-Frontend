@@ -155,8 +155,8 @@ const ArticleEditor = ({
         )}
       </div>
 
-      {/* FOOTER */}
-      <div className="editor-actions">
+      {/* FOOTER AREA */}
+      <div className={`editor-actions ${activeTab === TABS.INFO ? "info-tab-actions" : ""}`}>
         <div className="seo-actions-wrapper">
           {activeTab === TABS.SEO && (
             <>
