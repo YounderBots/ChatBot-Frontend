@@ -4,24 +4,32 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #6ec6ff, #9ad9ff);
+  background: linear-gradient(95deg,
+      #ffffff 0%,
+      #a1cef5 45%,
+      #4d81ab 100%);
+
 }
 
 .login-layout {
-  width: 1150px;
+  width: 1300px;
   height: 620px;
   display: flex;
   border-radius: 22px;
   overflow: hidden;
   background: white;
-  box-shadow: 0 40px 90px rgba(0,0,0,0.25);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
 }
+
 .login-left {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
 .login-right {
   flex: 1;
   padding: 4rem;
@@ -51,16 +59,16 @@
 
 .login-card {
   width: 100%;
-  max-width: 520px;          
-  padding: 3rem 3rem;        
-  border-radius: 20px;
+  max-width: 520px;
+  padding: 3rem 3rem;
+  /* border-radius: 20px; */
   border: none;
-  box-shadow: var(--cvq-shadow-lg);
-  background: var(--cvq-white);
+  /* box-shadow: var(--cvq-shadow-lg);
+  background: var(--cvq-white); */
 }
 
 .login-logo {
-  height: 60px;          
+  height: 60px;
   margin-bottom: 1rem;
 }
 
@@ -73,7 +81,7 @@
   border-radius: 14px;
   border: 1px solid var(--cvq-gray-300);
   padding: 0.9rem 1rem;
-  font-size: 1.1rem;   
+  font-size: 1.1rem;
   padding-right: 3rem;
 }
 
@@ -90,11 +98,12 @@
 .password-toggle {
   position: absolute;
   top: 70%;
-  right: 1rem;              /* spacing from right edge */
+  right: 1rem;
+  /* spacing from right edge */
   transform: translateY(-50%);
   color: #6c8cff;
   cursor: pointer;
-                /* ensures icon stays above input */
+  /* ensures icon stays above input */
 }
 
 
@@ -115,14 +124,30 @@
 
 input[type="password"],
 input[type="text"] {
-  padding-right: 2.5rem; /* leave space for the icon */
+  padding-right: 2.5rem;
+  /* leave space for the icon */
 }
 
 /* Remove native browser password reveal icon */
 input[type="password"]::-webkit-password-eye {
-    display: none !important;
+  display: none !important;
 }
 
 input[type="password"]::-ms-reveal {
-    display: none !important;
+  display: none !important;
+}
+
+.btn-signin {
+  background-color: #194d84;
+  color: white;
+  border-radius: 4px;
+  font-size: 20px;
+  margin-top: 20px;
+  width: 100%;
+  border: 10px;
+}
+
+.btn-signin:hover {
+  background-color: #194d84;
+  color: white;
 }

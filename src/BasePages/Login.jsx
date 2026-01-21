@@ -1,6 +1,6 @@
 import React from 'react'
 import { useState } from 'react'
-import { Card, Spinner, Button, Form } from 'react-bootstrap'
+import { Card} from 'react-bootstrap'
 import { Eye, EyeOff } from 'lucide-react'
 import "./Login.css"
 import chatviq from "./chatviq.png";
@@ -51,6 +51,7 @@ const Login = () => {
                 <label className='form-label'>Email Address</label>
                 <input
                   type='email'
+                  placeholder='example@gmail.com'
                   className='form-control'
                   required
                   autoComplete='email'
@@ -62,6 +63,7 @@ const Login = () => {
                 <label className="form-label">Password</label>
                 <input
                   type={showPassword ? "text" : "password"}
+                  placeholder='Enter Password'
                   className="form-control"
                   required
                   value={password}
@@ -76,35 +78,32 @@ const Login = () => {
               </div>
 
 
-              <div className='d-flex justify-content-between align-items-center mb-3'>
-
+              <div className="d-flex justify-content-center">
+                <button
+                  type="submit"
+                  className="btn btn-signin"
+                  disabled={loading}
+                >
+                  {loading && (
+                    <span className="spinner-border spinner-border-sm me-2"></span>
+                  )}
+                  {loading ? "Signing In..." : "Sign In"}
+                </button>
               </div>
-
-              <button
-                type="submit"
-                className="btn btn-primary w-100"
-                disabled={loading}
-              >
-                {loading && (
-                  <span className="spinner-border spinner-border-sm me-2"></span>
-                )}
-                {loading ? "Signing In..." : "Sign In"}
-              </button>
-
             </form>
 
           </Card>
         </div>
-        
+
 
       </div>
     </div>
   );
-      
 
 
-    
-  
+
+
+
 }
 
 export default Login
