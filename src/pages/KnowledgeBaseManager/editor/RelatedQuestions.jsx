@@ -22,7 +22,7 @@ const RelatedQuestions = ({ questions, setQuestions }) => {
       )}
 
       {questions.map((q, i) => (
-        <div key={`rq-${i}`} className="question-row">
+        <div key={`rq-${i}`} className="related-question-item">
           <input
             value={q}
             placeholder="Alternate user question"

@@ -116,20 +116,18 @@ const ArticleEditor = ({
       {/* TAB CONTENT */}
       <div className="editor-card">
         {activeTab === TABS.INFO && (
-          <section>
-            <ArticleInfoSection
-              form={form}
-              setForm={setForm}
-              errors={errors}
-              categories={categories}
-              setCategories={setCategories}
-              allTags={allTags}
-            />
-          </section>
+          <ArticleInfoSection
+            form={form}
+            setForm={setForm}
+            errors={errors}
+            categories={categories}
+            setCategories={setCategories}
+            allTags={allTags}
+          />
         )}
 
         {activeTab === TABS.CONTENT && (
-          <section>
+          <>
             <ArticleContentSection form={form} setForm={setForm} />
             {errors.content && (
               <small className="error">{errors.content}</small>
@@ -138,17 +136,15 @@ const ArticleEditor = ({
               questions={relatedQuestions}
               setQuestions={setRelatedQuestions}
             />
-          </section>
+          </>
         )}
 
         {activeTab === TABS.SEO && (
-          <section>
-            <ArticleSEOSection
-              form={form}
-              setForm={setForm}
-              errors={errors}
-            />
-          </section>
+          <ArticleSEOSection
+            form={form}
+            setForm={setForm}
+            errors={errors}
+          />
         )}
       </div>
 
