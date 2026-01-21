@@ -120,7 +120,7 @@ const ArticleSEOSection = ({
           </select>
         </div>
 
-        <div className="checkbox align-bottom">
+        <div className="checkbox">
           <input
             type="checkbox"
             checked={form.featured}

@@ -282,28 +282,50 @@
 /* ===============================
    SEO SECTION
 ================================ */
-.seo-section h4 {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 14px;
+.seo-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .seo-block {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  padding: 16px;
-  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 20px;
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+}
+
+.seo-block:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.seo-block label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 2px;
 }
 
 .seo-block textarea,
 .seo-block select,
 .seo-block input {
-  padding: 10px 12px;
-  border-radius: 8px;
+  padding: 12px 14px;
+  border-radius: 10px;
   border: 1px solid #d1d5db;
+  font-size: 14px;
+  background: #ffffff;
+}
+
+.seo-block textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .seo-meta {
@@ -698,49 +720,94 @@
 
 /* ---- Status / Featured / Publish row ---- */
 .seo-grid {
-  grid-template-columns: 1.2fr 1fr 1.4fr;
-  align-items: center;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  align-items: stretch;
 }
 
 /* Individual control cards */
-.seo-grid>div {
+.seo-grid>div,
+.checkbox {
   background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 95px;
+  margin: 0 !important;
+  /* Forces removal of any external align-bottom margins */
+}
+
+/* Specific for checkbox card to keep it horizontal but centered */
+.checkbox {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 12px;
+}
+
+.checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.checkbox span {
+  font-size: 14px;
+  font-weight: 500;
+  color: #334155;
 }
 
 /* Labels */
 .seo-grid label {
   font-size: 13px;
-  font-weight: 500;
-  color: #334155;
-  margin-bottom: 4px;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
-/* Inputs refinement */
-.seo-grid select,
-.seo-grid input[type="date"] {
+/* Inputs refinement ONLY for SEO section */
+.seo-section select,
+.seo-section input[type="date"] {
   width: 100%;
-  height: 38px;
+  height: 44px;
+  padding: 0 14px;
   font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+  transition: all 0.2s;
+  appearance: none;
 }
 
-/* Featured checkbox alignment */
-.checkbox {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  height: 100%;
+/* Custom Dropdown Arrow */
+.seo-section select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 40px;
 }
 
-.checkbox span {
-  font-size: 14px;
-  color: #334155;
+.seo-section input[type="date"] {
+  cursor: pointer;
+}
+
+.seo-section select:focus,
+.seo-section input[type="date"]:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.seo-section select:hover,
+.seo-section input[type="date"]:hover {
+  border-color: #94a3b8;
 }
 
 /* ======================================================
