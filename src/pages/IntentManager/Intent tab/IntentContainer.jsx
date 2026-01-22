@@ -89,7 +89,8 @@ const IntentContainer = () => {
   /* ------------------ UI ------------------ */
 
   return (
-    <div className=" h-100 d-flex flex-column gap-3 overflow-auto">
+    <div className="h-100 d-flex flex-column gap-3">
+
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
         <h3 className="fw-bold text-cvq-blue-900 mb-0">Intents</h3>
@@ -200,26 +201,29 @@ const IntentContainer = () => {
       </div>
 
       {/* Content */}
-      {viewMode === 'table' ? (
-        <IntentTable
-          intents={intents}
-          selectedIds={selectedIds}
-          onToggleAll={toggleSelectAll}
-          onToggleOne={toggleSelectOne}
-          onEdit={handleEdit}
-          onDuplicate={handleDuplicate}
-          onDelete={handleDelete}
-        />
-      ) : (
-        <IntentGrid
-          intents={intents}
-          selectedIds={selectedIds}
-          onToggleOne={toggleSelectOne}
-          onEdit={handleEdit}
-          onDuplicate={handleDuplicate}
-          onDelete={handleDelete}
-        />
-      )}
+      <div className="bg-white rounded-4 shadow flex-grow-1 overflow-auto">
+  {viewMode === 'table' ? (
+    <IntentTable
+      intents={intents}
+      selectedIds={selectedIds}
+      onToggleAll={toggleSelectAll}
+      onToggleOne={toggleSelectOne}
+      onEdit={handleEdit}
+      onDuplicate={handleDuplicate}
+      onDelete={handleDelete}
+    />
+  ) : (
+    <IntentGrid
+      intents={intents}
+      selectedIds={selectedIds}
+      onToggleOne={toggleSelectOne}
+      onEdit={handleEdit}
+      onDuplicate={handleDuplicate}
+      onDelete={handleDelete}
+    />
+  )}
+</div>
+
 
       {/* Delete Modal */}
       {showDeleteModal && (

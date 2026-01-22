@@ -18,6 +18,24 @@ const CategoryAPI = {
       name: "Payments",
       description: "UPI, cards, wallets",
       lastModified: "2026-01-10"
+    },
+    {
+      id: 2,
+      name: "Payments",
+      description: "UPI, cards, wallets",
+      lastModified: "2026-01-10"
+    },
+    {
+      id: 2,
+      name: "Payments",
+      description: "UPI, cards, wallets",
+      lastModified: "2026-01-10"
+    },
+    {
+      id: 2,
+      name: "Payments",
+      description: "UPI, cards, wallets",
+      lastModified: "2026-01-10"
     }
   ],
 
@@ -120,7 +138,7 @@ const CategoryContainer = () => {
   /* ================= UI ================= */
 
   return (
-    <div className="p-4 h-100 d-flex flex-column gap-4 bg-light">
+    <div className="p-4 h-100 d-flex flex-column gap-4 ">
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center">
         <h1 className="fw-bold mb-0">Categories</h1>
