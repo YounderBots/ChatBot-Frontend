@@ -70,9 +70,7 @@
   height: 300px;
 }
 
-.chart-card {
-  height: 560px;
-}
+
 
 .chart-body {
   height: 100%;
@@ -87,20 +85,16 @@
 
 /* ================= Intent Distribution ================= */
 .intent-chart-container {
-  height: 420px;
+  width: 100%;
+  min-height: 360px;
   display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-/* ================= Heatmap ================= */
-.heatmap-container {
-  height: 420px;
-}
+/* Mobile */
 
-.heatmap-cell {
-  rx: 3;
-}
+
+
+
 
 /* ================= Recent Activity ================= */
 .activity-row {
@@ -146,7 +140,7 @@
     height: auto;
   }
 
-  .intent-chart-container,
+ 
   .heatmap-container {
     height: 320px;
   }

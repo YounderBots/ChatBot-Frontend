@@ -525,14 +525,16 @@ const DashboardContent = () => {
               <h6 className="fw-semibold mb-3">Intent Distribution</h6>
               <div className="intent-chart-container">
 
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height={360}>
                   <PieChart>
                     <Pie
                       data={intentData}
                       dataKey="value"
                       nameKey="name"
-                      innerRadius={70}
-                      outerRadius={110}
+                      innerRadius={window.innerWidth < 576 ? 45 : 70}
+                      cx="50%"
+                      cy="45%"
+                      outerRadius={window.innerWidth < 576 ? 80 : 110}
                       label={({ percent }) =>
                         `${(percent * 100).toFixed(0)}%`
                       }
@@ -549,7 +551,11 @@ const DashboardContent = () => {
                       ))}
                     </Pie>
                     <Tooltip />
-                    <Legend />
+                    <Legend
+                      verticalAlign="bottom"
+                      align="center"
+                      wrapperStyle={{ fontSize: 12 }}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -605,7 +611,7 @@ const DashboardContent = () => {
 
 
           {(showAllActivities ? recentConversations : recentConversations.slice(0, 4)).map((item) => (
-            <div key={item.id} className="activity-item">
+            <div key={item.id} className="activity-item d-flex flex-column flex-lg-row align-items-start align-items-lg-center">
               {/* Left */}
               <div className="flex-grow-1 me-3">
                 <div className="small text-muted">{item.timeAgo}</div>
@@ -623,13 +629,16 @@ const DashboardContent = () => {
               </div>
 
               {/* Right */}
-              <Button
-                size="sm"
-                variant='primary'
-                onClick={() => handleView(item)}
-              >
-                View
-              </Button>
+              <div className="mt-2 mt-lg-0 ms-lg-3">
+                <Button
+                  size="sm"
+                  variant="primary"
+                  onClick={() => handleView(item)}
+                >
+                  View
+                </Button>
+              </div>
+
             </div>
           ))}
         </Card.Body>
