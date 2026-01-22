@@ -262,6 +262,86 @@
 .related-question-item input:focus {
   outline: none;
 }
+/* ==================================
+   🔥 PREMIUM REMOVE BUTTON (CSS ONLY)
+================================== */
+
+.related-question-item {
+  position: relative;
+}
+
+/* Base button */
+.related-question-item button {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(135deg, #fee2e2, #fecaca);
+  border: 1px solid #fca5a5;
+  border-radius: 10px;
+
+  cursor: pointer;
+  font-size: 0;                 /* hides emoji text */
+  position: relative;
+
+  transition: all 0.2s ease;
+}
+
+/* Replace emoji visually (still same JSX) */
+.related-question-item button::before {
+  content: "✕";
+  font-size: 14px;
+  font-weight: 700;
+  color: #b91c1c;
+}
+
+/* Hover */
+.related-question-item button:hover {
+  background: linear-gradient(135deg, #fecaca, #fca5a5);
+  transform: scale(1.08);
+}
+
+/* Click */
+.related-question-item button:active {
+  transform: scale(0.92);
+}
+
+/* Focus ring */
+.related-question-item button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25);
+}
+
+/* Tooltip */
+.related-question-item button::after {
+  content: "Remove question";
+  position: absolute;
+  bottom: 42px;
+  right: 0;
+
+  background: #111827;
+  color: #ffffff;
+  font-size: 11px;
+  padding: 6px 8px;
+  border-radius: 6px;
+
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+
+  transform: translateY(4px);
+  transition: all 0.15s ease;
+}
+
+/* Tooltip arrow */
+.related-question-item button:hover::after {
+  opacity: 1;
+  transform: translateY(0);
+}
 
 /* Add button */
 .add-question-btn {
@@ -362,6 +442,53 @@
 
 .image-upload-box strong {
   color: #0f172a;
+}
+
+/* =========================================
+   REMOVE IMAGE BUTTON — UI ENHANCED (NO ICON)
+========================================= */
+
+.link-btn.danger {
+  margin-top: 10px;
+  align-self: flex-start;
+
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+
+  color: #b91c1c;
+  background-color: #fff;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+
+  cursor: pointer;
+  transition: 
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+/* Hover */
+.link-btn.danger:hover {
+  background-color: #fff1f2;
+  border-color: #fca5a5;
+  color: #991b1b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.15);
+}
+
+/* Active (click) */
+.link-btn.danger:active {
+  transform: scale(0.96);
+  box-shadow: none;
+}
+
+/* Keyboard focus */
+.link-btn.danger:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25);
 }
 
 /* ===============================
@@ -785,3 +912,4 @@
     padding: 8px 12px;
   }
 }
+
