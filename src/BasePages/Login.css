@@ -4,16 +4,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 1rem; /* mobile safety */
   background: linear-gradient(95deg,
       #ffffff 0%,
       #a1cef5 45%,
       #4d81ab 100%);
-
 }
 
 .login-layout {
-  width: 1300px;
-  height: 620px;
+  width: 70%;
+  min-height: 520px;
   display: flex;
   border-radius: 22px;
   overflow: hidden;
@@ -23,6 +23,7 @@
     0 0 0 1px rgba(0, 0, 0, 0.05);
 }
 
+/* LEFT */
 .login-left {
   flex: 1;
   display: flex;
@@ -30,6 +31,7 @@
   justify-content: center;
 }
 
+/* RIGHT */
 .login-right {
   flex: 1;
   padding: 4rem;
@@ -41,55 +43,115 @@
 }
 
 .login-right h1 {
-  font-size: 2.8rem;
+  font-size: 2.6rem;
   font-weight: 700;
   margin-bottom: 1rem;
 }
 
 .login-right p {
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   opacity: 0.95;
   margin-bottom: 2rem;
 }
 
 .chatbot-illustration {
   max-width: 100%;
+  object-fit: contain;
 }
 
-
+/* CARD */
 .login-card {
   width: 100%;
   max-width: 520px;
-  padding: 3rem 3rem;
-  /* border-radius: 20px; */
+  padding: 3rem;
   border: none;
-  /* box-shadow: var(--cvq-shadow-lg);
-  background: var(--cvq-white); */
 }
 
+/* LOGO */
 .login-logo {
   height: 60px;
   margin-bottom: 1rem;
 }
 
+/* FORM */
 .form-label {
   font-size: 1.05rem;
   font-weight: 600;
 }
 
-.form-control {
+.form-login-form {
   border-radius: 14px;
   border: 1px solid var(--cvq-gray-300);
-  padding: 0.9rem 1rem;
-  font-size: 1.1rem;
+  padding: 0.85rem 1rem;
+  font-size: 1.05rem;
   padding-right: 3rem;
+  width: 100%;
 }
 
-
-.form-control:focus {
+.form-login-form:focus {
   border-color: var(--cvq-blue-500);
   box-shadow: 0 0 0 0.2rem rgba(30, 123, 217, 0.15);
 }
+
+/* Tablets */
+@media (max-width: 992px) {
+  .login-layout {
+    width: 90%;
+  }
+
+  .login-right {
+    padding: 2.5rem;
+  }
+
+  .login-right h1 {
+    font-size: 2.2rem;
+  }
+}
+
+/* Mobiles */
+@media (max-width: 768px) {
+  .login-layout {
+    flex-direction: column;
+    width: 100%;
+    min-height: auto;
+  }
+
+  .login-right {
+    order: -1;
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .chatbot-illustration {
+    max-width: 200px;
+    margin: 0 auto;
+  }
+
+  .login-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .login-logo {
+    height: 50px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .login-right h1 {
+    font-size: 1.7rem;
+  }
+
+  .login-right p {
+    font-size: 1rem;
+  }
+
+  .form-login-form {
+    font-size: 1rem;
+    padding: 0.7rem 0.9rem;
+  }
+}
+
 
 .mb-3.position-relative {
   position: relative;
@@ -101,9 +163,8 @@
   right: 1rem;
   /* spacing from right edge */
   transform: translateY(-50%);
-  color: #6c8cff;
+  color: #194d84;
   cursor: pointer;
-  /* ensures icon stays above input */
 }
 
 

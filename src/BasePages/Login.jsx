@@ -1,6 +1,5 @@
-import React from 'react'
 import { useState } from 'react'
-import { Card} from 'react-bootstrap'
+import { Card, Spinner, Button, Form } from 'react-bootstrap'
 import { Eye, EyeOff } from 'lucide-react'
 import "./Login.css"
 import chatviq from "./chatviq.png";
@@ -10,7 +9,6 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -28,13 +26,12 @@ const Login = () => {
   return (
     <div className='login-wrapper bgLogoLightColor'>
       <div className='login-layout'>
-        <div className="login-right">
+        <div className="login-right d-flex justify-content-center">
           <h1>Welcome to ChatVIQ</h1>
           <p>
             Your intelligent AI chatbot platform to assist, automate,
             and enhance conversations.
           </p>
-          <img src={chatviq} alt="Chatbot" className="chatbot-illustration" />
         </div>
         <div className='login-left'>
           <Card className='login-card '>
@@ -48,8 +45,8 @@ const Login = () => {
                 <label className='form-label'>Email Address</label>
                 <input
                   type='email'
-                  placeholder='example@gmail.com'
-                  className='form-control'
+                  placeholder='Enter Your Email'
+                  className='form-login-form'
                   required
                   autoComplete='email'
                   value={email}
@@ -61,7 +58,7 @@ const Login = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder='Enter Password'
-                  className="form-control"
+                  className="form-login-form"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -91,15 +88,9 @@ const Login = () => {
 
           </Card>
         </div>
-
-
       </div>
     </div>
   );
-
-
-
-
 
 }
 

@@ -127,7 +127,7 @@ const AnalyticsCharts = () => {
                 placement: "top",
                 container: "body",
                 boundary: "window",
-                trigger: window.innerWidth < 768 ? "click" : "hover",
+                // trigger: window.innerWidth < 768 ? "click" : "hover",
             });
         });
 
