@@ -378,25 +378,23 @@ const SettingsAdvanced = () => {
           <hr />
 
           {/* BACKUP & RESET */}
-<Row className="align-items-center mb-3">
-  <Col>
-    <h6 className="text-primary mb-0">
-      Backup & Restore
-    </h6>
-  </Col>
+          <Row className="align-items-center mb-3">
+            <Col>
+              <h6 className="text-primary mb-0">
+                Backup & Restore
+              </h6>
+            </Col>
 
-  <Col xs="auto" className="ms-auto">
-    <Button
-      size="sm"
-      variant="primary"
-      onClick={exportSettings}
-    >
-      Export
-    </Button>
-  </Col>
-</Row>
-
-
+            <Col xs="auto" className="ms-auto">
+              <Button
+                size="sm"
+                variant="primary"
+                onClick={exportSettings}
+              >
+                Export
+              </Button>
+            </Col>
+          </Row>
 
           <Row className="align-items-center mb-3">
             <Col lg={6} md={12} className="mb-2">

@@ -85,7 +85,7 @@
 .heatmap-hours {
     display: grid;
     grid-template-columns: repeat(24, 1fr);
-    gap: clamp(4px, 0.5vw, 10px);
+    gap: clamp(4px, 0.vw, 10px);
     font-size: 10px;
     color: #6c757d;
     text-align: center;
@@ -131,7 +131,6 @@
 .heatmap-days span:last-child {
     margin-bottom: 0;
 }
-
 
 /* CELLS */
 .heatmap-cell {
