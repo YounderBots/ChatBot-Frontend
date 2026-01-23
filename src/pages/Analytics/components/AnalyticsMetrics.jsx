@@ -34,7 +34,7 @@ const AnalyticsMetrics = () => {
                             <Row className="g-2">
 
                                 {/* Live Users */}
-                                <Col md={3}>
+                                <Col lg={3} md={6}>
                                     <Card className="h-100 border-0 bg-light">
                                         <Card.Body className="analytics-card-body d-flex flex-column justify-content-center align-items-center text-center h-100">
                                             <div className="text-muted small">Live Users</div>
@@ -45,7 +45,7 @@ const AnalyticsMetrics = () => {
                                 </Col>
 
                                 {/* Active Conversations */}
-                                <Col md={3}>
+                                <Col lg={3} md={6}>
                                     <Card className="h-100 border-0 bg-light">
                                         <Card.Body className="analytics-card-body d-flex flex-column justify-content-center align-items-center text-center h-100">
                                             <div className="text-muted small">Active Conversations</div>
@@ -55,7 +55,7 @@ const AnalyticsMetrics = () => {
                                 </Col>
 
                                 {/* Messages per Minute */}
-                                <Col md={3}>
+                                <Col lg={3} md={6}>
                                     <Card className="h-100 border-0 bg-light">
                                         <Card.Body className="analytics-card-body d-flex flex-column justify-content-center align-items-center text-center h-100">
                                             <div className="text-muted small">Messages / Minute</div>
@@ -65,7 +65,7 @@ const AnalyticsMetrics = () => {
                                 </Col>
 
                                 {/* System Health */}
-                                <Col md={3}>
+                                <Col lg={3} md={6}>
                                     <Card className="h-100 border-0 bg-light">
                                         <Card.Body className="analytics-card-body d-flex flex-column justify-content-center align-items-center text-center h-100">
                                             <div className="text-muted small">System Health</div>
