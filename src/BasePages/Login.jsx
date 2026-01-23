@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { Card, Spinner, Button, Form } from 'react-bootstrap'
 import { Eye, EyeOff } from 'lucide-react'
 import "./Login.css"
-import chatviq from "./chatviq.png";
+import chatviq from "./assets/chatviq.png";
+import robot from "./assets/robot.png";
 const Login = () => {
   const [error, setError] = useState("");
   const [email, setEmail] = useState("");
@@ -26,13 +27,19 @@ const Login = () => {
   return (
     <div className='login-wrapper bgLogoLightColor'>
       <div className='login-layout'>
-        <div className="login-right d-flex justify-content-center">
+        <div className="login-right d-flex flex-column align-items-center justify-content-center text-center">
+          <img
+            src={robot}
+            alt="Robot"
+            className="chatbot-illustration img-fluid mb-4 d-none d-md-block"
+          />
           <h1>Welcome to ChatVIQ</h1>
           <p>
             Your intelligent AI chatbot platform to assist, automate,
             and enhance conversations.
           </p>
         </div>
+
         <div className='login-left'>
           <Card className='login-card '>
             <div className='text-center mb-4'>

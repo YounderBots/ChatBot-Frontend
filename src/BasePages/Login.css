@@ -4,7 +4,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem; /* mobile safety */
+  padding: 1rem;
+  /* mobile safety */
   background: linear-gradient(95deg,
       #ffffff 0%,
       #a1cef5 45%,
@@ -12,7 +13,7 @@
 }
 
 .login-layout {
-  width: 70%;
+  width: 50%;
   min-height: 520px;
   display: flex;
   border-radius: 22px;
@@ -34,7 +35,7 @@
 /* RIGHT */
 .login-right {
   flex: 1;
-  padding: 4rem;
+  padding: 2rem;
   background: linear-gradient(135deg, #5dade2, #85c1e9);
   color: white;
   display: flex;
@@ -55,7 +56,9 @@
 }
 
 .chatbot-illustration {
-  max-width: 100%;
+  width: 100%;
+  max-width: 200px;
+  height: auto;
   object-fit: contain;
 }
 
@@ -123,8 +126,9 @@
   }
 
   .chatbot-illustration {
-    max-width: 200px;
-    margin: 0 auto;
+    max-width: 100%;
+    height: auto;
+    justify-content: center;
   }
 
   .login-card {

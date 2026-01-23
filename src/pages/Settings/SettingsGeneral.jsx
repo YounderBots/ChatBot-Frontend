@@ -1,4 +1,4 @@
-import React, { useState,useRef } from "react";
+import React, { useState, useRef } from "react";
 import { Card, Row, Col, Form, Button } from "react-bootstrap";
 import { FaEdit, FaCheck, FaTimes } from "react-icons/fa";
 import Select from "react-select";
@@ -18,7 +18,7 @@ const SettingsGeneral = () => {
   const fileInputRef = useRef(null);
   const [botNameError, setBotNameError] = useState("");
   const [isEditingWelcome, setIsEditingWelcome] = useState(false);
-  
+
 
   const [formData, setFormData] = useState({
     botName: "Chatbot",
@@ -35,31 +35,31 @@ const SettingsGeneral = () => {
     })),
   });
   const timezoneOptions = [
-  { value: "Asia/Kolkata", label: "Asia / Kolkata (IST)" },
-  { value: "UTC", label: "UTC (Coordinated Universal Time)" },
-  { value: "America/New_York", label: "America / New York (EST)" },
-  { value: "Europe/London", label: "Europe / London (GMT)" },
-  { value: "Asia/Dubai", label: "Asia / Dubai (GST)" },
-  { value: "Asia/Singapore", label: "Asia / Singapore (SGT)" },
-];
+    { value: "Asia/Kolkata", label: "Asia / Kolkata (IST)" },
+    { value: "UTC", label: "UTC (Coordinated Universal Time)" },
+    { value: "America/New_York", label: "America / New York (EST)" },
+    { value: "Europe/London", label: "Europe / London (GMT)" },
+    { value: "Asia/Dubai", label: "Asia / Dubai (GST)" },
+    { value: "Asia/Singapore", label: "Asia / Singapore (SGT)" },
+  ];
 
-const copyToAllDays = (sourceIndex) => {
-  const sourceDay = formData.businessHours[sourceIndex];
+  const copyToAllDays = (sourceIndex) => {
+    const sourceDay = formData.businessHours[sourceIndex];
 
-  const updatedBusinessHours = formData.businessHours.map(
-    (day) => ({
-      ...day,
-      enabled: sourceDay.enabled,
-      start: sourceDay.start,
-      end: sourceDay.end,
-    })
-  );
+    const updatedBusinessHours = formData.businessHours.map(
+      (day) => ({
+        ...day,
+        enabled: sourceDay.enabled,
+        start: sourceDay.start,
+        end: sourceDay.end,
+      })
+    );
 
-  setFormData({
-    ...formData,
-    businessHours: updatedBusinessHours,
-  });
-};
+    setFormData({
+      ...formData,
+      businessHours: updatedBusinessHours,
+    });
+  };
 
 
   const [tempWelcomeMessage, setTempWelcomeMessage] = useState(
@@ -91,8 +91,8 @@ const copyToAllDays = (sourceIndex) => {
         {/* Bot Configuration */}
         <h6 className="text-primary mb-3">Bot Configuration</h6>
 
-        <Row className="mb-3">
-          <Col md={6}>
+        <Row className="mb-2">
+          <Col md={6} className="mb-3">
             <Form.Label>
               Bot Name
             </Form.Label>
@@ -122,41 +122,38 @@ const copyToAllDays = (sourceIndex) => {
             )}
           </Col>
 
-          <Col md={6}>
-              <Form.Label>Bot Avatar</Form.Label>
+          <Col md={6} className="mb-3">
+            <Form.Label>Bot Avatar</Form.Label>
 
-              <Form.Control
-                  type="file"
-                  accept="image/*"
-                  ref={fileInputRef}
-                  onChange={handleAvatarChange}
-              />
+            <Form.Control
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              onChange={handleAvatarChange}
+            />
 
-              {avatarPreview && (
-                  <div className="mt-2 d-flex align-items-center gap-3">
-                  <img
-                      src={avatarPreview}
-                      alt="Avatar Preview"
-                      width={80}
-                      height={80}
-                      className="rounded"
-                  />
+            {avatarPreview && (
+              <div className="mt-2 d-flex align-items-center gap-3">
+                <img
+                  src={avatarPreview}
+                  alt="Avatar Preview"
+                  width={80}
+                  height={80}
+                  className="rounded"
+                />
 
-                  <Button
-                      variant="outline-danger"
-                      size="sm"
-                      onClick={handleRemoveAvatar}
-                  >
-                      Remove
-                  </Button>
-                  </div>
-              )}
+                <Button
+                  variant="outline-danger"
+                  size="sm"
+                  onClick={handleRemoveAvatar}
+                >
+                  Remove
+                </Button>
+              </div>
+            )}
           </Col>
 
-        </Row>
-
-        <Row className="mb-4">
-          <Col md={4}>
+          <Col lg={4} md={12} className="mb-3">
             <div className="d-flex justify-content-between align-items-center">
               <Form.Label>Welcome Message</Form.Label>
 
@@ -204,7 +201,7 @@ const copyToAllDays = (sourceIndex) => {
             />
           </Col>
 
-          <Col md={4}>
+          <Col lg={4} md={12} className="mb-3">
             <Form.Label>Fallback Message</Form.Label>
             <Form.Control
               as="textarea"
@@ -217,7 +214,7 @@ const copyToAllDays = (sourceIndex) => {
             />
           </Col>
 
-          <Col md={4}>
+          <Col lg={4} md={12} className="mb-3">
             <Form.Label>Offline Message</Form.Label>
             <Form.Control
               as="textarea"
@@ -236,8 +233,8 @@ const copyToAllDays = (sourceIndex) => {
         {/* Business Hours */}
         <h6 className="text-primary mb-3">Business Hours</h6>
 
-        <Row className="mb-3">
-          <Col md={6}>
+        <Row className="mb-2">
+          <Col lg={6} md={6}>
             <Form.Label>Timezone</Form.Label>
             <Select
               options={timezoneOptions}
@@ -258,7 +255,7 @@ const copyToAllDays = (sourceIndex) => {
 
         {formData.businessHours.map((item, index) => (
           <Row key={item.day} className="align-items-center mb-2">
-            <Col md={3}>
+            <Col md={4}>
               <Form.Check
                 label={item.day}
                 checked={item.enabled}
@@ -269,7 +266,7 @@ const copyToAllDays = (sourceIndex) => {
             </Col>
 
 
-            <Col md={3}>
+            <Col md={4} className="p-1">
               <Form.Control
                 type="time"
                 disabled={!item.enabled}
@@ -280,7 +277,7 @@ const copyToAllDays = (sourceIndex) => {
               />
             </Col>
 
-            <Col md={3}>
+            <Col md={4} className="p-1">
               <Form.Control
                 type="time"
                 disabled={!item.enabled}
@@ -291,9 +288,9 @@ const copyToAllDays = (sourceIndex) => {
               />
             </Col>
           </Row>
-          
+
         ))}
-          <Button
+        <Button
           size="sm"
           variant="primary"
           className="mt-3"
