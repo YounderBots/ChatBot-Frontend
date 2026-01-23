@@ -11,16 +11,12 @@ import PeakHoursHeatmap from './components/PeakHoursHeatmap';
 import { heatmapData } from './components/heatmapData';
 
 // ================= API PLACEHOLDERS =================
-// Later: replace body with real API calls
-
-const apiGetKpiMetrics = async () => {
-  return {
-    totalConversations: Math.floor(Math.random() * 5000) + 100,
-    activeUsers: Math.floor(Math.random() * 120) + 1,
-    avgResponseTime: parseFloat((Math.random() * 5).toFixed(2)),
-    resolutionRate: Math.floor(Math.random() * 40) + 60,
-  };
-};
+const apiGetKpiMetrics = async () => ({
+  totalConversations: Math.floor(Math.random() * 5000) + 100,
+  activeUsers: Math.floor(Math.random() * 120) + 1,
+  avgResponseTime: parseFloat((Math.random() * 5).toFixed(2)),
+  resolutionRate: Math.floor(Math.random() * 40) + 60,
+});
 
 const apiGetConversationTrends = async (range) => {
   if (range === "30") {
@@ -31,8 +27,6 @@ const apiGetConversationTrends = async (range) => {
       escalated: Math.floor(Math.random() * 60) + 20,
     }));
   }
-
-  // Default: last 7 days
   return [
     { date: "Mon", total: 120, resolved: 90, escalated: 30 },
     { date: "Tue", total: 180, resolved: 140, escalated: 40 },
@@ -43,7 +37,6 @@ const apiGetConversationTrends = async (range) => {
     { date: "Sun", total: 230, resolved: 180, escalated: 50 },
   ];
 };
-
 
 const apiGetIntentDistribution = async () => ([
   { name: "Booking", value: 320 },
@@ -67,154 +60,65 @@ const apiGetPeakHours = async () => {
 };
 
 const apiGetRecentConversations = async () => ([
-  {
-    id: 1,
-    message: "I want to cancel my booking for tomorrow",
-    intent: "Cancellation",
-    confidence: 92,
-    timeAgo: "2 mins ago",
-  },
-  {
-    id: 2,
-    message: "What is the pricing for premium plan?",
-    intent: "Pricing",
-    confidence: 88,
-    timeAgo: "5 mins ago",
-  },
-  {
-    id: 3,
-    message: "I want to upgrade my account",
-    intent: "Upgrade", confidence: 80,
-    timeAgo: "10 mins ago"
-  },
-  {
-    id: 4,
-    message: "I need a refund for my last purchase",
-    intent: "Refund",
-    confidence: 95, timeAgo: "15 mins ago"
-  },
-  {
-    id: 5,
-    message: "The support response is too slow",
-    intent: "Complaint",
-    confidence: 70,
-    timeAgo: "20 mins ago"
-  },
-  {
-    id: 6,
-    message: "How do I book a new service?",
-    intent: "Booking",
-    confidence: 85,
-    timeAgo: "25 mins ago"
-  },
-  {
-    id: 7,
-    message: "Feedback for your last update",
-    intent: "Feedback",
-    confidence: 60,
-    timeAgo: "30 mins ago"
-  },
-  {
-    id: 8,
-    message: "Can I downgrade my plan?",
-    intent: "Downgrade",
-    confidence: 75,
-    timeAgo: "40 mins ago"
-  },
+  { id: 1, message: "I want to cancel my booking for tomorrow", intent: "Cancellation", confidence: 92, timeAgo: "2 mins ago" },
+  { id: 2, message: "What is the pricing for premium plan?", intent: "Pricing", confidence: 88, timeAgo: "5 mins ago" },
+  { id: 3, message: "I want to upgrade my account", intent: "Upgrade", confidence: 80, timeAgo: "10 mins ago" },
+  { id: 4, message: "I need a refund for my last purchase", intent: "Refund", confidence: 95, timeAgo: "15 mins ago" },
+  { id: 5, message: "The support response is too slow", intent: "Complaint", confidence: 70, timeAgo: "20 mins ago" },
+  { id: 6, message: "How do I book a new service?", intent: "Booking", confidence: 85, timeAgo: "25 mins ago" },
+  { id: 7, message: "Feedback for your last update", intent: "Feedback", confidence: 60, timeAgo: "30 mins ago" },
+  { id: 8, message: "Can I downgrade my plan?", intent: "Downgrade", confidence: 75, timeAgo: "40 mins ago" },
 ]);
 
-const DashboardCard = ({
-  title,
-  value,
-  subtitle,
-  icon,
-  extra,
-  progress,
-  progressVariant,
-}) => (
-  <Card
-    className="rounded-4 shadow-sm dashboard-card"
-  >
+// ================= Colors =================
+const INTENT_COLORS = [
+  "#0d6efd", "#198754", "#fd7e14", "#dc3545", "#6f42c1", "#20c997", "#ffc107", "#0dcaf0", "#adb5bd", "#343a40",
+];
+
+const intentVariant = (intent) => {
+  switch (intent) {
+    case "Cancellation": return "danger";
+    case "Pricing": return "primary";
+    case "Complaint": return "warning";
+    case "Upgrade": return "success";
+    case "Refund": return "info";
+    case "Booking": return "secondary";
+    case "Feedback": return "dark";
+    case "Downgrade": return "info";
+    default: return "secondary";
+  }
+};
+
+// ================= Dashboard Card =================
+const DashboardCard = ({ title, value, subtitle, icon, extra, progress, progressVariant }) => (
+  <Card className="rounded-4 shadow-sm dashboard-card">
     <Card.Body className="dashboard-card-body">
-      <div className="d-flex justify-content-between align-items-start">
+      <div className="kpi-top d-flex justify-content-between align-items-start">
         <div>
           <div className="text-muted small">{title}</div>
           <h3 className="fw-bold mt-2">{value}</h3>
-          {subtitle && (
-            <div className="text-muted small">{subtitle}</div>
-          )}
+          {subtitle && <div className="text-muted small">{subtitle}</div>}
         </div>
         <div className="dashboard-icon">{icon}</div>
       </div>
-
-      {extra && <div className="mt-3">{extra}</div>}
-
-      {progress !== undefined && (
-        <ProgressBar
-          now={progress}
-          variant={progressVariant}
-          className="mt-3"
-          style={{ height: 8 }}
-        />
-      )}
+      <div className="kpi-bottom">{extra}</div>
+      {progress !== undefined && <ProgressBar now={progress} variant={progressVariant} className="mt-3" style={{ height: 8 }} />}
     </Card.Body>
   </Card>
 );
 
-
+// ================= Download Chart =================
 const downloadChart = async () => {
   const chart = document.getElementById("conversation-trends-chart");
   if (!chart) return;
-
-  const canvas = await html2canvas(chart, {
-    backgroundColor: "#ffffff", // ensures white background
-    scale: 2, // higher quality
-  });
-
+  const canvas = await html2canvas(chart, { backgroundColor: "#ffffff" });
   const link = document.createElement("a");
   link.download = "conversation-trends.png";
   link.href = canvas.toDataURL("image/png");
   link.click();
 };
 
-const INTENT_COLORS = [
-  "#0d6efd", // blue
-  "#198754", // green
-  "#fd7e14", // orange
-  "#dc3545", // red
-  "#6f42c1", // purple
-  "#20c997", // teal
-  "#ffc107", // yellow
-  "#0dcaf0", // cyan
-  "#adb5bd", // gray
-  "#343a40", // dark
-];
-
-const intentVariant = (intent) => {
-  switch (intent) {
-    case "Cancellation":
-      return "danger";
-    case "Pricing":
-      return "primary";
-    case "Complaint":
-      return "warning";
-    case "Upgrade":
-      return "success";
-    case "Refund":
-      return "info";
-    case "Complaint":
-      return "warning";     // yellow
-    case "Booking":
-      return "secondary";   // gray
-    case "Feedback":
-      return "dark";        // dark
-    case "Downgrade":
-      return "info";       // light gray
-    default:
-      return "secondary";
-  }
-};
-
+// ================= Dashboard Content =================
 const DashboardContent = () => {
   const [totalConversations, setTotalConversations] = useState(0);
   const [activeUsers, setActiveUsers] = useState(0);
@@ -226,29 +130,24 @@ const DashboardContent = () => {
   const [recentConversations, setRecentConversations] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedConversation, setSelectedConversation] = useState(null);
-  const navigate = useNavigate();
   const [trendRange, setTrendRange] = useState("7");
-
   const [showAllActivities, setShowAllActivities] = useState(false);
+  const [chartRadius, setChartRadius] = useState({ inner: 70, outer: 110 });
 
-  const handleViewAll = () => {
-    setShowAllActivities(true);
-  };
+  const navigate = useNavigate();
 
-  const handleViewLess = () => {
-    setShowAllActivities(false);
-  };
+  // Handle responsive pie chart radius
+  useEffect(() => {
+    const updateRadius = () => {
+      if (window.innerWidth < 576) setChartRadius({ inner: 45, outer: 80 });
+      else setChartRadius({ inner: 70, outer: 110 });
+    };
+    updateRadius();
+    window.addEventListener("resize", updateRadius);
+    return () => window.removeEventListener("resize", updateRadius);
+  }, []);
 
-
-  const handleView = (conversation) => {
-    setSelectedConversation(conversation);
-    setShowModal(true);
-  };
-
-  const handleClose = () => {
-    setShowModal(false);
-    setSelectedConversation(null);
-  };
+  // Load dashboard data
   useEffect(() => {
     const loadDashboard = async () => {
       const kpi = await apiGetKpiMetrics();
@@ -256,396 +155,154 @@ const DashboardContent = () => {
       setActiveUsers(kpi.activeUsers);
       setAvgResponseTime(kpi.avgResponseTime);
       setResolutionRate(kpi.resolutionRate);
-
       setTrendsData(await apiGetConversationTrends(trendRange));
       setIntentData(await apiGetIntentDistribution());
 
       const heatmap = await apiGetPeakHours();
       const scatter = [];
-      heatmap.forEach(d => {
-        d.hours.forEach((count, hour) => {
-          scatter.push({ day: d.day, dayIndex: d.dayIndex + 1, hour: hour + 1, count });
-        });
-      });
+      heatmap.forEach(d => d.hours.forEach((count, hour) => scatter.push({ day: d.day, dayIndex: d.dayIndex + 1, hour: hour + 1, count })));
       setScatterData(scatter);
 
       setRecentConversations(await apiGetRecentConversations());
     };
-
     loadDashboard();
-
-
-  }, []);
-  useEffect(() => {
-    const loadTrends = async () => {
-      const data = await apiGetConversationTrends(trendRange);
-      setTrendsData(data);
-    };
-
-    loadTrends();
   }, [trendRange]);
 
+  // Active users refresh every 5s
   useEffect(() => {
-    // Update only Active Users every 5 seconds
-    let isMounted = true;
-    const fetchActiveUsers = async () => {
+    const interval = setInterval(async () => {
       const kpi = await apiGetKpiMetrics();
-      if (isMounted) setActiveUsers(kpi.activeUsers);
-    };
-
-    const interval = setInterval(fetchActiveUsers, 5000);
-
-    return () => {
-      isMounted = false;
-      clearInterval(interval);
-    };
+      setActiveUsers(kpi.activeUsers);
+    }, 5000);
+    return () => clearInterval(interval);
   }, []);
 
-  const getResponseColor = (time) => {
-    if (time < 1) return 'success';
-    if (time <= 3) return 'warning';
-    return 'danger';
-  };
+  const getResponseColor = time => time < 1 ? 'success' : time <= 3 ? 'warning' : 'danger';
+  const handleView = conversation => { setSelectedConversation(conversation); setShowModal(true); };
+  const handleClose = () => { setShowModal(false); setSelectedConversation(null); };
 
   return (
     <div className="p-3">
 
-
-      {/* ================= KPI CARDS ================= */}
-      <div className="row g-3 mb-4 ">
-
-        {/* Card 1: Total Conversations */}
+      {/* KPI CARDS */}
+      <div className="row g-3 mb-4 align-items-stretch kpi-row">
         <div className="col-12 col-md-6 col-lg-3">
-          <div
-            style={{ cursor: "pointer" }}
-            onClick={() => {
-              navigate("/conversations");
-            }}
-          >
+          <div className="kpi-card-wrapper" onClick={() => navigate("/conversations")}>
             <DashboardCard
               title="Total Conversations"
               value={totalConversations}
               subtitle="↑ 12% vs yesterday"
               icon={<MessageSquare size={26} />}
-
-              extra={
-                <Form.Select
-                  size="sm"
-                  onClick={(e) => e.stopPropagation()}
-                  onChange={(e) => e.stopPropagation()}
-                >
-                  <option>Today</option>
-                  <option>Week</option>
-                  <option>Month</option>
-                </Form.Select>
-              }
-
+              extra={<Form.Select size="sm" onClick={e => e.stopPropagation()} onChange={e => e.stopPropagation()}>
+                <option>Today</option><option>Week</option><option>Month</option>
+              </Form.Select>}
             />
           </div>
         </div>
-
-        {/* Card 2: Active Users */}
         <div className="col-12 col-md-6 col-lg-3">
-          <DashboardCard
-            title="Active Users"
-            value={activeUsers}
-            subtitle="Right now"
-            icon={<Users size={26} />}
-
-          />
+          <DashboardCard title="Active Users" value={activeUsers} subtitle="Right now" icon={<Users size={26} />} />
         </div>
-
-        {/* Card 3: Avg Response Time */}
         <div className="col-12 col-md-6 col-lg-3">
-          <DashboardCard
-            title="Avg Response Time"
-            value={`${avgResponseTime}s`}
-            icon={<Timer size={26} />}
-
-            progress={Math.min(avgResponseTime * 20, 100)}
-            progressVariant={getResponseColor(avgResponseTime)}
-          />
+          <DashboardCard title="Avg Response Time" value={`${avgResponseTime}s`} icon={<Timer size={26} />} progress={Math.min(avgResponseTime * 20, 100)} progressVariant={getResponseColor(avgResponseTime)} />
         </div>
-
-        {/* Card 4: Resolution Rate */}
         <div className="col-12 col-md-6 col-lg-3">
           <Card className="rounded-4 shadow-sm text-center resolution-card">
             <Card.Body>
-
-              {/* Circular Progress */}
-              <div
-                className="resolution-progress"
-                style={{
-                  background: `conic-gradient(
-            #198754 ${resolutionRate * 3.6}deg,
-            #e9ecef 0deg
-          )`,
-                }}
-              >
+              <div className="resolution-progress" style={{ background: `conic-gradient(#198754 ${resolutionRate * 3.6}deg, #e9ecef 0deg)` }}>
                 <div className="resolution-inner">
                   <CheckCircle size={20} className="text mb-1" />
-                  <div className="resolution-value">
-                    {resolutionRate}%
-                  </div>
+                  <div className="resolution-value">{resolutionRate}%</div>
                 </div>
               </div>
-
-              <div className="mt-3 fw-medium">
-                Resolution Rate
-              </div>
-
-              <div className="text-muted small">
-                Target: 90%
-              </div>
-
+              <div className="mt-3 fw-medium">Resolution Rate</div>
+              <div className="text-muted small">Target: 90%</div>
             </Card.Body>
           </Card>
         </div>
-
       </div>
 
+      {/* Conversation Trends */}
+      <div className="chart-section">
 
+        {/* Conversation Trends */}
+        <Row className="mb-4">
+          <Col xs={12}>
+            <Card className="rounded-4 shadow-sm chart-card h-100">
+              <Card.Body className="chart-body">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <h6 className="fw-semibold">Conversation Trends</h6>
+                  <div className="d-flex gap-2">
+                    <Form.Select size="sm" value={trendRange} onChange={e => setTrendRange(e.target.value)}>
+                      <option value="7">Last 7 days</option>
+                      <option value="30">Last 30 days</option>
+                      <option value="custom">Custom</option>
+                    </Form.Select>
+                    <Button size="sm" variant="primary" onClick={downloadChart}>Download</Button>
+                  </div>
+                </div>
+                <div id="conversation-trends-chart" style={{ width: '100%', height: '300px', minHeight: '240px' }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={trendsData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" />
+                      <YAxis />
+                      <Tooltip />
+                      <Area type="monotone" dataKey="total" fill="#1e7bd933" stroke="#1e7bd9" />
+                      <Line type="monotone" dataKey="resolved" stroke="#198754" strokeWidth={3} />
+                      <Line type="monotone" dataKey="escalated" stroke="#fd7e14" strokeWidth={3} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
 
-      {/* ================= CHART SECTION ================= */}
-      <Card className="rounded-4 shadow-sm mb-4 ">
-        <Card.Body className='chart-body'>
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <h6 className="fw-semibold">Conversation Trends</h6>
-
-            <div className="d-flex  gap-2">
-              <Form.Select
-                size="sm"
-                value={trendRange}
-                onChange={(e) => setTrendRange(e.target.value)}
-              >
-                <option value="7">Last 7 days</option>
-                <option value="30">Last 30 days</option>
-                <option value="custom">Custom</option>
-              </Form.Select>
-
-
-              <Button size="sm" variant='primary' onClick={downloadChart}>
-                Download
-              </Button>
-            </div>
-          </div>
-
-          <div id="conversation-trends-chart" className="trend-chart flex-grow-1">
-
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={trendsData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Area
-                  type="monotone"
-                  dataKey="total"
-                  fill="#1e7bd933"
-                  stroke="#1e7bd9"
-                />
-                <Line
-                  type="monotone"
-                  dataKey="resolved"
-                  stroke="#198754"
-                  strokeWidth={3}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="escalated"
-                  stroke="#fd7e14"
-                  strokeWidth={3}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </Card.Body>
-      </Card>
-
-
-
-
-      {selectedConversation && (
-        <Modal show={showModal} onHide={handleClose} centered>
-          <Modal.Header closeButton>
-            <Modal.Title>Conversation Details</Modal.Title>
-          </Modal.Header>
-
-          <Modal.Body>
-            <div className="mb-3">
-              <small className="text-muted">Time</small>
-              <div className="fw-medium">
-                {selectedConversation.timeAgo}
-              </div>
-            </div>
-
-            <div className="mb-3">
-              <small className="text-muted">User Message</small>
-              <div className="modal-message">
-                {selectedConversation.message}
-              </div>
-            </div>
-
-            <div className="mb-3 d-flex align-items-center gap-2">
-              <span
-                className={`badge bg-${intentVariant(
-                  selectedConversation.intent
-                )}`}
-              >
-                {selectedConversation.intent}
-              </span>
-
-              <span className="text-muted small">
-                Confidence: {selectedConversation.confidence}%
-              </span>
-            </div>
-
-            <ProgressBar
-              now={selectedConversation.confidence}
-              variant="success"
-            />
-          </Modal.Body>
-
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleClose}>
-              Close
-            </Button>
-            <Button variant="primary">
-              Open Full Conversation
-            </Button>
-          </Modal.Footer>
-        </Modal>
-      )}
-
-      <Row className="g-4 justify-content-between " >
         {/* Intent Distribution */}
-        <Col>
-          <Card className="rounded-4 shadow-sm h-100 chart-card">
-            <Card.Body>
-              <h6 className="fw-semibold mb-3">Intent Distribution</h6>
-              <div className="intent-chart-container">
-
-                <ResponsiveContainer width="100%" height={360}>
-                  <PieChart>
-                    <Pie
-                      data={intentData}
-                      dataKey="value"
-                      nameKey="name"
-                      innerRadius={window.innerWidth < 576 ? 45 : 70}
-                      cx="50%"
-                      cy="45%"
-                      outerRadius={window.innerWidth < 576 ? 80 : 110}
-                      label={({ percent }) =>
-                        `${(percent * 100).toFixed(0)}%`
-                      }
-                    >
-                      {intentData.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={
-                            INTENT_COLORS[
-                            index % INTENT_COLORS.length
-                            ]
-                          }
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend
-                      verticalAlign="bottom"
-                      align="center"
-                      wrapperStyle={{ fontSize: 12 }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-
-      <Row className="g-4 justify-content-between my-2" >
+        <Row className="mb-4">
+          <Col xs={12}>
+            <Card className="rounded-4 shadow-sm chart-card h-100">
+              <Card.Body>
+                <h6 className="fw-semibold mb-3">Intent Distribution</h6>
+                <div style={{ width: '100%', height: '360px' }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={intentData}
+                        dataKey="value"
+                        nameKey="name"
+                        innerRadius={chartRadius.inner}
+                        outerRadius={chartRadius.outer}
+                        cx="50%"
+                        cy="50%"
+                        label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
+                      >
+                        {intentData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={INTENT_COLORS[index % INTENT_COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend verticalAlign="bottom" align="center" wrapperStyle={{ fontSize: 12 }} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
 
         {/* Peak Hours Heatmap */}
-        <Col >
-          <Card className="rounded-4 shadow-sm h-100 chart-card">
-            <Card.Body>
-              <PeakHoursHeatmap data={heatmapData} />
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+        <Row className="mb-4">
+          <Col xs={12}>
+            <Card className="rounded-4 shadow-sm chart-card h-100">
+              <Card.Body>
+                <PeakHoursHeatmap data={heatmapData} />
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
 
-      <Card className="rounded-4 shadow-sm mt-4">
-        <Card.Body>
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <h6 className="fw-semibold mb-0">Recent Activity</h6>
-
-            {/* View All button (below values) */}
-            {!showAllActivities && recentConversations.length > 4 && (
-              <div className="d-flex justify-content-center mt-3">
-                <Button
-                  size="sm"
-                  variant="primary"
-                  onClick={handleViewAll}
-                >
-                  View All
-                </Button>
-              </div>
-            )}
-
-            {/* View Less button (below values) */}
-            {showAllActivities && (
-              <div className="d-flex justify-content-center mt-3">
-                <Button
-                  size="sm"
-                  variant="primary"
-                  onClick={handleViewLess}
-                >
-                  View Less
-                </Button>
-              </div>
-            )}
-
-          </div>
-
-
-          {(showAllActivities ? recentConversations : recentConversations.slice(0, 4)).map((item) => (
-            <div key={item.id} className="activity-item d-flex flex-column flex-lg-row align-items-start align-items-lg-center">
-              {/* Left */}
-              <div className="flex-grow-1 me-3">
-                <div className="small text-muted">{item.timeAgo}</div>
-                <div className="fw-medium text-truncate activity-message">{item.message}</div>
-
-                <div className="d-flex align-items-center gap-2 mt-1">
-                  <span className={`badge bg-${intentVariant(item.intent)}`}>{item.intent}</span>
-
-                  <div className="confidence-bar">
-                    <ProgressBar now={item.confidence} variant="success" style={{ height: 6 }} />
-                  </div>
-
-                  <small className="text-muted">{item.confidence}%</small>
-                </div>
-              </div>
-
-              {/* Right */}
-              <div className="mt-2 mt-lg-0 ms-lg-3">
-                <Button
-                  size="sm"
-                  variant="primary"
-                  onClick={() => handleView(item)}
-                >
-                  View
-                </Button>
-              </div>
-
-            </div>
-          ))}
-        </Card.Body>
-      </Card>
-
-
-
+      </div>
 
 
 
@@ -654,12 +311,11 @@ const DashboardContent = () => {
   );
 };
 
-const Dashboard = () => {
-  return (
-    <NormalLayout>
-      <DashboardContent />
-    </NormalLayout>
-  );
-};
+// ================= Dashboard Wrapper =================
+const Dashboard = () => (
+  <NormalLayout>
+    <DashboardContent />
+  </NormalLayout>
+);
 
 export default Dashboard;
