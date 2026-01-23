@@ -73,8 +73,9 @@ const ArticleEditor = ({
   const validate = () => {
     const err = {};
     if (!form.title.trim()) err.title = "Title is required";
-    if (!form.content.replace(/<[^>]+>/g, "").trim())
-      err.content = "Content is required";
+    // Content is now optional based on user preference
+    // if (!form.content.replace(/<[^>]+>/g, "").trim())
+    //   err.content = "Content is required";
     if (form.metaDescription.length > 160)
       err.meta = "Max 160 characters";
 

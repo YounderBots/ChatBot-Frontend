@@ -2,9 +2,9 @@ import ArticleEditor from "../editor/ArticleEditor";
 import "./new-article-dialog.css";
 
 
-const NewArticleDialog = ({ onClose, article }) => {
+const NewArticleDialog = ({ onClose, article, onSave }) => {
   const handleSave = (data) => {
-    console.log("ARTICLE PAYLOAD", data);
+    onSave?.(data);
     onClose();
   };
 
