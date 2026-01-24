@@ -360,3 +360,34 @@
     gap: 10px !important;
   }
 }
+
+/* ================= INTENT HEADER LAYOUT ================= */
+
+.intent-header-actions {
+  flex-wrap: nowrap; /* FORCE single line */
+  overflow-x: auto;  /* Prevent breaking */
+}
+
+/* Tablet & Laptop */
+@media (min-width: 768px) {
+  .intent-header-actions {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
+}
+
+/* Mobile only */
+@media (max-width: 767px) {
+  .intent-header-actions {
+    flex-wrap: wrap;
+  }
+
+  .intent-header-actions > * {
+    width: 100%;
+  }
+
+  .add-intent-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

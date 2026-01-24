@@ -95,7 +95,8 @@ const IntentContainer = () => {
       <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
         <h3 className="fw-bold text-cvq-blue-900 mb-0">Intents</h3>
 
-        <div className="d-flex align-items-center gap-3">
+        <div className="intent-header-actions d-flex align-items-center gap-3">
+
           {/* Search */}
           <div className="input-group bg-white border rounded-3 shadow-sm px-2 py-0.10">
             <span className="input-group-text bg-white border-0">
