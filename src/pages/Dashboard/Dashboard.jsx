@@ -9,6 +9,9 @@ import NormalLayout from '../../components/NormalLayout';
 import "./Dashboard.css";
 import PeakHoursHeatmap from './components/PeakHoursHeatmap';
 import { heatmapData } from './components/heatmapData';
+import "../Analytics/Analytics.css";
+
+
 
 // ================= API PLACEHOLDERS =================
 const apiGetKpiMetrics = async () => ({
@@ -180,6 +183,8 @@ const DashboardContent = () => {
   const getResponseColor = time => time < 1 ? 'success' : time <= 3 ? 'warning' : 'danger';
   const handleView = conversation => { setSelectedConversation(conversation); setShowModal(true); };
   const handleClose = () => { setShowModal(false); setSelectedConversation(null); };
+  const handleViewAll = () => setShowAllActivities(true);
+  const handleViewLess = () => setShowAllActivities(false);
 
   return (
     <div className="p-3">
@@ -294,20 +299,137 @@ const DashboardContent = () => {
         {/* Peak Hours Heatmap */}
         <Row className="mb-4">
           <Col xs={12}>
-            <Card className="rounded-4 shadow-sm chart-card h-100">
-              <Card.Body>
-                <PeakHoursHeatmap data={heatmapData} />
-              </Card.Body>
-            </Card>
+            <PeakHoursHeatmap />
           </Col>
         </Row>
 
-      </div>
+
+        <Card className="rounded-4 shadow-sm mt-4">
+          <Card.Body>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h6 className="fw-semibold mb-0">Recent Activity</h6>
+
+              {!showAllActivities && recentConversations.length > 4 && (
+                <Button size="sm" variant="primary" onClick={handleViewAll}>
+                  View All
+                </Button>
+              )}
+
+              {showAllActivities && (
+                <Button size="sm" variant="primary" onClick={handleViewLess}>
+                  View Less
+                </Button>
+              )}
+            </div>
+
+            {(showAllActivities ? recentConversations : recentConversations.slice(0, 4)).map((item) => (
+              <div
+                key={item.id}
+                className="activity-item d-flex flex-column flex-lg-row align-items-start align-items-lg-center mb-3"
+              >
+                {/* LEFT */}
+                <div className="flex-grow-1 me-lg-3">
+                  <div className="small text-muted">{item.timeAgo}</div>
+
+                  <div className="fw-medium text-truncate activity-message">
+                    {item.message}
+                  </div>
+
+                  <div className="d-flex align-items-center gap-2 mt-1">
+                    <span className={`badge bg-${intentVariant(item.intent)}`}>
+                      {item.intent}
+                    </span>
+
+                    <div className="confidence-bar flex-grow-1">
+                      <ProgressBar
+                        now={item.confidence}
+                        variant="success"
+                        style={{ height: 6 }}
+                      />
+                    </div>
+
+                    <small className="text-muted">
+                      {item.confidence}%
+                    </small>
+                  </div>
+                </div>
+
+                {/* RIGHT */}
+                <div className="mt-2 mt-lg-0">
+                  <Button
+                    size="sm"
+                    variant="primary"
+                    onClick={() => handleView(item)}
+                  >
+                    View
+                  </Button>
+                </div>
+              </div>
+            ))}
+            <Modal
+              show={showModal}
+              onHide={handleClose}
+              centered
+              size="md"
+            >
+              <Modal.Header closeButton>
+                <Modal.Title>Conversation Details</Modal.Title>
+              </Modal.Header>
+
+              <Modal.Body>
+                {selectedConversation && (
+                  <>
+                    <div className="mb-3">
+                      <div className="text-muted small">Message</div>
+                      <div className="fw-medium">
+                        {selectedConversation.message}
+                      </div>
+                    </div>
+
+                    <div className="mb-2">
+                      <strong>Intent:</strong>{" "}
+                      <span className={`badge bg-${intentVariant(selectedConversation.intent)}`}>
+                        {selectedConversation.intent}
+                      </span>
+                    </div>
+
+                    <div className="mb-2">
+                      <strong>Confidence:</strong> {selectedConversation.confidence}%
+                      <ProgressBar
+                        now={selectedConversation.confidence}
+                        variant="success"
+                        className="mt-1"
+                        style={{ height: 6 }}
+                      />
+                    </div>
+
+                    <div className="mb-2">
+                      <strong>Received:</strong> {selectedConversation.timeAgo}
+                    </div>
+                  </>
+                )}
+              </Modal.Body>
+
+              <Modal.Footer>
+                <Button variant="secondary" onClick={handleClose}>
+                  Close
+                </Button>
+              </Modal.Footer>
+            </Modal>
+
+          </Card.Body>
+        </Card>
 
 
 
 
+
+      </div >
     </div>
+
+
+
+
   );
 };
 

@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Tooltip as BootstrapTooltip } from "bootstrap";
-import "./PeakHoursHeatmap.css"; // make sure your CSS from AnalyticsCharts is included
+import "../../Analytics/Analytics.css";
+
+
 import { Card, Row, Col, Form, Button } from "react-bootstrap";
 
 
@@ -112,9 +114,9 @@ const PeakHoursHeatmap = () => {
                 html: true,
                 placement: "top",
                 container: "body",
-                boundary: "window",
-                // trigger: window.innerWidth < 768 ? "click" : "hover",
+                trigger: window.innerWidth < 768 ? "click" : "hover",
             });
+
         });
 
         return () => {
@@ -180,79 +182,79 @@ const PeakHoursHeatmap = () => {
     const chartRef = useRef(null);
 
 
- 
 
-  return (
-    <Col sm={12}>
-                        <Card className="rounded-4 shadow-sm analytics-card mt-2 ">
-                            <Card.Body className="d-flex flex-column p-3 p-md-4">
-    
-                                {/* TITLE */}
-                                <h6 className="fw-semibold mb-3 mb-md-4">
-                                    Peak Hours Heatmap
-                                </h6>
-    
-                                {/* HEATMAP LAYOUT */}
-                                <div className="analytics-heatmap-layout flex-grow-1">
-                                    {/* DAYS */}
-                                    <div className="heatmap-days">
-                                        {days.map((day) => (
-                                            <span key={day}>
-                                                <span className="d-md-none">
-                                                    {day.slice(0, 3)}
-                                                </span>
-    
-                                                <span className="d-none d-md-inline">
-                                                    {day}
-                                                </span>
-                                            </span>
-                                        ))}
-                                    </div>
-    
-                                    {/* SCROLLABLE AREA */}
-                                    <div className="heatmap-scroll flex-grow-1">
-                                        <div className="heatmap-hours d-md-none">
-                                            {hours.map((h) => (
-                                                <span key={h}>{h}</span>
-                                            ))}
-                                        </div>
-                                        <div className="heatmap-hours d-none d-md-grid">
-                                            {hours.map((h) => (
-                                                <span key={h}>{h}</span>
-                                            ))}
-                                        </div>
-    
-                                        {/* GRID */}
-                                        <div className="heatmap-grid w-100 h-100">
-                                            {days.map((day) =>
-                                                hours.map((hour) => {
-                                                    const count = heatmapData?.[day]?.[hour] ?? 0;
-    
-                                                    return (
-                                                        <div
-                                                            key={`${day}-${hour}`}
-                                                            className={`heatmap-cell ${getHeatClass(count)}`}
-                                                            data-bs-toggle="tooltip"
-                                                            data-bs-placement="top"
-                                                            data-bs-html="true"
-                                                            data-bs-title={`
+
+    return (
+        <Col xs={12}>
+            <Card className="rounded-4 shadow-sm analytics-card mt-2 ">
+                <Card.Body className="d-flex flex-column p-3 p-md-4">
+
+                    {/* TITLE */}
+                    <h6 className="fw-semibold mb-3 mb-md-4">
+                        Peak Hours Heatmap
+                    </h6>
+
+                    {/* HEATMAP LAYOUT */}
+                    <div className="analytics-heatmap-layout flex-grow-1">
+                        {/* DAYS */}
+                        <div className="heatmap-days">
+                            {days.map((day) => (
+                                <span key={day}>
+                                    <span className="d-md-none">
+                                        {day.slice(0, 3)}
+                                    </span>
+
+                                    <span className="d-none d-md-inline">
+                                        {day}
+                                    </span>
+                                </span>
+                            ))}
+                        </div>
+
+                        {/* SCROLLABLE AREA */}
+                        <div className="heatmap-scroll flex-grow-1">
+                            <div className="heatmap-hours d-md-none">
+                                {hours.map((h) => (
+                                    <span key={h}>{h}</span>
+                                ))}
+                            </div>
+                            <div className="heatmap-hours d-none d-md-grid">
+                                {hours.map((h) => (
+                                    <span key={h}>{h}</span>
+                                ))}
+                            </div>
+
+                            {/* GRID */}
+                            <div className="heatmap-grid w-100 h-100">
+                                {days.map((day) =>
+                                    hours.map((hour) => {
+                                        const count = heatmapData?.[day]?.[hour] ?? 0;
+
+                                        return (
+                                            <div
+                                                key={`${day}-${hour}`}
+                                                className={`heatmap-cell ${getHeatClass(count)}`}
+                                                data-bs-toggle="tooltip"
+                                                data-bs-placement="top"
+                                                data-bs-html="true"
+                                                data-bs-title={`
                                                 <strong>${day}</strong><br/>
                                                 <strong>Time:</strong> ${hour}:00<br/>
                                                 <strong>Count:</strong> ${count}
                                             `}
-                                                        />
-                                                    );
-                                                })
-                                            )}
-                                        </div>
-    
-                                    </div>
-                                </div>
-    
-                            </Card.Body>
-                        </Card>
-                    </Col>
-  );
+                                            />
+                                        );
+                                    })
+                                )}
+                            </div>
+
+                        </div>
+                    </div>
+
+                </Card.Body>
+            </Card>
+        </Col>
+    );
 };
 
 export default PeakHoursHeatmap;
