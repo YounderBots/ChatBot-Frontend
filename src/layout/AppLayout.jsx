@@ -1,13 +1,13 @@
 import { ChevronLeft, ChevronRight, ChevronRightIcon, ChevronsLeft, User } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, } from "react-router-dom";
 
 import favIconChatViq from "./assets/favIconChatViq.png";
 import ChatViq from "./assets/chatviq.png";
 import dpPlaceholder from "./assets/dpPlaceholder.png";
 
 import menuList from "./menulist";
-import "./AppLayout.css";
+import "./AppLayout.css"; 
 
 /* -------------------- Render Menu -------------------- */
 const RenderMenu = ({ isExpanded, isMobile, activeMenu, setActiveMenu }) => {
@@ -50,10 +50,18 @@ const RenderMenu = ({ isExpanded, isMobile, activeMenu, setActiveMenu }) => {
 /* -------------------- Top Bar -------------------- */
 const TopBar = ({ isMobile, toggleSidebar, activeMenu, setActiveMenu }) => {
   const [dpImage, setDpImage] = useState(null);
+  const [showMenu, setShowMenu] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     setDpImage(dpPlaceholder);
+  }, []);
+
+
+  useEffect(() => {
+    const close = () => setShowMenu(false);
+    window.addEventListener("click", close);
+    return () => window.removeEventListener("click", close);
   }, []);
 
   return (
@@ -80,8 +88,38 @@ const TopBar = ({ isMobile, toggleSidebar, activeMenu, setActiveMenu }) => {
         )}
       </div>
 
-      <div className="userIcon">
+      {/* DP SECTION */}
+      <div
+        className="userIcon"
+        style={{ position: "relative" }}
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowMenu(!showMenu);
+        }}
+      >
         {dpImage ? <img src={dpImage} alt="User" /> : <User />}
+
+        {showMenu && (
+          <div className="dp-menu">
+            <div
+              onClick={() => {
+                navigate("/Profile");
+                setShowMenu(true);
+              }}
+            >
+              View Profile
+            </div>
+
+            <div
+              onClick={() => {
+                navigate("/login");
+                setShowMenu(false);
+              }}
+            >
+              Logout
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );

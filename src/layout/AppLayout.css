@@ -491,9 +491,12 @@ footer {
 }
 
 
-
 .userIcon {
+  position: relative;
   height: 90%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .mobileMenu .userIcon {
@@ -501,6 +504,30 @@ footer {
 }
 
 .userIcon img {
-  object-fit: cover;
   height: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 100%;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.dp-menu {
+  position: absolute;
+  right: 0;
+  top: 110%;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  min-width: 150px;
+  overflow: hidden;
+  z-index: 999;
+}
+
+.dp-menu div {
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.dp-menu div:hover {
+  background: #f3f3f3;
 }

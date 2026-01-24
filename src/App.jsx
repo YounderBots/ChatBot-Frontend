@@ -12,6 +12,7 @@ import IntentManager from './pages/IntentManager/IntentManager'
 import KnowledgeBaseManager from './pages/KnowledgeBaseManager/KnowledgeBaseManager'
 import Settings from './pages/Settings/Settings'
 import UserMgmt from './pages/UserManagement/UserMgmt'
+import UserProfile from './pages/Profile/UserProfile'
 // import ChatbotWidget from './components/ChatBotWidgetBS'
 
 
@@ -29,6 +30,7 @@ const App = () => {
           <Route path="/Knowledge-Base" element={<KnowledgeBaseManager />} />
           <Route path="/User-Management" element={<UserMgmt />} />
           <Route path="/Settings" element={<Settings />} />
+          <Route path="/Profile" element={<UserProfile />} />
         </Route>
       </Routes>
     </Router>
