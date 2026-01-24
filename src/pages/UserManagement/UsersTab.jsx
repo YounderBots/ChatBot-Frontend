@@ -272,27 +272,33 @@ export default function UsersTab() {
             <Col md={4}>
               <h5 className="mb-0 text-primary">Users</h5>
             </Col>
-            <Col md={8} className="d-flex justify-content-end gap-2">
-              <Form className="position-relative searchForm">
-                <Search className="searchIcon" size={14} />
-                <Form.Control
-                  size="sm"
-                  placeholder="    Search users"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="ps-4"
-                />
-              </Form>
-              <Form.Select size="sm" className="w-auto" value={filter} onChange={(e) => setFilter(e.target.value)}>
+            <Col
+              xs={12}
+              lg={8}
+              className="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center justify-content-lg-end gap-2 mt-2 mt-lg-0">
+              <Col xs={12} md className="p-0">
+                <Form className="position-relative searchForm w-100 ">
+                  <Search className="searchIcon" size={14} />
+                  <Form.Control
+                    size="sm"
+                    placeholder="    Search users"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="ps-4 w-100"
+                  />
+                </Form>
+              </Col>
+
+              <Form.Select size="sm" className="w-auto flex-shrink-0" value={filter} onChange={(e) => setFilter(e.target.value)}>
                 <option value="All">All</option>
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
               </Form.Select>
               <Form.Select
                 size="sm"
-                className="w-auto"
+                className="w-auto flex-shrink-0"
                 value={sortBy}
-                
+
                 onChange={(e) => setSortBy(e.target.value)}
               >
                 <option>Sort By Name</option>
@@ -300,7 +306,7 @@ export default function UsersTab() {
                 <option value="ZA">Descending</option>
               </Form.Select>
 
-              <Button size="sm" className="primaryBtn" onClick={openAddUser}>
+              <Button size="sm" className="primaryBtn flex-shrink-0" onClick={openAddUser}>
                 <Plus size={14} /> Add User
               </Button>
             </Col>
@@ -355,8 +361,7 @@ export default function UsersTab() {
                   />
                 </td>
                 <td>
-                  <div className="d-flex justify-content-center align-items-center gap-3 h-100 w-100">
-
+                  <div className="d-flex flex-wrap justify-content-center align-items-center gap-2">
                     <Edit2 size={16} className="cursorPointer" onClick={() => openEditUser(u)} />
                     <Trash2
                       size={16}
@@ -364,8 +369,8 @@ export default function UsersTab() {
                       onClick={() => deleteUser(u.id)}
                     />
                   </div>
-
                 </td>
+
               </tr>
             ))}
           </tbody>
@@ -390,7 +395,7 @@ export default function UsersTab() {
         <Modal.Body>
           <h6 className="mb-3">Basic Info</h6>
           <Row className="g-3">
-            <Col md={4} className="text-center pt-3">
+            <Col xs={12} md={4} className="text-center pt-3">
               <div className="mb-2 d-flex justify-content-center ">
                 {form.avatar ? (
                   <Image
@@ -445,7 +450,7 @@ export default function UsersTab() {
               )}
             </Col>
 
-            <Col md={8}>
+            <Col xs={12} md={8}>
               <Form.Group className="mb-2">
                 <Form.Label>Full Name *</Form.Label>
                 <Form.Control size="sm" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
@@ -459,7 +464,7 @@ export default function UsersTab() {
                   <Form.Group className="mb-2">
                     <Form.Label>Password</Form.Label>
 
-                    <div className="d-flex gap-2">
+                    <div className="d-flex flex-wrap gap-2">
                       <Form.Control
                         size="sm"
                         type={showPassword ? "text" : "password"}

@@ -121,7 +121,7 @@ const AnalyticsFilter = ({ onApply }) => {
                                         }}
                                     />
                                 </Col>
-                                <Col xs={12} md={3} className="d-flex justify-content-end">
+                                <Col xs={12} md={3} className="d-flex justify-content-end g-2">
                                     <Button size="sm" variant="primary" className="px-4" onClick={handleApply}>
                                         Apply Filter
                                     </Button>

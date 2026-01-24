@@ -17,15 +17,15 @@ const SettingsNotifications = () => {
     },
 
     enablePush: false,
-     pushEvents: {
-    newConversation: false,
-    escalatedConversation: false,
-    lowConfidence: false,
-    failedConversation: false,
-    negativeFeedback: false,
-    dailySummary: false,
-    weeklyReport: false,
-  },
+    pushEvents: {
+      newConversation: false,
+      escalatedConversation: false,
+      lowConfidence: false,
+      failedConversation: false,
+      negativeFeedback: false,
+      dailySummary: false,
+      weeklyReport: false,
+    },
 
     enableInApp: true,
     sound: "default",
@@ -43,14 +43,14 @@ const SettingsNotifications = () => {
   const [emailError, setEmailError] = useState("");
 
   const togglePushEvent = (key) => {
-  setSettings({
-    ...settings,
-    pushEvents: {
-      ...settings.pushEvents,
-      [key]: !settings.pushEvents[key],
-    },
-  });
-};
+    setSettings({
+      ...settings,
+      pushEvents: {
+        ...settings.pushEvents,
+        [key]: !settings.pushEvents[key],
+      },
+    });
+  };
 
 
   return (
@@ -72,27 +72,27 @@ const SettingsNotifications = () => {
           <Col md={6}>
             <Form.Label>Admin Email</Form.Label>
             <Form.Control
-            type="email"
-            value={settings.adminEmail}
-            isInvalid={!!emailError}
-            onChange={(e) => {
+              type="email"
+              value={settings.adminEmail}
+              isInvalid={!!emailError}
+              onChange={(e) => {
                 const value = e.target.value;
                 setSettings({ ...settings, adminEmail: value });
 
                 if (!value) {
-                setEmailError("Email is required");
+                  setEmailError("Email is required");
                 } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-                setEmailError("Enter a valid email address");
+                  setEmailError("Enter a valid email address");
                 } else {
-                setEmailError("");
+                  setEmailError("");
                 }
-            }}
+              }}
             />
 
             {emailError && (
-            <Form.Control.Feedback type="invalid">
+              <Form.Control.Feedback type="invalid">
                 {emailError}
-            </Form.Control.Feedback>
+              </Form.Control.Feedback>
             )}
 
           </Col>
@@ -183,72 +183,72 @@ const SettingsNotifications = () => {
           </Col>
         </Row>
 
-        <hr/>
+        <hr />
 
         <h6 className="text-primary mb-3">Push Notifications</h6>
 
         <Form.Check
-        type="switch"
-        label="Enable for admins"
-        checked={settings.enablePush}
-        onChange={(e) =>
+          type="switch"
+          label="Enable for admins"
+          checked={settings.enablePush}
+          onChange={(e) =>
             setSettings({ ...settings, enablePush: e.target.checked })
-        }
+          }
         />
 
         <Row className="mt-3">
-        <Col md={12}>
+          <Col md={12}>
             <Form.Label>Events</Form.Label>
 
             <Form.Check
-            className="mb-3"
-            label="New Conversation"
-            checked={settings.pushEvents.newConversation}
-            onChange={() => togglePushEvent("newConversation")}
+              className="mb-3"
+              label="New Conversation"
+              checked={settings.pushEvents.newConversation}
+              onChange={() => togglePushEvent("newConversation")}
             />
 
             <Form.Check
-            className="mb-3"
-            label="Escalated Conversation"
-            checked={settings.pushEvents.escalatedConversation}
-            onChange={() => togglePushEvent("escalatedConversation")}
+              className="mb-3"
+              label="Escalated Conversation"
+              checked={settings.pushEvents.escalatedConversation}
+              onChange={() => togglePushEvent("escalatedConversation")}
             />
 
             <Form.Check
-            className="mb-3"
-            label="Low Confidence Warning"
-            checked={settings.pushEvents.lowConfidence}
-            onChange={() => togglePushEvent("lowConfidence")}
+              className="mb-3"
+              label="Low Confidence Warning"
+              checked={settings.pushEvents.lowConfidence}
+              onChange={() => togglePushEvent("lowConfidence")}
             />
 
             <Form.Check
-            className="mb-3"
-            label="Failed Conversation"
-            checked={settings.pushEvents.failedConversation}
-            onChange={() => togglePushEvent("failedConversation")}
+              className="mb-3"
+              label="Failed Conversation"
+              checked={settings.pushEvents.failedConversation}
+              onChange={() => togglePushEvent("failedConversation")}
             />
 
             <Form.Check
-            className="mb-3"
-            label="Negative Feedback"
-            checked={settings.pushEvents.negativeFeedback}
-            onChange={() => togglePushEvent("negativeFeedback")}
+              className="mb-3"
+              label="Negative Feedback"
+              checked={settings.pushEvents.negativeFeedback}
+              onChange={() => togglePushEvent("negativeFeedback")}
             />
 
             <Form.Check
-            className="mb-3"
-            label="Daily Summary"
-            checked={settings.pushEvents.dailySummary}
-            onChange={() => togglePushEvent("dailySummary")}
+              className="mb-3"
+              label="Daily Summary"
+              checked={settings.pushEvents.dailySummary}
+              onChange={() => togglePushEvent("dailySummary")}
             />
 
             <Form.Check
-            className="mb-3"
-            label="Weekly Report"
-            checked={settings.pushEvents.weeklyReport}
-            onChange={() => togglePushEvent("weeklyReport")}
+              className="mb-3"
+              label="Weekly Report"
+              checked={settings.pushEvents.weeklyReport}
+              onChange={() => togglePushEvent("weeklyReport")}
             />
-        </Col>
+          </Col>
         </Row>
 
 

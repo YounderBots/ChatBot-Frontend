@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { Edit, Copy, Trash2 } from "lucide-react";
 import NewArticleDialog from "../dialog/NewArticleDialog";
+import DuplicateArticleDialog from "../dialog/DuplicateArticleDialog";
 
 /* ================= MOCK DATA ================= */
 const MOCK_ARTICLES = Array.from({ length: 50 }).map((_, i) => ({
@@ -10,14 +11,15 @@ const MOCK_ARTICLES = Array.from({ length: 50 }).map((_, i) => ({
     i % 3 === 0
       ? "Getting Started"
       : i % 3 === 1
-      ? "Account & Billing"
-      : "Technical Support",
+        ? "Account & Billing"
+        : "Technical Support",
   status:
     i % 3 === 0 ? "Published" : i % 3 === 1 ? "Draft" : "Archived",
   views: Math.floor(Math.random() * 500),
   helpful: Math.floor(Math.random() * 100),
   updatedAt: `2026-01-${String((i % 28) + 1).padStart(2, "0")}`,
   author: i % 2 === 0 ? "Admin" : "Support",
+  content: "",
 }));
 
 const PAGE_SIZE = 5;
@@ -30,7 +32,9 @@ export default function ArticlesPanel({ activeCategory = "All" }) {
   const [page, setPage] = useState(1);
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
   const [editingArticle, setEditingArticle] = useState(null);
+  const [articleToDuplicate, setArticleToDuplicate] = useState(null);
 
   /* ================= FILTER + SORT ================= */
   const filtered = useMemo(() => {
@@ -90,16 +94,28 @@ export default function ArticlesPanel({ activeCategory = "All" }) {
   };
 
   const handleDuplicate = (article) => {
-    setArticles((prev) => [
-      {
-        ...article,
+    setArticleToDuplicate(article);
+    setDuplicateDialogOpen(true);
+  };
+
+  const handleSaveArticle = (data) => {
+    if (data.id) {
+      // Edit existing
+      setArticles((prev) =>
+        prev.map((a) => (a.id === data.id ? { ...a, ...data } : a))
+      );
+    } else {
+      // Creative new or Duplicate
+      const newArticle = {
+        ...data,
         id: Date.now(),
-        title: `${article.title} (Copy)`,
-        status: "Draft",
         updatedAt: new Date().toISOString().slice(0, 10),
-      },
-      ...prev,
-    ]);
+        views: data.views || 0,
+        helpful: data.helpful || 0,
+        author: data.author || "Admin",
+      };
+      setArticles((prev) => [newArticle, ...prev]);
+    }
   };
 
   const handleDelete = (id) => {
@@ -267,6 +283,18 @@ export default function ArticlesPanel({ activeCategory = "All" }) {
             setDialogOpen(false);
             setEditingArticle(null);
           }}
+          onSave={handleSaveArticle}
+        />
+      )}
+
+      {duplicateDialogOpen && (
+        <DuplicateArticleDialog
+          article={articleToDuplicate}
+          onClose={() => {
+            setDuplicateDialogOpen(false);
+            setArticleToDuplicate(null);
+          }}
+          onSave={handleSaveArticle}
         />
       )}
     </>

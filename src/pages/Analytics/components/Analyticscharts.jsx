@@ -109,6 +109,8 @@ const heatmapData = {
     Sun: Array.from({ length: 24 }, () => Math.floor(Math.random() * 100)),
 };
 
+
+
 const AnalyticsCharts = () => {
     const [sortBy, setSortBy] = useState("usage");
     const [confidenceFilter, setConfidenceFilter] = useState(null);
@@ -138,6 +140,15 @@ const AnalyticsCharts = () => {
             });
         };
     }, []);
+
+    const maxCount = Math.max(
+        ...Object.values(heatmapData).flat()
+    );
+
+    const getColor = (value, max) => {
+        const intensity = value / max;
+        return `rgba(13, 110, 253, ${0.15 + intensity * 0.85})`;
+    };
 
     const sortedIntentData = [...intentData]
         .sort((a, b) => {
@@ -448,6 +459,24 @@ const AnalyticsCharts = () => {
                                     </div>
 
                                 </div>
+                            </div>
+                            <div className="d-flex justify-content-end align-items-center mt-3 small text-muted">
+                                <span className="me-2">Less</span>
+
+                                {[0, 0.25, 0.5, 0.75, 1].map((v, i) => (
+                                    <div
+                                        key={i}
+                                        style={{
+                                            width: 14,
+                                            height: 14,
+                                            borderRadius: 3,
+                                            marginRight: 4,
+                                            backgroundColor: getColor(v * maxCount, maxCount),
+                                        }}
+                                    />
+                                ))}
+
+                                <span className="ms-2">More</span>
                             </div>
 
                         </Card.Body>

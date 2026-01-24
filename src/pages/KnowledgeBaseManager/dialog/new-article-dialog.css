@@ -262,6 +262,7 @@
 .related-question-item input:focus {
   outline: none;
 }
+
 /* ==================================
    🔥 PREMIUM REMOVE BUTTON (CSS ONLY)
 ================================== */
@@ -285,7 +286,8 @@
   border-radius: 10px;
 
   cursor: pointer;
-  font-size: 0;                 /* hides emoji text */
+  font-size: 0;
+  /* hides emoji text */
   position: relative;
 
   transition: all 0.2s ease;
@@ -462,7 +464,7 @@
   border-radius: 8px;
 
   cursor: pointer;
-  transition: 
+  transition:
     background-color 0.2s ease,
     color 0.2s ease,
     border-color 0.2s ease,
@@ -818,7 +820,7 @@
 
   .featured-checkbox-wrapper label {
     display: none;
-    /* Remove phantom label on stacked layout */
+
   }
 }
 
@@ -912,4 +914,3 @@
     padding: 8px 12px;
   }
 }
-

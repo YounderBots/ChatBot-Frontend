@@ -3,34 +3,34 @@ import React, { useState } from "react";
 import { Card, Row, Col, Form, Button } from "react-bootstrap";
 
 const SettingsAppearance = () => {
- 
+
   const defaultSettings = {
-  primaryColor: "#f1f3f5",
-  ConversationBotColor:"#0000FF",
-  ConversationWordColor:"#FFFFFF",
-  UserChatColor:"#f1f3f5",
-  UserWordColor:"#111111",
-  ButtonColor:"#007bff",
-  fontFamily: "Sans-serif",
+    primaryColor: "#f1f3f5",
+    ConversationBotColor: "#0000FF",
+    ConversationWordColor: "#FFFFFF",
+    UserChatColor: "#f1f3f5",
+    UserWordColor: "#111111",
+    ButtonColor: "#007bff",
+    fontFamily: "Sans-serif",
 
-  widgetPosition: "bottom-right",
-  widgetSize: "medium",
-  chatBubbleText: "Chat with us",
+    widgetPosition: "bottom-right",
+    widgetSize: "medium",
+    chatBubbleText: "Chat with us",
 
-  autoOpen: false,
-  autoOpenDelay: 5,
-  showOnMobile: true,
+    autoOpen: false,
+    autoOpenDelay: 5,
+    showOnMobile: true,
 
-  greetingDelay: 0,
+    greetingDelay: 0,
 
-  showOnScroll: false,
-  scrollPercent: 50,
-};
-const [settings, setSettings] = useState(defaultSettings);
+    showOnScroll: false,
+    scrollPercent: 50,
+  };
+  const [settings, setSettings] = useState(defaultSettings);
 
-const handleReset = () => {
-  setSettings(defaultSettings);
-};
+  const handleReset = () => {
+    setSettings(defaultSettings);
+  };
 
   return (
     <Card className="border-0">
@@ -40,7 +40,7 @@ const handleReset = () => {
         <h6 className="text-primary mb-3">Chat Widget Customization</h6>
 
         <Row className="mb-3">
-          <Col md={4}>
+          <Col lg={4} md={6} sm={6} className="mb-3">
             <Form.Label>Widget Background Color</Form.Label>
             <Form.Control
               type="color"
@@ -51,7 +51,7 @@ const handleReset = () => {
             />
           </Col>
 
-          <Col md={4}>
+          <Col lg={4} md={6} sm={6} className="mb-3">
             <Form.Label>BotChat Message Background</Form.Label>
             <Form.Control
               type="color"
@@ -62,7 +62,7 @@ const handleReset = () => {
             />
           </Col>
 
-          <Col md={4}>
+          <Col lg={4} md={6} sm={6} className="mb-3">
             <Form.Label>Userchat Message Background</Form.Label>
             <Form.Control
               type="color"
@@ -73,7 +73,7 @@ const handleReset = () => {
             />
           </Col>
 
-          <Col md={4}>
+          <Col lg={4} md={6} sm={6} className="mb-3">
             <Form.Label>Bot Text Color</Form.Label>
             <Form.Control
               type="color"
@@ -84,7 +84,7 @@ const handleReset = () => {
             />
           </Col>
 
-          <Col md={4}>
+          <Col lg={4} md={6} sm={6} className="mb-3">
             <Form.Label>User Text Color</Form.Label>
             <Form.Control
               type="color"
@@ -94,8 +94,8 @@ const handleReset = () => {
               }
             />
           </Col>
-          
-          <Col md={4}>
+
+          <Col lg={4} md={6} sm={6} className="mb-3">
             <Form.Label>Button Color</Form.Label>
             <Form.Control
               type="color"
@@ -108,8 +108,8 @@ const handleReset = () => {
 
         </Row>
 
-        <Row className="mb-4">
-          <Col md={6}>
+        <Row className="mb-3">
+          <Col md={6} className="mb-3">
             <Form.Label>Font Family</Form.Label>
             <Form.Select
               value={settings.fontFamily}
@@ -123,7 +123,7 @@ const handleReset = () => {
             </Form.Select>
           </Col>
 
-          <Col md={6}>
+          <Col md={6} className="mb-3">
             <Form.Label>Chat Bubble Text</Form.Label>
             <Form.Control
               type="text"
@@ -184,8 +184,8 @@ const handleReset = () => {
         {/* WIDGET BEHAVIOR */}
         <h6 className="text-primary mb-3">Widget Behavior</h6>
         <Row className="mb-3">
-          <Col md={6}>
-            <Form.Check 
+          <Col lg={6} md={12}>
+            <Form.Check
               type="checkbox"
               label="Auto-open on page load"
               checked={settings.autoOpen}
@@ -196,7 +196,7 @@ const handleReset = () => {
           </Col>
 
           {settings.autoOpen && (
-            <Col md={6}>
+            <Col lg={6} md={12}>
               <Form.Label>Delay (seconds)</Form.Label>
               <Form.Control
                 type="number"
@@ -214,7 +214,7 @@ const handleReset = () => {
         </Row>
 
         <Row className="mb-3">
-          <Col md={6}>
+          <Col lg={6} md={12}>
             <Form.Check
               type="checkbox"
               label="Show on mobile"
@@ -230,7 +230,7 @@ const handleReset = () => {
         </Row>
 
         <Row className="mb-3">
-          <Col md={6}>
+          <Col lg={6} md={12}>
             <Form.Label>Greeting delay (seconds)</Form.Label>
             <Form.Control
               type="number"
@@ -288,7 +288,7 @@ const handleReset = () => {
 
         <div
           style={{
-            width:"100%",
+            width: "100%",
             maxWidth: "400px",
             borderRadius: "16px",
             fontFamily: settings.fontFamily,
@@ -389,7 +389,7 @@ const handleReset = () => {
 
 
         <div className="mt-4">
-          <Button size="sm" variant="danger"  onClick={handleReset}>
+          <Button size="sm" variant="danger" onClick={handleReset}>
             Reset to Default
           </Button>
         </div>

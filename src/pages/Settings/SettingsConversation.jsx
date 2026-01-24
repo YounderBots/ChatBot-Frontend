@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Card, Row, Col, Form, Button, Modal } from "react-bootstrap";
-
+import { FaTrash } from "react-icons/fa";
 const SettingsConversation = () => {
   const [settings, setSettings] = useState({
     confidenceThreshold: 60,
@@ -41,17 +41,17 @@ const SettingsConversation = () => {
     setShowKeywordModal(false);
   };
 
-const updatePriority = (index, priority) => {
-  const updated = [...settings.escalationKeywords];
-  updated[index].priority = priority;
-  setSettings({ ...settings, escalationKeywords: updated });
-};
+  const updatePriority = (index, priority) => {
+    const updated = [...settings.escalationKeywords];
+    updated[index].priority = priority;
+    setSettings({ ...settings, escalationKeywords: updated });
+  };
 
-const removeKeyword = (index) => {
-  const updated = [...settings.escalationKeywords];
-  updated.splice(index, 1);
-  setSettings({ ...settings, escalationKeywords: updated });
-};
+  const removeKeyword = (index) => {
+    const updated = [...settings.escalationKeywords];
+    updated.splice(index, 1);
+    setSettings({ ...settings, escalationKeywords: updated });
+  };
 
 
   return (
@@ -62,76 +62,73 @@ const removeKeyword = (index) => {
         <h6 className="text-primary mb-3">AI Configuration</h6>
 
         <Row className="mb-3">
-            <Col md={6}>
-                <Form.Label className="fw-semibold">
-                Confidence Threshold
-                <span className="text-primary ms-2">
-                    ({settings.confidenceThreshold}%)
-                </span>
-                </Form.Label>
+          <Col md={6} className="mb-3">
+            <Form.Label className="fw-semibold">
+              Confidence Threshold
+              <span className="text-primary ms-2">
+                ({settings.confidenceThreshold}%)
+              </span>
+            </Form.Label>
 
-                <Form.Range
-                min={0}
-                max={100}
-                value={settings.confidenceThreshold}
-                onChange={(e) =>
-                    setSettings({
-                    ...settings,
-                    confidenceThreshold: Number(e.target.value),
-                    })
+            <Form.Range
+              min={0}
+              max={100}
+              value={settings.confidenceThreshold}
+              onChange={(e) =>
+                setSettings({
+                  ...settings,
+                  confidenceThreshold: Number(e.target.value),
+                })
+              }
+            />
+
+            <Form.Label>
+              Description
+            </Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={3}
+            ></Form.Control>
+          </Col>
+
+          <Col md={6} className="mb-3">
+            <Form.Label>Context Timeout (minutes)</Form.Label>
+            <Form.Control
+              type="number"
+              value={settings.contextTimeout === 0 ? "" : settings.contextTimeout}
+              isInvalid={!!contextTimeoutError}
+              onChange={(e) => {
+                let value = e.target.value;
+                if (value.length > 1 && value.startsWith("0")) {
+                  value = value.replace(/^0+/, "");
                 }
-                />
+                const numericValue = value === "" ? "" : Number(value);
+                setSettings({
+                  ...settings,
+                  contextTimeout: numericValue,
+                });
+                if (numericValue !== "" && numericValue < 5) {
+                  setContextTimeoutError(
+                    "Context timeout must be at least 5 minutes"
+                  );
+                } else if (numericValue > 120) {
+                  setContextTimeoutError(
+                    "Context timeout cannot exceed 120 minutes"
+                  );
+                } else {
+                  setContextTimeoutError("");
+                }
+              }}
+            />
 
-                <Form.Label>
-                    Description
-                </Form.Label>
-                <Form.Control
-                as="textarea"
-                rows={3}
-                ></Form.Control>
-            </Col>
+            {contextTimeoutError && (
+              <Form.Control.Feedback type="invalid">
+                {contextTimeoutError}
+              </Form.Control.Feedback>
+            )}
+          </Col>
 
-           <Col md={6}>
-                <Form.Label>Context Timeout (minutes)</Form.Label>
-                <Form.Control
-                    type="number"
-                    value={settings.contextTimeout === 0 ? "" : settings.contextTimeout}
-                    isInvalid={!!contextTimeoutError}
-                    onChange={(e) => {
-                    let value = e.target.value;
-                    if (value.length > 1 && value.startsWith("0")) {
-                        value = value.replace(/^0+/, "");
-                    }
-                    const numericValue = value === "" ? "" : Number(value);
-                    setSettings({
-                        ...settings,
-                        contextTimeout: numericValue,
-                    });
-                    if (numericValue !== "" && numericValue < 5) {
-                        setContextTimeoutError(
-                        "Context timeout must be at least 5 minutes"
-                        );
-                    } else if (numericValue > 120) {
-                        setContextTimeoutError(
-                        "Context timeout cannot exceed 120 minutes"
-                        );
-                    } else {
-                        setContextTimeoutError("");
-                    }
-                    }}
-                />
-
-                {contextTimeoutError && (
-                    <Form.Control.Feedback type="invalid">
-                    {contextTimeoutError}
-                    </Form.Control.Feedback>
-                )}
-            </Col>
-
-        </Row>
-
-        <Row className="mb-4">
-          <Col md={6}>
+          <Col md={6} className="mb-3">
             <Form.Label>Max Conversation Length</Form.Label>
 
             <Form.Control
@@ -175,10 +172,7 @@ const removeKeyword = (index) => {
               </Form.Control.Feedback>
             )}
           </Col>
-        </Row>
 
-
-        <Row className="mb-4">
           <Col md={6} className="d-flex align-items-center">
             <Form.Check
               type="switch"
@@ -194,7 +188,7 @@ const removeKeyword = (index) => {
           </Col>
         </Row>
 
-        <hr/>
+        <hr />
 
         {/* AUTO ESCALATION */}
         <h6 className="text-primary mb-3">Auto-Escalation Rules</h6>
@@ -233,21 +227,25 @@ const removeKeyword = (index) => {
               </Col>
             </Row>
             <Row className="mb-4">
-                <Col md={6}>
-                    <Form.Check
-                    type="checkbox"
-                    label="Escalate on negative sentiment"
-                    />
-                </Col>
+              <Col md={12}>
+                <Form.Check
+                  type="checkbox"
+                  label="Escalate on negative sentiment"
+                />
+              </Col>
             </Row>
-            <hr/>
-            <Row>
-              <h6 className="text-primary">Escalation Keywords</h6>
-              <Col xs={12} md={4} className="mb-2">
-              <Button
+            <hr />
+            <Row className="align-items-center mb-2">
+              <Col xs={8} md={6}>
+                <h6 className="text-primary mb-0">
+                  Escalation Keywords
+                </h6>
+              </Col>
+
+              <Col xs={4} md={6} className="text-end">
+                <Button
                   size="sm"
                   variant="primary"
-                  className="mt-2"
                   onClick={() => setShowKeywordModal(true)}
                 >
                   Add Keyword
@@ -255,36 +253,42 @@ const removeKeyword = (index) => {
               </Col>
             </Row>
 
-                {settings.escalationKeywords.map((item, index) => (
-                  <Row key={index} className="align-items-center mb-2">
-                    <Col xs={12} md={4}>{item.label}</Col>
+            {settings.escalationKeywords.map((item, index) => (
 
-                    <Col md={4}>
-                      <Form.Select
-                        size="sm"
-                        value={item.priority}
-                        onChange={(e) =>
-                          updatePriority(index, e.target.value)
-                        }
-                      >
-                        <option value="HIGH">High</option>
-                        <option value="MEDIUM">Medium</option>
-                        <option value="LOW">Low</option>
-                      </Form.Select>
-                    </Col>
 
-                    <Col xs={12} md={2}>
-                      <Button
-                        size="sm"
-                        variant="danger"
-                        onClick={() => removeKeyword(index)}
-                      >
-                        Remove
-                      </Button>
-                    </Col>
-                  </Row>
-                ))}
+              <Row key={index} className="align-items-center mb-1">
+                <Col xs="auto" className="pe-2">
+                  {item.label}
+                </Col>
 
+                <Col>
+                  <div className="d-flex align-items-center gap-2">
+                    <Form.Select
+                      size="sm"
+                      value={item.priority}
+                      onChange={(e) =>
+                        updatePriority(index, e.target.value)
+                      }
+                    >
+                      <option value="HIGH">High</option>
+                      <option value="MEDIUM">Medium</option>
+                      <option value="LOW">Low</option>
+                    </Form.Select>
+
+                    <Button
+                      size="sm"
+                      variant="outline-danger"
+                      onClick={() => removeKeyword(index)}
+                      title="Delete"
+                    >
+                      <FaTrash />
+                    </Button>
+                  </div>
+                </Col>
+              </Row>
+
+
+            ))}
           </>
         )}
         <Modal
@@ -331,7 +335,6 @@ const removeKeyword = (index) => {
             </Button>
           </Modal.Footer>
         </Modal>
-
 
       </Card.Body>
     </Card>

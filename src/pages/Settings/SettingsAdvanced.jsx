@@ -1,11 +1,11 @@
-  import React, { useState,useEffect } from "react";
-  import { Card, Row, Col, Form, Button,Modal,Container } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { Card, Row, Col, Form, Button, Modal, Container } from "react-bootstrap";
 
-  const SettingsAdvanced = () => {
+const SettingsAdvanced = () => {
 
-    const defaultSettings = {
+  const defaultSettings = {
     enableLearning: true,
-    autoAddTraining: false,   
+    autoAddTraining: false,
     autoAddConfidence: 60,
     reviewQueueThreshold: 40,
 
@@ -26,50 +26,50 @@
   const [settings, setSettings] = useState(defaultSettings);
 
 
-    const [file, setFile] = useState(null);
-    const [showResetModal, setShowResetModal] = useState(false);
+  const [file, setFile] = useState(null);
+  const [showResetModal, setShowResetModal] = useState(false);
 
-    const exportSettings = () => {
-      const blob = new Blob(
-        [JSON.stringify(settings, null, 2)],
-        { type: "application/json" }
-      );
+  const exportSettings = () => {
+    const blob = new Blob(
+      [JSON.stringify(settings, null, 2)],
+      { type: "application/json" }
+    );
 
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "settings-backup.json";
-      link.click();
-      URL.revokeObjectURL(url);
-    };
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "settings-backup.json";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
   const [lastSavedAt, setLastSavedAt] = useState(null);
   const [savedSettings, setSavedSettings] = useState(settings);
   const [hasChanges, setHasChanges] = useState(false);
   const [dataRetentionError, setDataRetentionError] = useState("");
 
 
-    const importSettings = () => {
-      if (!file) return;
+  const importSettings = () => {
+    if (!file) return;
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const imported = JSON.parse(e.target.result);
-          setSettings(imported);
-          alert("Settings imported successfully");
-        } catch {
-          alert("Invalid JSON file");
-        }
-      };
-      reader.readAsText(file);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const imported = JSON.parse(e.target.result);
+        setSettings(imported);
+        alert("Settings imported successfully");
+      } catch {
+        alert("Invalid JSON file");
+      }
     };
+    reader.readAsText(file);
+  };
 
-    const resetSettings = () => {
-      setSettings({...defaultSettings});
-      setShowResetModal(false);
-    };
+  const resetSettings = () => {
+    setSettings({ ...defaultSettings });
+    setShowResetModal(false);
+  };
 
-    useEffect(() => {
+  useEffect(() => {
     setHasChanges(
       JSON.stringify(settings) !== JSON.stringify(savedSettings)
     );
@@ -86,10 +86,10 @@
     setHasChanges(false);
   };
 
-    return (
-      <Card className="border-0 overflow-hidden">
-        <Card.Body className="p-0 d-flex flex-column">
-          <div 
+  return (
+    <Card className="border-0 overflow-hidden">
+      <Card.Body className="p-0 d-flex flex-column">
+        <div
           className="flex-grow-1 overflow-auto p-4"
           style={{ maxHeight: "calc(100vh - 400px)" }}>
 
@@ -106,63 +106,63 @@
           />
 
           <Form.Check className="mt-3"
-          type="checkbox"
-          label="Auto-add to training"
-          checked={settings.autoAddToTraining}
-          onChange={(e) =>
+            type="checkbox"
+            label="Auto-add to training"
+            checked={settings.autoAddToTraining}
+            onChange={(e) =>
               setSettings({
-              ...settings,
-              autoAddToTraining: e.target.checked,
+                ...settings,
+                autoAddToTraining: e.target.checked,
               })
-          }
+            }
           />
 
           {settings.autoAddToTraining && (
-          <Row className="mt-3">
-              <Col md={6}>
-              <Form.Label>
+            <Row className="mt-3">
+              <Col lg={6} md={12}>
+                <Form.Label>
                   Confidence threshold for auto-add
                   <span className="text-primary ms-2">
-                  ({settings.autoAddConfidence}%)
+                    ({settings.autoAddConfidence}%)
                   </span>
-              </Form.Label>
+                </Form.Label>
 
-              <Form.Range
+                <Form.Range
                   min={0}
                   max={100}
                   value={settings.autoAddConfidence}
                   onChange={(e) =>
-                  setSettings({
+                    setSettings({
                       ...settings,
                       autoAddConfidence: Number(e.target.value),
-                  })
+                    })
                   }
-              />
+                />
               </Col>
-          </Row>
+            </Row>
           )}
 
           <Row className="mt-3">
-          <Col md={6}>
+            <Col lg={6} md={12}>
               <Form.Label>
-              Review queue threshold
-              <span className="text-primary ms-2">
+                Review queue threshold
+                <span className="text-primary ms-2">
                   ({settings.reviewQueueThreshold}%)
-              </span>
+                </span>
               </Form.Label>
 
               <Form.Range
-              min={0}
-              max={100}
-              value={settings.reviewQueueThreshold}
-              onChange={(e) =>
+                min={0}
+                max={100}
+                value={settings.reviewQueueThreshold}
+                onChange={(e) =>
                   setSettings({
-                  ...settings,
-                  reviewQueueThreshold: Number(e.target.value),
+                    ...settings,
+                    reviewQueueThreshold: Number(e.target.value),
                   })
-              }
+                }
               />
-          </Col>
+            </Col>
           </Row>
           <hr />
 
@@ -170,49 +170,49 @@
           <h6 className="text-primary mb-3">Data & Privacy</h6>
 
           <Row className="mb-3">
-          <Col md={6}>
+            <Col lg={6} md={12}>
               <Form.Label>Data Retention (days)</Form.Label>
 
               <Form.Control
-              type="number"
-              value={settings.dataRetentionDays}
-              isInvalid={!!dataRetentionError}
-              onChange={(e) => {
+                type="number"
+                value={settings.dataRetentionDays}
+                isInvalid={!!dataRetentionError}
+                onChange={(e) => {
                   const value = e.target.value;
 
                   setSettings({
-                  ...settings,
-                  dataRetentionDays: value,
+                    ...settings,
+                    dataRetentionDays: value,
                   });
 
                   // Validation
                   if (value === "") {
-                  setDataRetentionError("");
-                  return;
+                    setDataRetentionError("");
+                    return;
                   }
 
                   const num = Number(value);
 
                   if (num < 30) {
-                  setDataRetentionError(
+                    setDataRetentionError(
                       "Data retention must be at least 30 days"
-                  );
+                    );
                   } else if (num > 365) {
-                  setDataRetentionError(
+                    setDataRetentionError(
                       "Data retention cannot exceed 365 days"
-                  );
+                    );
                   } else {
-                  setDataRetentionError("");
+                    setDataRetentionError("");
                   }
-              }}
+                }}
               />
 
               {dataRetentionError && (
-              <Form.Control.Feedback type="invalid">
+                <Form.Control.Feedback type="invalid">
                   {dataRetentionError}
-              </Form.Control.Feedback>
+                </Form.Control.Feedback>
               )}
-          </Col>
+            </Col>
           </Row>
 
 
@@ -277,7 +277,7 @@
           <h6 className="text-primary mb-3">Logging</h6>
 
           <Row className="mb-3">
-            <Col md={6}>
+            <Col lg={6} md={12}>
               <Form.Label>Log Level</Form.Label>
               <Form.Select
                 value={settings.logLevel}
@@ -321,10 +321,10 @@
           <hr />
 
           {/* SYSTEM */}
-          <h6 className="text-primary mb-3">System Settings</h6>
+          <h6 className="text-primary mb-2">System Settings</h6>
 
           <Row className="mb-3">
-            <Col md={4}>
+            <Col lg={6} md={12} className="mb-3">
               <Form.Label>Language</Form.Label>
               <Form.Select
                 value={settings.language}
@@ -338,7 +338,7 @@
               </Form.Select>
             </Col>
 
-            <Col md={4}>
+            <Col lg={4} md={12} className="mb-3">
               <Form.Label>Date Format</Form.Label>
               <Form.Select
                 value={settings.dateFormat}
@@ -351,7 +351,7 @@
               </Form.Select>
             </Col>
 
-            <Col md={4}>
+            <Col md={6} className="mb-3">
               <Form.Label>Time Format</Form.Label>
               <Form.Check
                 className="mb-2"
@@ -378,39 +378,44 @@
           <hr />
 
           {/* BACKUP & RESET */}
-          <h6 className="text-primary mb-3">Backup & Restore</h6>
-          <Row className="mb-3">
-            <Col md={4}>
+          <Row className="align-items-center mb-3">
+            <Col>
+              <h6 className="text-primary mb-0">
+                Backup & Restore
+              </h6>
+            </Col>
+
+            <Col xs="auto" className="ms-auto">
               <Button
+                size="sm"
                 variant="primary"
                 onClick={exportSettings}
               >
-                Export All Settings
+                Export
               </Button>
             </Col>
           </Row>
 
-          <Row className="mb-3 align-items-center">
-            <Col md={4}>
+          <Row className="align-items-center mb-3">
+            <Col lg={6} md={12} className="mb-2">
               <Form.Control
+                size="sm"
                 type="file"
                 accept="application/json"
                 onChange={(e) => setFile(e.target.files[0])}
               />
             </Col>
-            <Col md={2}>
+
+            <Col className="d-flex gap-2">
               <Button
+                size="sm"
                 variant="primary"
                 onClick={importSettings}
                 disabled={!file}
               >
                 Import
               </Button>
-            </Col>
-          </Row>
 
-          <Row>
-            <Col md={4}>
               <Button
                 size="sm"
                 variant="danger"
@@ -420,84 +425,88 @@
               </Button>
             </Col>
           </Row>
+
         </div>
 
         <div
-        className="bg-white border-top"
-        style={{
-          position: "sticky",
-          bottom: 0,
-          zIndex: 100,
-          pointerEvents: "auto",
-        }}
-      >
-        <Container fluid className="py-3">
-          <Row className="align-items-center gy-2">
-            <Col md={6} xs={12}className="text-muted">
-              {lastSavedAt
-                ? <>Last saved: <strong>{lastSavedAt.toLocaleString()}</strong></>
-                : "Not saved yet"}
-            </Col>
+          className="bg-white border-top"
+          style={{
+            position: "sticky",
+            bottom: 0,
+            zIndex: 100,
+            pointerEvents: "auto",
+          }}
+        >
+          <Container fluid className="py-3">
+            <Row className="align-items-center gy-2">
+              <Col md={6} xs={12} className="text-muted">
+                {lastSavedAt
+                  ? <>Last saved: <strong>{lastSavedAt.toLocaleString()}</strong></>
+                  : "Not saved yet"}
+              </Col>
 
-            <Col md={6} xs={12} className="text-md-end text-start">
-              <Button
-                variant="secondary"
-                className="me-2"
-                onClick={handleDiscard}
-                disabled={!hasChanges}
-              >
-                Discard Changes
-              </Button>
-
-              <Button
-                variant="primary"
-                onClick={handleSave}
-                disabled={!hasChanges}
-              >
-                Save Changes
-              </Button>
-            </Col>
-          </Row>
-        </Container>
-      </div>
+              <Col md={12} className="d-flex justify-content-end gap-2 mb-2">
+                <Button
+                  size="sm"
+                  variant="primary"
+                  onClick={handleDiscard}
+                  disabled={!hasChanges}
+                >
+                  Discard
+                </Button>
 
 
-      <Modal
-        show={showResetModal}
-        onHide={() => setShowResetModal(false)}
-        centered
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Reset</Modal.Title>
-        </Modal.Header>
+                <Button
+                  size="sm"
+                  variant="primary"
+                  onClick={handleSave}
+                  disabled={!hasChanges}
+                >
+                  Save Changes
+                </Button>
+              </Col>
 
-        <Modal.Body>
-          Are you sure you want to reset all settings to default?
-          <br />
-          <strong>This action cannot be undone.</strong>
-        </Modal.Body>
+            </Row>
+          </Container>
+        </div>
 
-        <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={() => setShowResetModal(false)}
-          >
-            Cancel
-          </Button>
-          <Button variant="danger" onClick={resetSettings}>
-            Reset
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    
 
-        </Card.Body>
-      </Card>
-      
-      
+        <Modal
+          show={showResetModal}
+          onHide={() => setShowResetModal(false)}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Confirm Reset</Modal.Title>
+          </Modal.Header>
 
-      
-    );
-  };
+          <Modal.Body>
+            Are you sure you want to reset all settings to default?
+            <br />
+            <strong>This action cannot be undone.</strong>
+          </Modal.Body>
 
-  export default SettingsAdvanced;
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => setShowResetModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={resetSettings}>
+              Reset
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+
+      </Card.Body>
+    </Card>
+
+
+
+
+  );
+};
+
+export default SettingsAdvanced;
