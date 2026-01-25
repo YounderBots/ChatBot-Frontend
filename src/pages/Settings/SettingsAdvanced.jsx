@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Card, Row, Col, Form, Button, Modal, Container } from "react-bootstrap";
+import { useEffect, useState } from "react";
+import { Button, Card, Col, Container, Form, Modal, Row } from "react-bootstrap";
 
 const SettingsAdvanced = () => {
 
@@ -91,7 +91,7 @@ const SettingsAdvanced = () => {
       <Card.Body className="p-0 d-flex flex-column">
         <div
           className="flex-grow-1 overflow-auto p-4"
-          style={{ maxHeight: "calc(100vh - 400px)" }}>
+          style={{ maxHeight: "calc(100vh - 440px)" }}>
 
           {/* TRAINING & LEARNING */}
           <h6 className="text-primary mb-3">Training & Learning</h6>
@@ -445,10 +445,10 @@ const SettingsAdvanced = () => {
                   : "Not saved yet"}
               </Col>
 
-              <Col md={12} className="d-flex justify-content-end gap-2 mb-2">
+              <Col md={6} className="d-flex justify-content-end gap-2 mb-2">
                 <Button
                   size="sm"
-                  variant="primary"
+                  variant="danger"
                   onClick={handleDiscard}
                   disabled={!hasChanges}
                 >

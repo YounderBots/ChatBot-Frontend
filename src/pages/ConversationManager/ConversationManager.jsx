@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { Card, Row, Col, Form, Button, InputGroup, Modal } from "react-bootstrap";
 import { Search, X } from "lucide-react";
+import { useState } from "react";
+import { Button, Card, Col, Form, InputGroup, Modal, Row } from "react-bootstrap";
 import Select from "react-select";
 
 const ConversationManager = () => {
@@ -510,7 +510,7 @@ const ConversationManager = () => {
           </Col>
 
           <div className="d-flex flex-column flex-lg-row gap-2 w-100 mt-3">
-            <Col xs={12} lg={4} className="bg-light border rounded mt-3 " style={{ height: "65vh", overflowY: "auto" }}>
+            <Col xs={12} lg={4} className="bg-light border rounded mt-3 " style={{ overflowY: "auto" }}>
               <div className="">
                 {filteredConversations
                   .filter(conv =>

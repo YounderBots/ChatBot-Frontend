@@ -1,12 +1,12 @@
-import { createPortal } from "react-dom";
 import {
-  X,
-  Trash2,
-  Pencil,
   Check,
   GripVertical,
+  Pencil,
+  Trash2,
+  X,
 } from "lucide-react";
 import { useState } from "react";
+import { createPortal } from "react-dom";
 
 export default function ManageCategoriesDialog({
   categories,
@@ -260,8 +260,8 @@ export default function ManageCategoriesDialog({
               }}
             />
             <button
+              className="btn btn-primary"
               style={{
-                background: "#2563eb",
                 color: "#ffffff",
                 padding: "10px 16px",
                 borderRadius: 12,

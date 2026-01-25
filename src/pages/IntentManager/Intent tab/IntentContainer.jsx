@@ -1,12 +1,12 @@
-import React, { useState } from 'react'
-import IntentTable from '../components/IntentTable/IntentTable'
+import { useState } from 'react'
 import IntentGrid from '../components/IntentGrid/IntentGrid'
 import IntentModal from '../components/IntentModel/IntentModel'
+import IntentTable from '../components/IntentTable/IntentTable'
 import TestPanel from '../components/Testpanel/TestPanel'
 import { INITIAL_INTENTS } from '../Dummy'
 
-import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
+import 'bootstrap/dist/css/bootstrap.min.css'
 import '../Theme.css'
 
 const IntentContainer = () => {
@@ -93,7 +93,7 @@ const IntentContainer = () => {
 
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <h3 className="fw-bold text-cvq-blue-900 mb-0">Intents</h3>
+        {/* <h3 className="fw-bold text-cvq-blue-900 mb-0">Intents</h3> */}
 
         <div className="intent-header-actions d-flex align-items-center gap-3">
 
@@ -170,21 +170,19 @@ const IntentContainer = () => {
           {/* View Toggle */}
           <div className="btn-group bg-light rounded-2">
             <button
-              className={`btn btn-sm ${
-                viewMode === 'grid'
-                  ? 'bg-white shadow-sm text-primary'
-                  : 'text-secondary'
-              }`}
+              className={`btn btn-sm ${viewMode === 'grid'
+                ? 'bg-white shadow-sm text-primary'
+                : 'text-secondary'
+                }`}
               onClick={() => setViewMode('grid')}
             >
               <i className="bi bi-grid"></i>
             </button>
             <button
-              className={`btn btn-sm ${
-                viewMode === 'table'
-                  ? 'bg-white shadow-sm text-primary'
-                  : 'text-secondary'
-              }`}
+              className={`btn btn-sm ${viewMode === 'table'
+                ? 'bg-white shadow-sm text-primary'
+                : 'text-secondary'
+                }`}
               onClick={() => setViewMode('table')}
             >
               <i className="bi bi-layout-three-columns"></i>
@@ -203,27 +201,27 @@ const IntentContainer = () => {
 
       {/* Content */}
       <div className="bg-white rounded-4 shadow flex-grow-1 overflow-auto">
-  {viewMode === 'table' ? (
-    <IntentTable
-      intents={intents}
-      selectedIds={selectedIds}
-      onToggleAll={toggleSelectAll}
-      onToggleOne={toggleSelectOne}
-      onEdit={handleEdit}
-      onDuplicate={handleDuplicate}
-      onDelete={handleDelete}
-    />
-  ) : (
-    <IntentGrid
-      intents={intents}
-      selectedIds={selectedIds}
-      onToggleOne={toggleSelectOne}
-      onEdit={handleEdit}
-      onDuplicate={handleDuplicate}
-      onDelete={handleDelete}
-    />
-  )}
-</div>
+        {viewMode === 'table' ? (
+          <IntentTable
+            intents={intents}
+            selectedIds={selectedIds}
+            onToggleAll={toggleSelectAll}
+            onToggleOne={toggleSelectOne}
+            onEdit={handleEdit}
+            onDuplicate={handleDuplicate}
+            onDelete={handleDelete}
+          />
+        ) : (
+          <IntentGrid
+            intents={intents}
+            selectedIds={selectedIds}
+            onToggleOne={toggleSelectOne}
+            onEdit={handleEdit}
+            onDuplicate={handleDuplicate}
+            onDelete={handleDelete}
+          />
+        )}
+      </div>
 
 
       {/* Delete Modal */}

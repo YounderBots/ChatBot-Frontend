@@ -1,7 +1,7 @@
-import { useState, useMemo } from "react";
-import { Edit, Copy, Trash2 } from "lucide-react";
-import NewArticleDialog from "../dialog/NewArticleDialog";
+import { Copy, Edit, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
 import DuplicateArticleDialog from "../dialog/DuplicateArticleDialog";
+import NewArticleDialog from "../dialog/NewArticleDialog";
 
 /* ================= MOCK DATA ================= */
 const MOCK_ARTICLES = Array.from({ length: 50 }).map((_, i) => ({
@@ -165,7 +165,7 @@ export default function ArticlesPanel({ activeCategory = "All" }) {
           </select>
 
           <button
-            className="btn primary"
+            className="btn btn-primary"
             onClick={() => {
               setEditingArticle(null);
               setDialogOpen(true);
