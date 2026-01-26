@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState ,useEffect} from "react";
 import { Card, Row, Col, Form, Button, Modal } from "react-bootstrap";
 import { FaTrash } from "react-icons/fa";
 const SettingsConversation = () => {
@@ -23,6 +23,16 @@ const SettingsConversation = () => {
   const [maxConversationError, setMaxConversationError] = useState("");
   const [showKeywordModal, setShowKeywordModal] = useState(false);
   const [newPriority, setNewPriority] = useState("HIGH");
+  const [savedSettings, setSavedSettings] = useState(settings);
+const [hasChanges, setHasChanges] = useState(false);
+const [lastSavedAt, setLastSavedAt] = useState(null);
+useEffect(() => {
+  setHasChanges(
+    JSON.stringify(settings) !== JSON.stringify(savedSettings)
+  );
+}, [settings, savedSettings]);
+
+
 
 
   const addKeyword = () => {
@@ -52,6 +62,21 @@ const SettingsConversation = () => {
     updated.splice(index, 1);
     setSettings({ ...settings, escalationKeywords: updated });
   };
+  const handleSave = () => {
+  setSavedSettings(settings);
+  setLastSavedAt(new Date());
+  setHasChanges(false);
+};
+
+const handleDiscard = () => {
+  setSettings(savedSettings);
+  setHasChanges(false);
+
+  // Reset local UI states
+  setContextTimeoutError("");
+  setMaxConversationError("");
+};
+
 
 
   return (
@@ -335,6 +360,39 @@ const SettingsConversation = () => {
             </Button>
           </Modal.Footer>
         </Modal>
+        <hr />
+
+<div className="d-flex justify-content-between align-items-center">
+  <div className="text-muted small">
+    {lastSavedAt && (
+      <>Last saved at {lastSavedAt.toLocaleTimeString()}</>
+    )}
+  </div>
+
+  <div className="d-flex gap-2">
+    <Button
+      size="sm"
+      variant="danger"
+      onClick={handleDiscard}
+      disabled={!hasChanges}
+    >
+      Discard
+    </Button>
+
+    <Button
+      size="sm"
+      variant="primary"
+      onClick={handleSave}
+      disabled={!hasChanges}
+    >
+      Save Changes
+    </Button>
+  </div>
+</div>
+
+
+
+
 
       </Card.Body>
     </Card>

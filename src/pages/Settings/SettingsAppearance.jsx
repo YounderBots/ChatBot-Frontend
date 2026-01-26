@@ -1,5 +1,5 @@
 import { User } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, Row, Col, Form, Button } from "react-bootstrap";
 
 const SettingsAppearance = () => {
@@ -31,6 +31,26 @@ const SettingsAppearance = () => {
   const handleReset = () => {
     setSettings(defaultSettings);
   };
+  const [savedSettings, setSavedSettings] = useState(defaultSettings);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState(null);
+  useEffect(() => {
+    setHasChanges(
+      JSON.stringify(settings) !== JSON.stringify(savedSettings)
+    );
+  }, [settings, savedSettings]);
+  const handleSave = () => {
+    setSavedSettings(settings);
+    setLastSavedAt(new Date());
+    setHasChanges(false);
+  };
+
+  const handleDiscard = () => {
+    setSettings(savedSettings);
+    setHasChanges(false);
+  };
+
+
 
   return (
     <Card className="border-0">
@@ -388,11 +408,44 @@ const SettingsAppearance = () => {
         </div>
 
 
-        <div className="mt-4">
-          <Button size="sm" variant="danger" onClick={handleReset}>
-            Reset to Default
-          </Button>
-        </div>
+        <hr />
+
+        <Row className="align-items-center mt-3">
+          <Col md={6} className="text-muted">
+            {lastSavedAt
+              ? <>Last saved: <strong>{lastSavedAt.toLocaleString()}</strong></>
+              : "Not saved yet"}
+          </Col>
+
+          <Col md={6} className="d-flex justify-content-end gap-2">
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={handleReset}
+            >
+              Reset to Default
+            </Button>
+
+            <Button
+              size="sm"
+              variant="danger"
+              onClick={handleDiscard}
+              disabled={!hasChanges}
+            >
+              Discard
+            </Button>
+
+            <Button
+              size="sm"
+              variant="primary"
+              onClick={handleSave}
+              disabled={!hasChanges}
+            >
+              Save Changes
+            </Button>
+          </Col>
+        </Row>
+
 
       </Card.Body>
     </Card>

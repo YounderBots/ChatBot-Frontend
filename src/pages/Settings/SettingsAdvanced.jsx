@@ -44,7 +44,7 @@ const SettingsAdvanced = () => {
   };
   const [lastSavedAt, setLastSavedAt] = useState(null);
   const [savedSettings, setSavedSettings] = useState(settings);
-  const [hasChanges, setHasChanges] = useState(false);
+  const [hasChanges, setHasChanges] = useState(true);
   const [dataRetentionError, setDataRetentionError] = useState("");
 
 

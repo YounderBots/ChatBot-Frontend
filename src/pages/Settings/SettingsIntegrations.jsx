@@ -1,7 +1,44 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, Row, Col, Form, Button, Table, Modal } from "react-bootstrap";
 import Select from "react-select";
 import { FaEdit, FaTrash } from "react-icons/fa";
+const defaultSettings = {
+  apiKey: "abcd-1234-xyz-9876",
+  apiEndpoint: "https://api.yourbot.com/v1",
+
+  webhooks: [
+    {
+      name: "Conversation Events",
+      url: "https://example.com/webhook",
+      events: "New Conversation, Escalation",
+      active: true,
+      lastTriggered: "Never",
+    },
+  ],
+
+  slack: {
+    connected: false,
+    channel: "",
+    notifyOnEscalation: true,
+    notifyOnFailure: false,
+  },
+
+  smtp: {
+    configured: false,
+    server: "",
+    port: "",
+    username: "",
+    password: "",
+    fromEmail: "",
+  },
+
+  crm: {
+    provider: "",
+    apiKey: "",
+    syncEnabled: false,
+  },
+};
+
 
 const SettingsIntegrations = () => {
   const [showApiKey, setShowApiKey] = useState(false);
@@ -18,24 +55,7 @@ const SettingsIntegrations = () => {
     });
   };
 
-  const [settings, setSettings] = useState({
-    apiKey: "abcd-1234-xyz-9876",
-    apiEndpoint: "https://api.yourbot.com/v1",
 
-    webhooks: [
-      {
-        name: "Conversation Events",
-        url: "https://example.com/webhook",
-        events: "New Conversation, Escalation",
-        active: true,
-        lastTriggered: getCurrentTimestamp()
-      },
-    ],
-
-    slackConnected: false,
-    smtpConfigured: false,
-    crm: "None",
-  });
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
@@ -45,6 +65,10 @@ const SettingsIntegrations = () => {
     events: "",
     active: true,
   });
+   const [settings, setSettings] = useState(defaultSettings);
+  const [savedSettings, setSavedSettings] = useState(defaultSettings);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState(null);
 
 
   const regenerateApiKey = () => {
@@ -108,27 +132,27 @@ const SettingsIntegrations = () => {
     setShowEditModal(true);
   };
 
-  const [slack, setSlack] = useState({
-    connected: false,
-    channel: "",
-    notifyOnEscalation: true,
-    notifyOnFailure: false,
-  });
+  // const [slack, setSlack] = useState({
+  //   connected: false,
+  //   channel: "",
+  //   notifyOnEscalation: true,
+  //   notifyOnFailure: false,
+  // });
 
-  const [smtp, setSmtp] = useState({
-    configured: false,
-    server: "",
-    port: "",
-    username: "",
-    password: "",
-    fromEmail: "",
-  });
+  // const [smtp, setSmtp] = useState({
+  //   configured: false,
+  //   server: "",
+  //   port: "",
+  //   username: "",
+  //   password: "",
+  //   fromEmail: "",
+  // });
 
-  const [crm, setCrm] = useState({
-    provider: "",
-    apiKey: "",
-    syncEnabled: false,
-  });
+  // const [crm, setCrm] = useState({
+  //   provider: "",
+  //   apiKey: "",
+  //   syncEnabled: false,
+  // });
 
 
   const handleUpdateWebhook = () => {
@@ -139,7 +163,12 @@ const SettingsIntegrations = () => {
       lastTriggered: getCurrentTimestamp(),
     };
 
-    setSettings({ ...settings, webhooks: updated });
+    setSettings({
+      ...settings,
+      webhooks: updated,
+    });
+
+
     setShowEditModal(false);
   };
 
@@ -153,6 +182,31 @@ const SettingsIntegrations = () => {
 
     setSettings({ ...settings, webhooks: updated });
   };
+ 
+
+
+
+  useEffect(() => {
+    const changed =
+      JSON.stringify(settings) !== JSON.stringify(savedSettings);
+
+    setHasChanges(changed);
+  }, [settings, savedSettings]);
+
+  const handleSave = () => {
+    setSavedSettings(settings);
+    setLastSavedAt(new Date());
+    setHasChanges(false);
+  };
+
+  const handleDiscard = () => {
+    setSettings(savedSettings);
+    setHasChanges(false);
+  };
+
+  const isModalOpen = showModal || showEditModal;
+
+
 
 
 
@@ -334,35 +388,48 @@ const SettingsIntegrations = () => {
         <Row className="align-items-center mb-3">
           <Col lg={3} md={6}>
             <strong>Status:</strong>{" "}
-            <span className={slack.connected ? "text-success" : "text-danger"}>
-              {slack.connected ? "Connected" : "Not Connected"}
+            <span className={settings.slack.connected ? "text-success" : "text-danger"}>
+              {settings.slack.connected ? "Connected" : "Not Connected"}
             </span>
           </Col>
 
           <Col lg={2} md={6}>
             <Button
               size="sm"
-              variant={slack.connected ? "danger" : "primary"}
+              variant={settings.slack.connected ? "danger" : "primary"}
               onClick={() =>
-                setSlack({ ...slack, connected: !slack.connected })
+                setSettings({
+                  ...settings,
+                  slack: {
+                    ...settings.slack,
+                    connected: !settings.slack.connected,
+                  },
+                })
               }
             >
-              {slack.connected ? "Disconnect" : "Connect Slack"}
+              {settings.slack.connected ? "Disconnect" : "Connect Slack"}
             </Button>
           </Col>
         </Row>
 
-        {slack.connected && (
+        {settings.slack.connected && (
           <>
             <Row className="mb-3">
               <Col lg={6} md={12}>
                 <Form.Label>Settings(if connected)</Form.Label>
                 <Form.Control
-                  value={slack.channel}
+                  value={settings.slack.channel}
                   onChange={(e) =>
-                    setSlack({ ...slack, channel: e.target.value })
+                    setSettings({
+                      ...settings,
+                      slack: {
+                        ...settings.slack,
+                        channel: e.target.value,
+                      },
+                    })
                   }
                 />
+
               </Col>
             </Row>
           </>
@@ -375,18 +442,25 @@ const SettingsIntegrations = () => {
         <Row className="align-items-center mb-4">
           <Col lg={3} md={7}>
             <strong>Status:</strong>{" "}
-            <span className={smtp.configured ? "text-success" : "text-danger"}>
-              {smtp.configured ? "Configured" : "Not Configured"}
+            <span className={settings.smtp.configured ? "text-success" : "text-danger"}>
+              {settings.smtp.configured ? "Configured" : "Not Configured"}
             </span>
           </Col>
 
           <Col md={5}>
             <Button
               size="sm"
-              variant={smtp.configured ? "outline-secondary" : "primary"}
+              variant={settings.smtp.configured ? "outline-secondary" : "primary"}
               onClick={() =>
-                setSmtp({ ...smtp, configured: true })
+                setSettings({
+                  ...settings,
+                  smtp: {
+                    ...settings.smtp,
+                    configured: true,
+                  },
+                })
               }
+
             >
               Configure
             </Button>
@@ -398,22 +472,35 @@ const SettingsIntegrations = () => {
           <Col lg={4} md={12} className="mb-3">
             <Form.Label>SMTP Server</Form.Label>
             <Form.Control
-              value={smtp.server}
+              value={settings.smtp.server}
               onChange={(e) =>
-                setSmtp({ ...smtp, server: e.target.value })
+                setSettings({
+                  ...settings,
+                  smtp: {
+                    ...settings.smtp,
+                    server: e.target.value,
+                  },
+                })
               }
-              placeholder="smtp.gmail.com"
             />
+
           </Col>
 
           <Col lg={4} md={12} className="mb-3">
             <Form.Label>Port</Form.Label>
             <Form.Control
               type="number"
-              value={smtp.port}
+              value={settings.smtp.port}
               onChange={(e) =>
-                setSmtp({ ...smtp, port: e.target.value })
+                setSettings({
+                  ...settings,
+                  smtp: {
+                    ...settings.smtp,
+                    port: e.target.value,
+                  },
+                })
               }
+
               placeholder="587"
             />
           </Col>
@@ -421,33 +508,54 @@ const SettingsIntegrations = () => {
           <Col lg={4} md={12} className="mb-3">
             <Form.Label>Username</Form.Label>
             <Form.Control
-              value={smtp.username}
+              value={settings.smtp.username}
               onChange={(e) =>
-                setSmtp({ ...smtp, username: e.target.value })
+                setSettings({
+                  ...settings,
+                  smtp: {
+                    ...settings.smtp,
+                    username: e.target.value,
+                  },
+                })
               }
             />
+
           </Col>
 
           <Col lg={4} md={12} className="mb-3">
             <Form.Label>Password</Form.Label>
             <Form.Control
               type="password"
-              value={smtp.password}
+              value={settings.smtp.password}
               onChange={(e) =>
-                setSmtp({ ...smtp, password: e.target.value })
+                setSettings({
+                  ...settings,
+                  smtp: {
+                    ...settings.smtp,
+                    password: e.target.value,
+                  },
+                })
               }
             />
+
           </Col>
 
           <Col lg={4} md={12} className="mb-3">
             <Form.Label>From Email</Form.Label>
             <Form.Control
               type="email"
-              value={smtp.fromEmail}
+              value={settings.smtp.fromEmail}
               onChange={(e) =>
-                setSmtp({ ...smtp, fromEmail: e.target.value })
+                setSettings({
+                  ...settings,
+                  smtp: {
+                    ...settings.smtp,
+                    fromEmail: e.target.value,
+                  },
+                })
               }
             />
+
           </Col>
         </Row>
 
@@ -467,11 +575,18 @@ const SettingsIntegrations = () => {
             <Col lg={6} md={12} className="mb-3">
               <Form.Label>CRM Provider</Form.Label>
               <Form.Select
-                value={crm.provider}
+                value={settings.crm.provider}
                 onChange={(e) =>
-                  setCrm({ ...crm, provider: e.target.value })
+                  setSettings({
+                    ...settings,
+                    crm: {
+                      ...settings.crm,
+                      provider: e.target.value,
+                    },
+                  })
                 }
               >
+
                 <option value="">Select CRM</option>
                 <option value="Salesforce">Salesforce</option>
                 <option value="HubSpot">HubSpot</option>
@@ -484,10 +599,17 @@ const SettingsIntegrations = () => {
               <Form.Control
                 type="password"
                 placeholder="API Key / Token"
-                value={crm.apiKey}
+                value={settings.crm.apiKey}
                 onChange={(e) =>
-                  setCrm({ ...crm, apiKey: e.target.value })
+                  setSettings({
+                    ...settings,
+                    crm: {
+                      ...settings.crm,
+                      apiKey: e.target.value,
+                    },
+                  })
                 }
+
               />
             </Col>
           </Row>
@@ -703,6 +825,37 @@ const SettingsIntegrations = () => {
             </Button>
           </Modal.Footer>
         </Modal>
+        <hr />
+
+        <Row className="align-items-center mt-3">
+          <Col md={6} className="text-muted">
+            {lastSavedAt
+              ? <>Last saved: <strong>{lastSavedAt.toLocaleString()}</strong></>
+              : "Not saved yet"}
+          </Col>
+
+          <Col md={6} className="d-flex justify-content-end gap-2">
+            <Button
+              size="sm"
+              variant="danger"
+              disabled={!hasChanges}
+              onClick={handleDiscard}
+            >
+              Discard
+            </Button>
+
+            <Button
+              size="sm"
+              variant="primary"
+              disabled={!hasChanges || isModalOpen}
+              onClick={handleSave}
+            >
+              Save Changes
+            </Button>
+
+          </Col>
+        </Row>
+
 
 
       </Card.Body>

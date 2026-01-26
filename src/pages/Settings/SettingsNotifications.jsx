@@ -1,8 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, Row, Col, Form, Button } from "react-bootstrap";
-
-const SettingsNotifications = () => {
-  const [settings, setSettings] = useState({
+const defaultSettings = {
     enableEmail: true,
     adminEmail: "",
     emailFrequency: "REALTIME",
@@ -29,7 +27,37 @@ const SettingsNotifications = () => {
 
     enableInApp: true,
     sound: "default",
-  });
+  };
+
+const SettingsNotifications = () => {
+  // const [settings, setSettings] = useState({
+  //   enableEmail: true,
+  //   adminEmail: "",
+  //   emailFrequency: "REALTIME",
+  //   emailEvents: {
+  //     newConversation: true,
+  //     escalatedConversation: true,
+  //     lowConfidence: false,
+  //     failedConversation: true,
+  //     negativeFeedback: true,
+  //     dailySummary: false,
+  //     weeklyReport: false,
+  //   },
+
+  //   enablePush: false,
+  //   pushEvents: {
+  //     newConversation: false,
+  //     escalatedConversation: false,
+  //     lowConfidence: false,
+  //     failedConversation: false,
+  //     negativeFeedback: false,
+  //     dailySummary: false,
+  //     weeklyReport: false,
+  //   },
+
+  //   enableInApp: true,
+  //   sound: "default",
+  // });
 
   const toggleEmailEvent = (key) => {
     setSettings({
@@ -40,7 +68,7 @@ const SettingsNotifications = () => {
       },
     });
   };
-  const [emailError, setEmailError] = useState("");
+  
 
   const togglePushEvent = (key) => {
     setSettings({
@@ -51,6 +79,45 @@ const SettingsNotifications = () => {
       },
     });
   };
+  const [settings, setSettings] = useState(defaultSettings);
+  const [savedSettings, setSavedSettings] = useState(defaultSettings);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState(null);
+  const [emailError, setEmailError] = useState("");
+  useEffect(() => {
+    setHasChanges(
+      JSON.stringify(settings) !== JSON.stringify(savedSettings)
+    );
+  }, [settings, savedSettings]);
+
+  
+  const handleSave = () => {
+    if (emailError) return;
+
+    setSavedSettings(settings);
+    setLastSavedAt(new Date());
+    setHasChanges(false);
+
+    alert("Notification settings saved successfully ✅");
+  };
+
+  const handleDiscard = () => {
+    setSettings(savedSettings);
+    setEmailError("");
+    setHasChanges(false);
+  };
+
+  const playSound = () => {
+    const soundMap = {
+      default: "/sounds/default.mp3",
+      chime: "/sounds/chime.mp3",
+      alert: "/sounds/alert.mp3",
+    };
+
+    const audio = new Audio(soundMap[settings.sound]);
+    audio.play();
+  };
+
 
 
   return (
@@ -281,14 +348,46 @@ const SettingsNotifications = () => {
 
             <Button
               size="sm"
-              variant="primary"
+              variant="secondary"
               className="mt-2"
-              onClick={() => alert("Sound test")}
+              onClick={playSound}
             >
               Play Sound Test
             </Button>
+
           </Col>
         </Row>
+        <hr />
+
+        <div className="d-flex align-items-center justify-content-between mt-3">
+          <div className="text-muted">
+            {lastSavedAt
+              ? <>Last saved: <strong>{lastSavedAt.toLocaleString()}</strong></>
+              : "Not saved yet"}
+          </div>
+
+          <div className="d-flex gap-2">
+            <Button
+              size="sm"
+              variant="danger"
+              onClick={handleDiscard}
+              disabled={!hasChanges}
+            >
+              Discard
+            </Button>
+
+            <Button
+              size="sm"
+              variant="primary"
+              onClick={handleSave}
+              disabled={!hasChanges || !!emailError}
+            >
+              Save Changes
+            </Button>
+          </div>
+        </div>
+
+
 
       </Card.Body>
     </Card>

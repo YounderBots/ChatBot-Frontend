@@ -1,7 +1,8 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Card, Row, Col, Form, Button } from "react-bootstrap";
 import { FaEdit, FaCheck, FaTimes } from "react-icons/fa";
 import Select from "react-select";
+import { Container } from "react-bootstrap";
 
 const daysOfWeek = [
   "Monday",
@@ -34,6 +35,10 @@ const SettingsGeneral = () => {
       end: "18:00",
     })),
   });
+  const [savedFormData, setSavedFormData] = useState(formData);
+  const [lastSavedAt, setLastSavedAt] = useState(null);
+  const [hasChanges, setHasChanges] = useState(false);
+
   const timezoneOptions = [
     { value: "Asia/Kolkata", label: "Asia / Kolkata (IST)" },
     { value: "UTC", label: "UTC (Coordinated Universal Time)" },
@@ -42,6 +47,27 @@ const SettingsGeneral = () => {
     { value: "Asia/Dubai", label: "Asia / Dubai (GST)" },
     { value: "Asia/Singapore", label: "Asia / Singapore (SGT)" },
   ];
+  const defaultSettings = {
+    enableLearning: true,
+    autoAddTraining: false,
+    autoAddConfidence: 60,
+    reviewQueueThreshold: 40,
+
+    dataRetentionDays: 90,
+    enableDataExport: true,
+    enableDataDeletion: true,
+    showPrivacyLink: true,
+    privacyPolicyUrl: "https://yourcompany.com/privacy",
+
+    logLevel: "INFO",
+    enableConsoleLogs: true,
+    enableDatabaseLogs: false,
+
+    language: "English",
+    dateFormat: "DD/MM/YYYY",
+    timeFormat: "24H",
+  };
+
 
   const copyToAllDays = (sourceIndex) => {
     const sourceDay = formData.businessHours[sourceIndex];
@@ -83,6 +109,36 @@ const SettingsGeneral = () => {
     updated[index][key] = value;
     setFormData({ ...formData, businessHours: updated });
   };
+
+  const [file, setFile] = useState(null);
+  const [showResetModal, setShowResetModal] = useState(false);
+
+  const [dataRetentionError, setDataRetentionError] = useState("");
+
+
+
+
+
+  const handleSave = () => {
+  setSavedFormData(formData);
+  setLastSavedAt(new Date());
+  setHasChanges(false);
+};
+const handleDiscard = () => {
+  setFormData(savedFormData);
+  setHasChanges(false);
+  setIsEditingWelcome(false); // important UX fix
+};
+
+  useEffect(() => {
+  setHasChanges(
+    JSON.stringify(formData) !== JSON.stringify(savedFormData)
+  );
+}, [formData, savedFormData]);
+
+
+ 
+
 
   return (
     <Card className="border-0">
@@ -335,9 +391,43 @@ const SettingsGeneral = () => {
             setFormData({ ...formData, outsideBehavior: "contact" })
           }
         />
+        <Container fluid className="py-3">
+          <Row className="align-items-center gy-2">
+            <Col md={6} xs={12} className="text-muted">
+              {lastSavedAt
+                ? <>Last saved: <strong>{lastSavedAt.toLocaleString()}</strong></>
+                : "Not saved yet"}
+            </Col>
+
+            <Col md={6} className="d-flex justify-content-end gap-2 mb-2">
+              <Button
+                size="sm"
+                variant="danger"
+                onClick={handleDiscard}
+                disabled={!hasChanges}
+              >
+                Discard
+              </Button>
+
+
+              <Button
+                size="sm"
+                variant="primary"
+                onClick={handleSave}
+                disabled={!hasChanges}
+              >
+                Save Changes
+              </Button>
+            </Col>
+
+          </Row>
+        </Container>
 
       </Card.Body>
+
     </Card>
+
+
   );
 };
 
