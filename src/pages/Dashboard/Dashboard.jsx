@@ -1,6 +1,6 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import html2canvas from "html2canvas";
-import { CheckCircle, MessageSquare, Timer, Users } from "lucide-react";
+import { CheckCircle, CheckCircle2, MessageSquare, Timer, Users } from "lucide-react";
 import { useEffect, useState } from 'react';
 import { Button, Card, Col, Form, Modal, ProgressBar, Row } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
@@ -8,8 +8,6 @@ import { Area, CartesianGrid, Cell, Legend, Line, LineChart, Pie, PieChart, Resp
 import NormalLayout from '../../components/NormalLayout';
 import "./Dashboard.css";
 import PeakHoursHeatmap from './components/PeakHoursHeatmap';
-import { heatmapData } from './components/heatmapData';
-import "../Analytics/Analytics.css";
 
 
 
@@ -92,24 +90,6 @@ const intentVariant = (intent) => {
   }
 };
 
-// ================= Dashboard Card =================
-const DashboardCard = ({ title, value, subtitle, icon, extra, progress, progressVariant }) => (
-  <Card className="rounded-4 shadow-sm dashboard-card">
-    <Card.Body className="dashboard-card-body">
-      <div className="kpi-top d-flex justify-content-between align-items-start">
-        <div>
-          <div className="text-muted small">{title}</div>
-          <h3 className="fw-bold mt-2">{value}</h3>
-          {subtitle && <div className="text-muted small">{subtitle}</div>}
-        </div>
-        <div className="dashboard-icon">{icon}</div>
-      </div>
-      <div className="kpi-bottom">{extra}</div>
-      {progress !== undefined && <ProgressBar now={progress} variant={progressVariant} className="mt-3" style={{ height: 8 }} />}
-    </Card.Body>
-  </Card>
-);
-
 // ================= Download Chart =================
 const downloadChart = async () => {
   const chart = document.getElementById("conversation-trends-chart");
@@ -180,57 +160,141 @@ const DashboardContent = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const getResponseColor = time => time < 1 ? 'success' : time <= 3 ? 'warning' : 'danger';
   const handleView = conversation => { setSelectedConversation(conversation); setShowModal(true); };
   const handleClose = () => { setShowModal(false); setSelectedConversation(null); };
   const handleViewAll = () => setShowAllActivities(true);
   const handleViewLess = () => setShowAllActivities(false);
+  const getResponseCircleColor = (time) => {
+    if (time < 1) return "#198754";
+    if (time < 2) return "#ffc107";
+    return "#dc3545";
+  };
 
   return (
-    <div className="p-3">
+    <div className='g-2 h-100'>
+      <Row className='g-2 mb-3'>
+        <Col lg={3} sm={6}>
+          <Card
+            className="rounded-4 shadow-sm analytics-card h-100 cursor-pointer"
+            onClick={() => navigate("/conversations")}
+          >
+            <Card.Body className="d-flex flex-column">
 
-      {/* KPI CARDS */}
-      <div className="row g-3 mb-4 align-items-stretch kpi-row">
-        <div className="col-12 col-md-6 col-lg-3">
-          <div className="kpi-card-wrapper" onClick={() => navigate("/conversations")}>
-            <DashboardCard
-              title="Total Conversations"
-              value={totalConversations}
-              subtitle="↑ 12% vs yesterday"
-              icon={<MessageSquare size={26} />}
-              extra={<Form.Select size="sm" onClick={e => e.stopPropagation()} onChange={e => e.stopPropagation()}>
-                <option>Today</option><option>Week</option><option>Month</option>
-              </Form.Select>}
-            />
-          </div>
-        </div>
-        <div className="col-12 col-md-6 col-lg-3">
-          <DashboardCard title="Active Users" value={activeUsers} subtitle="Right now" icon={<Users size={26} />} />
-        </div>
-        <div className="col-12 col-md-6 col-lg-3">
-          <DashboardCard title="Avg Response Time" value={`${avgResponseTime}s`} icon={<Timer size={26} />} progress={Math.min(avgResponseTime * 20, 100)} progressVariant={getResponseColor(avgResponseTime)} />
-        </div>
-        <div className="col-12 col-md-6 col-lg-3">
-          <Card className="rounded-4 shadow-sm text-center resolution-card">
-            <Card.Body>
-              <div className="resolution-progress" style={{ background: `conic-gradient(#198754 ${resolutionRate * 3.6}deg, #e9ecef 0deg)` }}>
-                <div className="resolution-inner">
-                  <CheckCircle size={20} className="text mb-1" />
-                  <div className="resolution-value">{resolutionRate}%</div>
-                </div>
+              <div className="d-flex justify-content-between align-items-center mb-2">
+                <div className="text-muted small">Total Conversations</div>
+                <MessageSquare size={26} />
               </div>
-              <div className="mt-3 fw-medium">Resolution Rate</div>
-              <div className="text-muted small">Target: 90%</div>
+
+              <h3 className="fw-bold flex-grow-1">
+                {totalConversations.toLocaleString()}
+              </h3>
+
+              <Col className="text-success small mb-2">
+                ↑ 12% vs yesterday
+              </Col>
+
+              <Col md={12} className="text-end">
+                <Form.Select
+                  size="sm"
+                  onClick={(e) => e.stopPropagation()}
+                  onChange={(e) => e.stopPropagation()}
+                >
+                  <option>Today</option>
+                  <option>Week</option>
+                  <option>Month</option>
+                </Form.Select>
+              </Col>
             </Card.Body>
           </Card>
-        </div>
-      </div>
+        </Col>
+
+        <Col lg={3} sm={6}>
+          <Card className="rounded-4 shadow-sm analytics-card h-100 cursor-pointer">
+            <Card.Body className="d-flex flex-column">
+
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <div className="text-muted small">Active Users</div>
+                <Users size={26} />
+              </div>
+
+              <h3 className="fw-bold flex-grow-1">
+                {activeUsers.toLocaleString()}
+              </h3>
+
+              <Col className="text-success small mb-2">
+                Right now
+              </Col>
+            </Card.Body>
+          </Card>
+        </Col>
+
+        <Col lg={3} sm={6}>
+          <Card className="rounded-4 shadow-sm analytics-card h-100 cursor-pointer">
+            <Card.Body className="d-flex flex-column justify-content-center">
+              <div className="d-flex justify-content-between align-items-center mb-2">
+                <div className="text-muted small">Avg Response Time</div>
+                <Timer size={26} />
+              </div>
+              <div
+                className="resolution-progress"
+                style={{
+                  background: `conic-gradient(
+                  ${getResponseCircleColor(avgResponseTime)} 
+                  ${Math.min(avgResponseTime * 20, 100) * 3.6}deg,
+                  #e9ecef 0deg
+                )`
+                }}
+              >
+                <div className="resolution-inner">
+                  <Timer size={20} className="mb-1" />
+                  <div className="resolution-value">
+                    {avgResponseTime}s
+                  </div>
+                </div>
+              </div>
+              <div className="text-muted small">Last 24 hours</div>
+
+            </Card.Body>
+          </Card>
+        </Col>
+
+        <Col lg={3} sm={6}>
+          <Card className="rounded-4 shadow-sm analytics-card h-100 cursor-pointer">
+            <Card.Body className="d-flex flex-column">
+              <div className="d-flex justify-content-between align-items-center mb-2">
+                <div className="text-muted small">Resolution Rate</div>
+                <CheckCircle size={26} />
+              </div>
+
+              <div
+                className="resolution-progress mt-2 mb-"
+                style={{
+                  background: `conic-gradient(
+                    #198754 ${Math.min(resolutionRate, 100) * 3.6}deg,
+                    #e9ecef 0deg
+                  )`
+                }}
+              >
+                <div className="resolution-inner">
+                  <CheckCircle size={20} className="text-success mb-1" />
+                  <div className="resolution-value">
+                    {Math.round(resolutionRate)}%
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-muted small">Target: 90%</div>
+
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
 
       {/* Conversation Trends */}
       <div className="chart-section">
 
         {/* Conversation Trends */}
-        <Row className="mb-4">
+        <Row className="mb-3">
           <Col xs={12}>
             <Card className="rounded-4 shadow-sm chart-card h-100">
               <Card.Body className="chart-body">
@@ -264,7 +328,7 @@ const DashboardContent = () => {
         </Row>
 
         {/* Intent Distribution */}
-        <Row className="mb-4">
+        <Row className="mb-3">
           <Col xs={12}>
             <Card className="rounded-4 shadow-sm chart-card h-100">
               <Card.Body>
@@ -297,7 +361,7 @@ const DashboardContent = () => {
         </Row>
 
         {/* Peak Hours Heatmap */}
-        <Row className="mb-4">
+        <Row className="mb-3">
           <Col xs={12}>
             <PeakHoursHeatmap />
           </Col>
@@ -420,16 +484,9 @@ const DashboardContent = () => {
           </Card.Body>
         </Card>
 
-
-
-
-
       </div >
     </div>
-
-
-
-
+  
   );
 };
 
