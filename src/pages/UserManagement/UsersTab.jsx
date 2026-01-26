@@ -115,15 +115,6 @@ const initialUsers = [
     status: false,
   },
 ];
-const deleteUser = async (id) => {
-  try {
-    await apiDeleteUser(id);
-    setUsers(users.filter((u) => u.id !== id));
-  } catch (error) {
-    console.error("Error deleting user:", error);
-    alert("Failed to delete user. Check console.");
-  }
-};
 
 export default function UsersTab() {
   const [users, setUsers] = useState(initialUsers);
@@ -132,8 +123,7 @@ export default function UsersTab() {
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [sortBy, setSortBy] = useState(""); // AZ | ZA
-
+  const [sortBy, setSortBy] = useState("");
 
   const [form, setForm] = useState({
     avatar: null,
@@ -147,8 +137,6 @@ export default function UsersTab() {
     emailNotifications: false
   });
   const passwordStrength = getPasswordStrength(form.password);
-
-
 
   const filteredUsers = users.filter((u) => {
     const matchesSearch = u.name.toLowerCase().includes(search.toLowerCase());
@@ -164,6 +152,16 @@ export default function UsersTab() {
       }
       return b.name.localeCompare(a.name);
     });
+
+  const deleteUser = async (id) => {
+    try {
+      await apiDeleteUser(id);
+      setUsers(users.filter((u) => u.id !== id));
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      alert("Failed to delete user. Check console.");
+    }
+  };
 
   // const openAddUser = () => {
   //   setEditingUser(null);
@@ -201,8 +199,8 @@ export default function UsersTab() {
         permissions: form.role === "Custom" ? {} : form.permissions,
         lastLogin: editingUser ? editingUser.lastLogin : "-",
         // status: editingUser ? editingUser.status : true,
-        status: form.status,                       // ✅ ADD
-        emailNotifications: form.emailNotifications, // ✅ ADD
+        status: form.status,
+        emailNotifications: form.emailNotifications,
       };
 
       if (editingUser) {
@@ -222,7 +220,6 @@ export default function UsersTab() {
       alert("Failed to save user. Check console.");
     }
   };
-
 
   const resetForm = () => {
     setEditingUser(null);
@@ -259,9 +256,6 @@ export default function UsersTab() {
       setForm({ ...form, role, permissions: perms });
     }
   };
-
-
-
 
   return (
     <div>
@@ -419,11 +413,9 @@ export default function UsersTab() {
 
                     }}
                   >
-
                   </div>
                 )}
               </div>
-
 
               <Form.Control
                 size="sm"
@@ -588,14 +580,9 @@ export default function UsersTab() {
                 />
               </Form.Group>
 
-
-
-
             </Col>
           </Row>
         </Modal.Body>
-
-
 
         <Modal.Footer>
           <Button size="sm" variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
