@@ -3,6 +3,8 @@ import React from 'react'
 import TabComponent from "../../components/TabComponent";
 import IntentContainer from './Intent tab/IntentContainer'
 import CategoryContainer from './Intent tab/CategoryContainer'
+import 'bootstrap/dist/js/bootstrap.bundle.min.js'
+
 
 const IntentDashboard = () => {
 

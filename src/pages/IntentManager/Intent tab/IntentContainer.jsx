@@ -18,6 +18,10 @@ const IntentContainer = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [intentToDelete, setIntentToDelete] = useState(null)
   const [selectedIds, setSelectedIds] = useState([])
+  const [showBulkMenu, setShowBulkMenu] = useState(false)
+  const [bulkMenuPos, setBulkMenuPos] = useState({ top: 0, left: 0 })
+
+
 
   /* ------------------ Actions ------------------ */
 
@@ -129,43 +133,75 @@ const IntentContainer = () => {
 
           {/* Bulk Actions */}
           {selectedIds.length > 0 && (
-            <div className="input-group bg-white border rounded-3 shadow-sm px-2 py-1">
-              <button
-                className="form-select form-select-sm border-0 bg-transparent"
-                data-bs-toggle="dropdown"
-              >
-                Bulk actions
-              </button>
-              <ul className="dropdown-menu shadow-sm">
-                <li>
-                  <button
-                    className="dropdown-item text-danger"
-                    onClick={bulkDelete}
+              <div className="input-group bg-white border rounded-3 shadow-sm px-2 py-1 position-relative">
+                <button
+                  className="form-select form-select-sm border-0 bg-transparent"
+                  onClick={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect()
+                    setBulkMenuPos({
+                      top: rect.bottom + 6,
+                      left: rect.left
+                    })
+                    setShowBulkMenu(prev => !prev)
+                    
+                  }}
+                >
+                  Bulk actions
+                </button>
+
+
+                {showBulkMenu && (
+                  <ul
+                    className="dropdown-menu show shadow-sm"
+                     style={{
+                      position: 'fixed',
+                      top: bulkMenuPos.top,
+                      left: bulkMenuPos.left,
+                      zIndex: 3000
+                    }}
                   >
-                    <i className="bi bi-trash me-2"></i>Delete
-                  </button>
-                </li>
-                <li>
-                  <button
-                    className="dropdown-item"
-                    onClick={() => bulkUpdateStatus('Active')}
-                  >
-                    <i className="bi bi-check-circle text-success me-2"></i>
-                    Activate
-                  </button>
-                </li>
-                <li>
-                  <button
-                    className="dropdown-item"
-                    onClick={() => bulkUpdateStatus('Inactive')}
-                  >
-                    <i className="bi bi-slash-circle text-warning me-2"></i>
-                    Deactivate
-                  </button>
-                </li>
-              </ul>
-            </div>
-          )}
+                    <li>
+                      <button
+                        className="dropdown-item text-danger"
+                        onClick={() => {
+                          bulkDelete()
+                          setShowBulkMenu(false)
+                        }}
+                      >
+                        <i className="bi bi-trash me-2"></i> Delete
+                      </button>
+                    </li>
+
+                    <li>
+                      <button
+                        className="dropdown-item"
+                        onClick={() => {
+                          bulkUpdateStatus('Active')
+                          setShowBulkMenu(false)
+                        }}
+                      >
+                        <i className="bi bi-check-circle text-success me-2"></i>
+                        Activate
+                      </button>
+                    </li>
+
+                    <li>
+                      <button
+                        className="dropdown-item"
+                        onClick={() => {
+                          bulkUpdateStatus('Inactive')
+                          setShowBulkMenu(false)
+                        }}
+                      >
+                        <i className="bi bi-slash-circle text-warning me-2"></i>
+                        Deactivate
+                      </button>
+                    </li>
+                  </ul>
+                )}
+              </div>
+            )}
+
 
           {/* View Toggle */}
           <div className="btn-group bg-light rounded-2">
@@ -205,6 +241,7 @@ const IntentContainer = () => {
           <IntentTable
             intents={intents}
             selectedIds={selectedIds}
+            
             onToggleAll={toggleSelectAll}
             onToggleOne={toggleSelectOne}
             onEdit={handleEdit}
