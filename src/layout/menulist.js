@@ -5,7 +5,8 @@ import {
   Database,
   BarChart3,
   Settings,
-  Users
+  Users,
+  Ticket
 } from "lucide-react";
 
 
@@ -46,6 +47,11 @@ const menuList = [
     name: "User Management",
     path: "/User-Management",
     icon: Users
+  },
+    {
+    name: "Ticket Management",
+    path: "/Ticket-Management",
+    icon: Ticket
   }
 ];
 

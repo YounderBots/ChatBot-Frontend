@@ -13,6 +13,7 @@ import KnowledgeBaseManager from './pages/KnowledgeBaseManager/KnowledgeBaseMana
 import Settings from './pages/Settings/Settings'
 import UserMgmt from './pages/UserManagement/UserMgmt'
 import UserProfile from './pages/Profile/UserProfile'
+import TicketManagement from './pages/Ticketmanagement/TicketManagerment'
 // import ChatbotWidget from './components/ChatBotWidgetBS'
 
 
@@ -31,6 +32,7 @@ const App = () => {
           <Route path="/User-Management" element={<UserMgmt />} />
           <Route path="/Settings" element={<Settings />} />
           <Route path="/Profile" element={<UserProfile />} />
+          <Route path="/Ticket-Management" element={<TicketManagement />} />
         </Route>
       </Routes>
     </Router>
