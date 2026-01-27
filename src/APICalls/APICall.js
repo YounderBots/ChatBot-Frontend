@@ -1,18 +1,25 @@
 export const baseURL = "http://192.168.1.11:8002";
 
 const getAuthHeader = () => ({
-    Authorization: `Bearer ${localStorage.getItem("AuthToken")}`,
+    Authorization: `Bearer ${localStorage.getItem("token")}`,
 });
 
 const handleResponse = async (response) => {
     const result = await response.json();
 
     if (!response.ok) {
-        throw new Error(result.detail || result.message || "API Error");
+        if (Array.isArray(result.detail)) {
+            throw new Error(result.detail.map((e) => e.msg).join(", "));
+        }
+
+        throw new Error(
+            result.detail || result.message || "API Error"
+        );
     }
 
     return result;
 };
+
 
 const APICall = {
     // -------------------------
@@ -39,6 +46,7 @@ const APICall = {
     // -------------------------
     postT: async (endpoint, payload = {}) => {
         try {
+            console.log(localStorage.getItem("token"));
             const response = await fetch(`${baseURL}${endpoint}`, {
                 method: "POST",
                 headers: {
@@ -92,17 +100,16 @@ const APICall = {
     },
 
     // -------------------------
-    // PUT (With Token)
+    // POST File (With Token)
     // -------------------------
-    putT: async (endpoint, payload = {}) => {
+    postfileT: async (endpoint, formData) => {
         try {
             const response = await fetch(`${baseURL}${endpoint}`, {
-                method: "PUT",
+                method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
                     ...getAuthHeader(),
                 },
-                body: JSON.stringify(payload),
+                body: formData,
             });
 
             return await handleResponse(response);

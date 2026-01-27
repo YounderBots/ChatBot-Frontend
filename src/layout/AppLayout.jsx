@@ -76,6 +76,7 @@ const TopBar = ({ isMobile, toggleSidebar, activeMenu, setActiveMenu }) => {
   const [dpImage, setDpImage] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   useEffect(() => {
     setDpImage(dpPlaceholder);
@@ -138,6 +139,7 @@ const TopBar = ({ isMobile, toggleSidebar, activeMenu, setActiveMenu }) => {
               onClick={() => {
                 navigate("/login");
                 setShowMenu(false);
+                logout();
               }}
             >
               Logout

@@ -1,19 +1,9 @@
-import React, { useState } from "react";
-import { Container, Row, Col, Form, Button, Table, Badge, Card, Modal, Image, } from "react-bootstrap";
-import { Search, Plus, Edit2, Trash2, Eye, EyeOff, RefreshCw, } from "lucide-react";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { Edit2, Eye, EyeOff, Plus, RefreshCw, Search, Trash2, } from "lucide-react";
+import { useState } from "react";
+import { Badge, Button, Card, Col, Form, Image, Modal, Row, Table } from "react-bootstrap";
+import APICall from "../../APICalls/APICall";
 import "./UserMgmt.css";
-
-// Dummy API calls (replace with real endpoints later)
-const apiCreateUser = async (userData) => {
-  console.log("Creating user on server:", userData);
-  return new Promise((resolve) => setTimeout(() => resolve({ ...userData, id: Date.now() }), 500));
-};
-
-const apiUpdateUser = async (id, userData) => {
-  console.log("Updating user on server:", id, userData);
-  return new Promise((resolve) => setTimeout(() => resolve({ ...userData, id }), 500));
-};
 
 const apiDeleteUser = async (id) => {
   console.log("Deleting user on server:", id);
@@ -36,62 +26,14 @@ const getPasswordStrength = (password) => {
 const generatePassword = () =>
   Math.random().toString(36).slice(-10) + "@A1";
 
-const PERMISSIONS = {
-  dashboard: {
-    label: "Dashboard",
-    children: {
-      viewAnalytics: "View analytics",
-      exportReports: "Export reports",
-    },
-  },
-  conversations: {
-    label: "Conversations",
-    children: {
-      viewConversations: "View conversations",
-      exportConversations: "Export conversations",
-      deleteConversations: "Delete conversations",
-    },
-  },
-  intents: {
-    label: "Intents",
-    children: {
-      viewIntents: "View intents",
-      editIntents: "Create/edit intents",
-      deleteIntents: "Delete intents",
-      trainModel: "Train model",
-    },
-  },
-  knowledgeBase: {
-    label: "Knowledge Base",
-    children: {
-      viewArticles: "View articles",
-      editArticles: "Create/edit articles",
-      publishArticles: "Publish articles",
-    },
-  },
-  settings: {
-    label: "Settings",
-    children: {
-      viewSettings: "View settings",
-      modifySettings: "Modify settings",
-    },
-  },
-  users: {
-    label: "Users",
-    children: {
-      viewUsers: "View users",
-      editUsers: "Create/edit users",
-      deleteUsers: "Delete users",
-    },
-  },
-};
+const roles = [
+  { id: 1, name: "Super Admin" },
+  { id: 2, name: "Admin" },
+  { id: 3, name: "Editor" },
+  { id: 4, name: "Viewer" },
+  { id: 5, name: "Custom" },
+];
 
-const ROLE_PRESETS = {
-  "Super Admin": "ALL",
-  Admin: ["dashboard", "conversations", "intents", "knowledgeBase"],
-  Editor: ["intents", "knowledgeBase"],
-  Viewer: [],
-};
 
 const initialUsers = [
   {
@@ -100,7 +42,6 @@ const initialUsers = [
     name: "Admin One",
     email: "admin1@mail.com",
     role: "Admin",
-    permissions: 12,
     lastLogin: "2026-01-12",
     status: true,
   },
@@ -110,11 +51,24 @@ const initialUsers = [
     name: "Admin Two",
     email: "admin2@mail.com",
     role: "Viewer",
-    permissions: 4,
     lastLogin: "2026-01-10",
     status: false,
   },
 ];
+
+const fileToBase64 = (file) => {
+  if (!(file instanceof File)) {
+    return Promise.resolve(null);
+  }
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+  });
+};
+
 
 export default function UsersTab() {
   const [users, setUsers] = useState(initialUsers);
@@ -131,8 +85,7 @@ export default function UsersTab() {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "Admin",
-    permissions: {},
+    role: 0,
     status: true,
     emailNotifications: false
   });
@@ -189,35 +142,48 @@ export default function UsersTab() {
     setShowModal(true);
   };
 
+
   const saveUser = async () => {
     try {
-      let userData = {
-        avatar: form.avatar || null,
-        name: form.name,
+      let avatarBase64 = null;
+
+      // Convert ONLY if File
+      if (form.avatar instanceof File) {
+        avatarBase64 = await fileToBase64(form.avatar);
+      }
+
+      const payload = {
+        fullname: form.name,
         email: form.email,
         role: form.role,
-        permissions: form.role === "Custom" ? {} : form.permissions,
-        lastLogin: editingUser ? editingUser.lastLogin : "-",
-        // status: editingUser ? editingUser.status : true,
-        status: form.status,
-        emailNotifications: form.emailNotifications,
+        email_notification: form.emailNotifications,
       };
 
-      if (editingUser) {
-        // Call dummy update API
-        const updatedUser = await apiUpdateUser(editingUser.id, userData);
-        setUsers(users.map((u) => (u.id === editingUser.id ? updatedUser : u)));
-      } else {
-        // Call dummy create API
-        const newUser = await apiCreateUser(userData);
-        setUsers([...users, newUser]);
+      // Only send password on CREATE
+      if (!editingUser) {
+        payload.password = form.password;
       }
+
+      // Only send image if new one selected
+      if (avatarBase64) {
+        payload.profile_image = avatarBase64;
+      }
+
+      let response;
+
+      if (editingUser) {
+        response = await APICall.postT(`/hrms/update_user/${editingUser.id}`, payload);
+      } else {
+        response = await APICall.postT("/hrms/user", payload);
+      }
+
+      console.log("User saved:", response);
 
       setShowModal(false);
       resetForm();
     } catch (error) {
       console.error("Error saving user:", error);
-      alert("Failed to save user. Check console.");
+      alert(error.message || "Failed to save user");
     }
   };
 
@@ -234,27 +200,7 @@ export default function UsersTab() {
     });
   };
   const handleRoleChange = (role) => {
-    if (role === "Custom") {
-      // Just save role as Custom, no permission tree
-      setForm({ ...form, role, permissions: {} });
-      return;
-    }
-
-    if (ROLE_PRESETS[role] === "ALL") {
-      // Super Admin: all permissions
-      const allPerms = {};
-      Object.keys(PERMISSIONS).forEach((key) => {
-        allPerms[key] = Object.keys(PERMISSIONS[key].children);
-      });
-      setForm({ ...form, role, permissions: allPerms });
-    } else {
-      // Predefined roles: some permissions
-      const perms = {};
-      ROLE_PRESETS[role].forEach((key) => {
-        perms[key] = Object.keys(PERMISSIONS[key].children);
-      });
-      setForm({ ...form, role, permissions: perms });
-    }
+    setForm({ ...form, role });
   };
 
   return (
@@ -317,7 +263,6 @@ export default function UsersTab() {
               <th>Name</th>
               <th>Email</th>
               <th>Role</th>
-              <th>Permissions</th>
               <th>Last Login</th>
               <th>Status</th>
               <th>Actions</th>
@@ -344,8 +289,6 @@ export default function UsersTab() {
                 <td>{u.name}</td>
                 <td>{u.email}</td>
                 <td><Badge bg="info">{u.role}</Badge></td>
-                <td>{typeof u.permissions === "object" ? Object.values(u.permissions).flat().length : u.permissions}</td>
-
                 <td>{u.lastLogin}</td>
                 <td>
                   <Form.Check
@@ -542,14 +485,15 @@ export default function UsersTab() {
           <Row className="g-3">
             <Col md={12}>
               <Form.Group className="mb-3 roleSelection">
-                {["Super Admin", "Admin", "Editor", "Viewer", "Custom"].map((role) => (
+                {roles.map((role) => (
                   <Form.Check
-                    key={role}
+                    key={role.id}
                     type="radio"
                     name="role"
-                    label={role}
-                    checked={form.role === role}
-                    onChange={() => handleRoleChange(role)}
+                    id={`role-${role.id}`}
+                    label={role.name}
+                    checked={form.role === role.id}
+                    onChange={() => handleRoleChange(role.id)}
                     className="mb-1"
                   />
                 ))}
