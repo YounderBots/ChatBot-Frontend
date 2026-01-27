@@ -1,19 +1,18 @@
-import React from 'react'
-import AppLayout from './layout/AppLayout'
 import './App.css'
+import AppLayout from './layout/AppLayout'
 
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
 import Login from './BasePages/Login'
-import Dashboard from './pages/Dashboard/Dashboard'
 import Analytics from './pages/Analytics/Analytics'
 import ConversationManager from './pages/ConversationManager/ConversationManager'
+import Dashboard from './pages/Dashboard/Dashboard'
 import IntentManager from './pages/IntentManager/IntentManager'
 import KnowledgeBaseManager from './pages/KnowledgeBaseManager/KnowledgeBaseManager'
-import Settings from './pages/Settings/Settings'
-import UserMgmt from './pages/UserManagement/UserMgmt'
 import UserProfile from './pages/Profile/UserProfile'
+import Settings from './pages/Settings/Settings'
 import TicketManagement from './pages/Ticketmanagement/TicketManagerment'
+import UserMgmt from './pages/UserManagement/UserMgmt'
 // import ChatbotWidget from './components/ChatBotWidgetBS'
 
 
@@ -24,7 +23,7 @@ const App = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route element={<AppLayout />}>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/Dashboard" element={<Dashboard />} />
           <Route path="/Analytics" element={<Analytics />} />
           <Route path="/Conversations" element={<ConversationManager />} />
           <Route path="/Intents" element={<IntentManager />} />

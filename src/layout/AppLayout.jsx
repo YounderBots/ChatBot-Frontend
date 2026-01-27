@@ -1,16 +1,40 @@
-import { ChevronLeft, ChevronRight, ChevronRightIcon, ChevronsLeft, User } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronRightIcon, ChevronsLeft, Ticket, User } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Outlet, useNavigate, } from "react-router-dom";
 
-import favIconChatViq from "./assets/favIconChatViq.png";
+import { useAuth } from "../Context/AuthContext";
 import ChatViq from "./assets/chatviq.png";
 import dpPlaceholder from "./assets/dpPlaceholder.png";
+import favIconChatViq from "./assets/favIconChatViq.png";
 
-import menuList from "./menulist";
-import "./AppLayout.css"; 
+import "./AppLayout.css";
+
+
+import {
+  BarChart3,
+  Cpu,
+  Database,
+  LayoutDashboard,
+  MessagesSquare,
+  Settings,
+  Users
+} from "lucide-react";
+
+export const ICON_MAP = {
+  "dashboard": LayoutDashboard,
+  "conversation": MessagesSquare,
+  "intent": Cpu,
+  "knowledgebase": Database,
+  "analytics": BarChart3,
+  "settings": Settings,
+  "users": Users,
+  "ticket": Ticket
+};
+
 
 /* -------------------- Render Menu -------------------- */
 const RenderMenu = ({ isExpanded, isMobile, activeMenu, setActiveMenu }) => {
+  const { menus } = useAuth();
   const navigate = useNavigate();
 
   return (
@@ -19,8 +43,8 @@ const RenderMenu = ({ isExpanded, isMobile, activeMenu, setActiveMenu }) => {
         } justify-content-around gap-2 py-2 ${!isMobile && !isExpanded ? "align-items-center" : ""
         }`}
     >
-      {menuList.map((menu) => {
-        const Icon = menu.icon;
+      {menus.map((menu) => {
+        const Icon = ICON_MAP[menu.icon];
         return (
           <div
             key={menu.name}

@@ -1,9 +1,13 @@
-import { useState } from 'react'
-import { Card, Spinner, Button, Form } from 'react-bootstrap'
-import { Eye, EyeOff } from 'lucide-react'
-import "./Login.css"
+import { Eye, EyeOff } from 'lucide-react';
+import { useState } from 'react';
+import { Card } from 'react-bootstrap';
+import { useNavigate } from "react-router-dom";
+
+import APICall from '../APICalls/APICall';
+import { useAuth } from '../Context/AuthContext';
+import "./Login.css";
 import chatviq from "./assets/chatviq.png";
-import robot from "./assets/robot.png";
+
 const Login = () => {
   const [error, setError] = useState("");
   const [email, setEmail] = useState("");
@@ -11,35 +15,39 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     if (!email || !password) {
       setError("Email and Password are required");
       return;
     }
-    setLoading(true)
-    setTimeout(() => {
-      setLoading(false);
-    }, 1500)
+
+    const data = await APICall.postWT("/login/login_user", {
+      email,
+      password,
+    });
+
+    console.log(data)
+
+    login(data);
+
+    const redirectPath = data.menus?.[0]?.path || "/";
+    navigate(redirectPath);
   }
 
   return (
     <div className='login-wrapper bgLogoLightColor'>
       <div className='login-layout'>
-        <div className="login-right d-flex flex-column align-items-center justify-content-center text-center">
-          <img
-            src={robot}
-            alt="Robot"
-            className="chatbot-illustration img-fluid mb-4 d-none d-md-block"
-          />
+        <div className="login-right d-flex justify-content-center">
           <h1>Welcome to ChatVIQ</h1>
           <p>
             Your intelligent AI chatbot platform to assist, automate,
             and enhance conversations.
           </p>
         </div>
-
         <div className='login-left'>
           <Card className='login-card '>
             <div className='text-center mb-4'>
@@ -52,6 +60,7 @@ const Login = () => {
                 <label className='form-label'>Email Address</label>
                 <input
                   type='email'
+                  name='email'
                   placeholder='Enter Your Email'
                   className='form-login-form'
                   required
@@ -64,6 +73,7 @@ const Login = () => {
                 <label className="form-label">Password</label>
                 <input
                   type={showPassword ? "text" : "password"}
+                  name='password'
                   placeholder='Enter Password'
                   className="form-login-form"
                   required
