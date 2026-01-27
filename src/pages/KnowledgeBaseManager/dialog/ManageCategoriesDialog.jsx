@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { createPortal } from "react-dom";
+import APICall from "../../../APICalls/APICall";
 
 export default function ManageCategoriesDialog({
   categories,
@@ -18,20 +19,54 @@ export default function ManageCategoriesDialog({
   const [editingValue, setEditingValue] = useState("");
   const [dragIndex, setDragIndex] = useState(null);
 
+  const updateCategoryOrder = async (updatedCategories) => {
+    try {
+      await Promise.all(
+        updatedCategories.map((cat, index) =>
+          APICall.postT(`/knowledgebase/updatecategory/${cat.id}`, {
+            name: cat.name,
+            status: cat.status,
+            order: index + 1,
+          })
+        )
+      );
+    } catch (err) {
+      console.error("Failed to update order", err);
+      alert("Failed to save category order");
+    }
+  };
+
   /* ================= ADD ================= */
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!newCategory.trim()) return;
-    setCategories((prev) => [
-      ...prev,
-      { name: newCategory.trim(), count: 0 },
-    ]);
-    setNewCategory("");
+
+    try {
+      const payload = {
+        name: newCategory.trim(),
+        order: categories.length + 1,
+      };
+
+      const res = await APICall.postT("/knowledgebase/category", payload);
+
+    } catch (err) {
+      alert(err.message || "Failed to add category");
+    }
   };
 
   /* ================= DELETE ================= */
-  const handleDelete = (index) => {
-    if (categories[index].count > 0) return;
-    setCategories((prev) => prev.filter((_, i) => i !== index));
+  const handleDelete = async (index) => {
+    const category = categories[index];
+
+    // block delete if used
+    if (category.count > 0) return;
+
+    try {
+      await APICall.postT(`/knowledgebase/deletecategory/${category.id}`);
+
+      setCategories((prev) => prev.filter((_, i) => i !== index));
+    } catch (err) {
+      alert(err.message || "Failed to delete category");
+    }
   };
 
   /* ================= RENAME ================= */
@@ -40,26 +75,50 @@ export default function ManageCategoriesDialog({
     setEditingValue(name);
   };
 
-  const saveEdit = (i) => {
+  const saveEdit = async (i) => {
     if (!editingValue.trim()) return;
-    setCategories((prev) =>
-      prev.map((c, idx) =>
-        idx === i ? { ...c, name: editingValue.trim() } : c
-      )
-    );
-    setEditingIndex(null);
+
+    const category = categories[i];
+
+    try {
+      await APICall.postT(`/knowledgebase/updatecategory/${category.id}`, {
+        name: editingValue.trim(),
+        status: category.status,
+        order: category.order,
+      });
+
+      setCategories((prev) =>
+        prev.map((c, idx) =>
+          idx === i ? { ...c, name: editingValue.trim() } : c
+        )
+      );
+
+      setEditingIndex(null);
+      setEditingValue("");
+    } catch (err) {
+      alert(err.message || "Failed to update category");
+    }
   };
+
 
   /* ================= DRAG & DROP ================= */
   const onDragStart = (index) => setDragIndex(index);
 
-  const onDrop = (index) => {
+  const onDrop = async (index) => {
     if (dragIndex === null || dragIndex === index) return;
     const updated = [...categories];
     const [moved] = updated.splice(dragIndex, 1);
     updated.splice(index, 0, moved);
+
+    const reordered = updated.map((c, i) => ({
+      ...c,
+      order: i + 1,
+    }));
+
     setCategories(updated);
     setDragIndex(null);
+
+    await updateCategoryOrder(reordered);
   };
 
   return createPortal(

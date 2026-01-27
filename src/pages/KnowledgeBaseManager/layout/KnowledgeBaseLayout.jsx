@@ -1,26 +1,46 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ArticlesPanel from "../articles/ArticlesPanel";
 import ManageCategoriesDialog from "../dialog/ManageCategoriesDialog";
 
+import APICall from "../../../APICalls/APICall";
 import "./kb-layout.css";
 
 export default function KnowledgeBaseLayout() {
   const navigate = useNavigate();
 
   /* ================= CATEGORIES STATE ================= */
-  const [categories, setCategories] = useState([
-    { name: "Getting Started", count: 12 },
-    { name: "Account & Billing", count: 8 },
-    { name: "Technical Support", count: 15 },
-    { name: "Product Info", count: 6 },
-    { name: "Policies", count: 3 },
-  ]);
+  const [categories, setCategories] = useState([]);
+  //   { name: "Getting Started", count: 12 },
+  //   { name: "Account & Billing", count: 8 },
+  //   { name: "Technical Support", count: 15 },
+  //   { name: "Product Info", count: 6 },
+  //   { name: "Policies", count: 3 },
+  // ]);
 
   const [activeCategory, setActiveCategory] = useState("All");
   const [manageOpen, setManageOpen] = useState(false);
 
   const totalCount = categories.reduce((sum, c) => sum + c.count, 0);
+
+  const fetchCategory = async () => {
+    try {
+
+      const res = await APICall.getT("/knowledgebase/category");
+      const sortedCategories = [...res].sort(
+        (a, b) => a.order - b.order
+      );
+      setCategories(sortedCategories)
+
+
+    } catch (err) {
+      alert(err.message || "Failed to add category");
+    }
+  };
+
+  useEffect(() => {
+    fetchCategory();
+  }, [])
 
   /* ================= RENDER ================= */
   return (
@@ -31,9 +51,8 @@ export default function KnowledgeBaseLayout() {
         <aside className="kb-sidebar">
           {/* All Articles */}
           <div
-            className={`all-articles ${
-              activeCategory === "All" ? "active" : ""
-            }`}
+            className={`all-articles ${activeCategory === "All" ? "active" : ""
+              }`}
             onClick={() => setActiveCategory("All")}
           >
             All Articles <span className="count">({totalCount})</span>
@@ -43,9 +62,8 @@ export default function KnowledgeBaseLayout() {
           {categories.map((c) => (
             <div
               key={c.name}
-              className={`category-row ${
-                activeCategory === c.name ? "active" : ""
-              }`}
+              className={`category-row ${activeCategory === c.name ? "active" : ""
+                }`}
               onClick={() => setActiveCategory(c.name)}
             >
               <span>{c.name}</span>
