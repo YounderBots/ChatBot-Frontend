@@ -77,23 +77,35 @@ export default function RolesTab() {
 
 
 
-    const mapBackendPermissions = (permissionsArray) => {
-        const result = {};
+  const MENU_ID_TO_KEY = {
+  1: "dashboard",
+  2: "conversations",
+  3: "intents",
+  4: "knowledgeBase",
+  5: "settings",
+  6: "users",
+};
 
-        permissionsArray.forEach((perm) => {
-            const menuKey = MENU_ID_MAP[perm.menu];
-            if (!menuKey) return;
+const mapBackendPermissions= (permissions = []) => {
+  const result = {};
 
-            result[menuKey] = [];
+  if (!Array.isArray(permissions)) return permissions;
 
-            if (perm.view) result[menuKey].push("view");
-            if (perm.add) result[menuKey].push("add");
-            if (perm.edit) result[menuKey].push("edit");
-            if (perm.delete) result[menuKey].push("delete");
-        });
+  permissions.forEach((perm) => {
+    const menuKey = MENU_ID_TO_KEY[perm.menu];
+    if (!menuKey) return;
 
-        return result;
-    };
+    result[menuKey] = [];
+
+    if (perm.view) result[menuKey].push("view");
+    if (perm.add) result[menuKey].push("add");
+    if (perm.edit) result[menuKey].push("edit");
+    if (perm.delete) result[menuKey].push("delete");
+  });
+
+  return result;
+};
+
 
 
 
@@ -124,59 +136,60 @@ export default function RolesTab() {
 
 
     /* ---------- TOGGLE PERMISSION ---------- */
-    const togglePermission = (menu, action) => {
-        setTempPermissions((prev) => {
-            const current = prev[menu] || [];
-            const updated = current.includes(action)
-                ? current.filter((p) => p !== action)
-                : [...current, action];
+   const togglePermission = (menuKey, type) => {
+  setTempPermissions((prev) => {
+    const current = prev[menuKey] || [];
 
-            return { ...prev, [menu]: updated };
-        });
-    };
+    const updated = current.includes(type)
+      ? current.filter(p => p !== type)
+      : [...current, type];
+
+    return { ...prev, [menuKey]: updated };
+  });
+};
 
     /* ---------- SAVE ---------- */
 
-    const buildPermissionsPayload = () => {
-        return Object.entries(tempPermissions)
-            .map(([menuKey, actions]) => ({
-                menu: MENU_ID_MAP[menuKey],
-                view: actions.some(a => a.toLowerCase().includes("view")),
-                add: actions.some(a => a.toLowerCase().includes("add")),
-                edit: actions.some(a => a.toLowerCase().includes("edit")),
-                delete: actions.some(a => a.toLowerCase().includes("delete")),
-            }))
-            .filter(p => p.menu); // remove invalid menus
-    };
+const buildPermissionsPayload = () => {
+  return Object.entries(tempPermissions).map(([menuKey, actions]) => ({
+    menu: MENU_ID_MAP[menuKey],
+    view: actions.includes("view"),
+    add: actions.includes("add"),
+    edit: actions.includes("edit"),
+    delete: actions.includes("delete"),
+  }));
+};
 
 
-    const savePermissions = async () => {
-        if (!editingRole?.name?.trim()) {
-            alert("Role name is required");
-            return;
-        }
 
-        const payload = {
-            name: editingRole.name,
-            permissions: buildPermissionsPayload()
-        };
+const savePermissions = async () => {
+  if (!editingRole?.name?.trim()) {
+    alert("Role name is required");
+    return;
+  }
 
-        try {
-            // 👉 API call
-            const response = await APICall.postT("/hrms/role", payload);
-            console.log("Payload sent:", payload);
-            console.log("Save role response:", response);
+  const payload = {
+    name: editingRole.name,
+    permissions: buildPermissionsPayload(),
+  };
 
-           
+  try {
+    // UPDATE if ID exists, else CREATE
+    if (editingRole.id) {
+      await APICall.putT(`/hrms/role/${editingRole.id}`, payload);
+    } else {
+      await APICall.postT("/hrms/role", payload);
+    }
 
-             await fetchRoles();
-                setShowModal(false);
-            
-        } catch (error) {
-            console.error("Save role failed:", error);
-            alert("Failed to save role");
-        }
-    };
+    await fetchRoles(); // 🔥 ALWAYS refresh after save
+    setShowModal(false);
+
+  } catch (error) {
+    console.error("Save role failed:", error);
+    alert("Failed to save role");
+  }
+};
+
 
 
 
