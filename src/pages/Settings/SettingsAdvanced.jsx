@@ -428,47 +428,35 @@ const SettingsAdvanced = () => {
 
         </div>
 
-        <div
-          className="bg-white border-top"
-          style={{
-            position: "sticky",
-            bottom: 0,
-            zIndex: 100,
-            pointerEvents: "auto",
-          }}
-        >
-          <Container fluid className="py-3">
-            <Row className="align-items-center gy-2">
-              <Col md={6} xs={12} className="text-muted">
-                {lastSavedAt
-                  ? <>Last saved: <strong>{lastSavedAt.toLocaleString()}</strong></>
-                  : "Not saved yet"}
-              </Col>
+ <hr />
 
-              <Col md={6} className="d-flex justify-content-end gap-2 mb-2">
-                <Button
-                  size="sm"
-                  variant="danger"
-                  onClick={handleDiscard}
-                  disabled={!hasChanges}
-                >
-                  Discard
-                </Button>
+        <Row className="align-items-center mt-3">
+          <Col md={6} className="text-muted">
+            {lastSavedAt
+              ? <>Last saved: <strong>{lastSavedAt.toLocaleString()}</strong></>
+              : "Not saved yet"}
+          </Col>
 
+          <Col md={6} className="d-flex justify-content-end gap-2">
+            <Button
+              size="sm"
+              variant="danger"
+              onClick={handleDiscard}
+              disabled={!hasChanges}
+            >
+              Discard
+            </Button>
 
-                <Button
-                  size="sm"
-                  variant="primary"
-                  onClick={handleSave}
-                  disabled={!hasChanges}
-                >
-                  Save Changes
-                </Button>
-              </Col>
-
-            </Row>
-          </Container>
-        </div>
+            <Button
+              size="sm"
+              variant="primary"
+              onClick={handleSave}
+              disabled={!hasChanges}
+            >
+              Save Changes
+            </Button>
+          </Col>
+        </Row>
 
 
         <Modal

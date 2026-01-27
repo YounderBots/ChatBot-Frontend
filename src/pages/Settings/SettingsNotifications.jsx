@@ -107,22 +107,13 @@ const SettingsNotifications = () => {
     setHasChanges(false);
   };
 
-  const playSound = () => {
-    const soundMap = {
-      default: "/sounds/default.mp3",
-      chime: "/sounds/chime.mp3",
-      alert: "/sounds/alert.mp3",
-    };
-
-    const audio = new Audio(soundMap[settings.sound]);
-    audio.play();
-  };
-
-
 
   return (
-    <Card className="border-0">
-      <Card.Body>
+    <Card className="border-0 overflow-hidden">
+      <Card.Body className="p-0 d-flex flex-column">
+        <div
+          className="flex-grow-1 overflow-auto p-4"
+          style={{ maxHeight: "calc(100vh - 440px)" }}>
 
         <h6 className="text-primary mb-3">Email Notifications</h6>
 
@@ -346,17 +337,10 @@ const SettingsNotifications = () => {
               <option value="alert">Alert</option>
             </Form.Select>
 
-            <Button
-              size="sm"
-              variant="secondary"
-              className="mt-2"
-              onClick={playSound}
-            >
-              Play Sound Test
-            </Button>
-
           </Col>
         </Row>
+
+        </div>
         <hr />
 
         <div className="d-flex align-items-center justify-content-between mt-3">

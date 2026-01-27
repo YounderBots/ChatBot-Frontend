@@ -1,4 +1,4 @@
-import React, { useState ,useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { Card, Row, Col, Form, Button, Modal } from "react-bootstrap";
 import { FaTrash } from "react-icons/fa";
 const SettingsConversation = () => {
@@ -24,15 +24,16 @@ const SettingsConversation = () => {
   const [showKeywordModal, setShowKeywordModal] = useState(false);
   const [newPriority, setNewPriority] = useState("HIGH");
   const [savedSettings, setSavedSettings] = useState(settings);
-const [hasChanges, setHasChanges] = useState(false);
-const [lastSavedAt, setLastSavedAt] = useState(null);
-useEffect(() => {
-  setHasChanges(
-    JSON.stringify(settings) !== JSON.stringify(savedSettings)
-  );
-}, [settings, savedSettings]);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState(null);
+  useEffect(() => {
+    const { escalationKeywords, ...rest } = settings;
+    const { escalationKeywords: _, ...savedRest } = savedSettings;
 
-
+    setHasChanges(
+      JSON.stringify(rest) !== JSON.stringify(savedRest)
+    );
+  }, [settings, savedSettings]);
 
 
   const addKeyword = () => {
@@ -63,336 +64,339 @@ useEffect(() => {
     setSettings({ ...settings, escalationKeywords: updated });
   };
   const handleSave = () => {
-  setSavedSettings(settings);
-  setLastSavedAt(new Date());
-  setHasChanges(false);
-};
+    setSavedSettings(settings);
+    setLastSavedAt(new Date());
+    setHasChanges(false);
+  };
 
-const handleDiscard = () => {
-  setSettings(savedSettings);
-  setHasChanges(false);
+  const handleDiscard = () => {
+    setSettings({
+      ...savedSettings,
+      escalationKeywords: settings.escalationKeywords,
+    });
+    setHasChanges(false);
 
-  // Reset local UI states
-  setContextTimeoutError("");
-  setMaxConversationError("");
-};
-
+    // Reset local UI states
+    setContextTimeoutError("");
+    setMaxConversationError("");
+  };
 
 
   return (
-    <Card className="border-0">
-      <Card.Body>
+    <Card className="border-0 overflow-hidden">
+      <Card.Body className="p-0 d-flex flex-column">
+        <div
+          className="flex-grow-1 overflow-auto p-4"
+          style={{ maxHeight: "calc(100vh - 440px)" }}>
 
-        {/* AI CONFIGURATION */}
-        <h6 className="text-primary mb-3">AI Configuration</h6>
+          {/* AI CONFIGURATION */}
+          <h6 className="text-primary mb-3">AI Configuration</h6>
 
-        <Row className="mb-3">
-          <Col md={6} className="mb-3">
-            <Form.Label className="fw-semibold">
-              Confidence Threshold
-              <span className="text-primary ms-2">
-                ({settings.confidenceThreshold}%)
-              </span>
-            </Form.Label>
+          <Row className="mb-3">
+            <Col md={6} className="mb-3">
+              <Form.Label className="fw-semibold">
+                Confidence Threshold
+                <span className="text-primary ms-2">
+                  ({settings.confidenceThreshold}%)
+                </span>
+              </Form.Label>
 
-            <Form.Range
-              min={0}
-              max={100}
-              value={settings.confidenceThreshold}
-              onChange={(e) =>
-                setSettings({
-                  ...settings,
-                  confidenceThreshold: Number(e.target.value),
-                })
-              }
-            />
-
-            <Form.Label>
-              Description
-            </Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={3}
-            ></Form.Control>
-          </Col>
-
-          <Col md={6} className="mb-3">
-            <Form.Label>Context Timeout (minutes)</Form.Label>
-            <Form.Control
-              type="number"
-              value={settings.contextTimeout === 0 ? "" : settings.contextTimeout}
-              isInvalid={!!contextTimeoutError}
-              onChange={(e) => {
-                let value = e.target.value;
-                if (value.length > 1 && value.startsWith("0")) {
-                  value = value.replace(/^0+/, "");
+              <Form.Range
+                min={0}
+                max={100}
+                value={settings.confidenceThreshold}
+                onChange={(e) =>
+                  setSettings({
+                    ...settings,
+                    confidenceThreshold: Number(e.target.value),
+                  })
                 }
-                const numericValue = value === "" ? "" : Number(value);
-                setSettings({
-                  ...settings,
-                  contextTimeout: numericValue,
-                });
-                if (numericValue !== "" && numericValue < 5) {
-                  setContextTimeoutError(
-                    "Context timeout must be at least 5 minutes"
-                  );
-                } else if (numericValue > 120) {
-                  setContextTimeoutError(
-                    "Context timeout cannot exceed 120 minutes"
-                  );
-                } else {
-                  setContextTimeoutError("");
-                }
-              }}
-            />
+              />
 
-            {contextTimeoutError && (
-              <Form.Control.Feedback type="invalid">
-                {contextTimeoutError}
-              </Form.Control.Feedback>
-            )}
-          </Col>
+              <Form.Label>
+                Description
+              </Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+              ></Form.Control>
+            </Col>
 
-          <Col md={6} className="mb-3">
-            <Form.Label>Max Conversation Length</Form.Label>
-
-            <Form.Control
-              type="number"
-              value={settings.maxConversationLength}
-              isInvalid={!!maxConversationError}
-              onChange={(e) => {
-                const value = e.target.value; // keep as string
-
-                // Always update state (allows free typing)
-                setSettings({
-                  ...settings,
-                  maxConversationLength: value,
-                });
-
-                // Validation
-                if (value === "") {
-                  setMaxConversationError("");
-                  return;
-                }
-
-                const num = Number(value);
-
-                if (num < 10) {
-                  setMaxConversationError(
-                    "Conversation length must be at least 10 messages"
-                  );
-                } else if (num > 500) {
-                  setMaxConversationError(
-                    "Conversation length cannot exceed 500 messages"
-                  );
-                } else {
-                  setMaxConversationError("");
-                }
-              }}
-            />
-
-            {maxConversationError && (
-              <Form.Control.Feedback type="invalid">
-                {maxConversationError}
-              </Form.Control.Feedback>
-            )}
-          </Col>
-
-          <Col md={6} className="d-flex align-items-center">
-            <Form.Check
-              type="switch"
-              label="Enable Sentiment Analysis"
-              checked={settings.enableSentiment}
-              onChange={(e) =>
-                setSettings({
-                  ...settings,
-                  enableSentiment: e.target.checked,
-                })
-              }
-            />
-          </Col>
-        </Row>
-
-        <hr />
-
-        {/* AUTO ESCALATION */}
-        <h6 className="text-primary mb-3">Auto-Escalation Rules</h6>
-
-        <Form.Check
-          type="switch"
-          label="Enable Auto-Escalation"
-          checked={settings.enableAutoEscalation}
-          onChange={(e) =>
-            setSettings({
-              ...settings,
-              enableAutoEscalation: e.target.checked,
-            })
-          }
-        />
-
-        {settings.enableAutoEscalation && (
-          <>
-            {/* MEDIUM PRIORITY */}
-            <Row className="mb-3 mt-3">
-              <Col md={6}>
-                <Form.Label>
-                  Escalate after X failed attempts
-                </Form.Label>
-                <Form.Control
-                  type="number"
-                  min={1}
-                  value={settings.escalationAttempts}
-                  onChange={(e) =>
-                    setSettings({
-                      ...settings,
-                      escalationAttempts: Number(e.target.value),
-                    })
+            <Col md={6} className="mb-3">
+              <Form.Label>Context Timeout (minutes)</Form.Label>
+              <Form.Control
+                type="number"
+                value={settings.contextTimeout === 0 ? "" : settings.contextTimeout}
+                isInvalid={!!contextTimeoutError}
+                onChange={(e) => {
+                  let value = e.target.value;
+                  if (value.length > 1 && value.startsWith("0")) {
+                    value = value.replace(/^0+/, "");
                   }
-                />
-              </Col>
-            </Row>
-            <Row className="mb-4">
-              <Col md={12}>
-                <Form.Check
-                  type="checkbox"
-                  label="Escalate on negative sentiment"
-                />
-              </Col>
-            </Row>
-            <hr />
-            <Row className="align-items-center mb-2">
-              <Col xs={8} md={6}>
-                <h6 className="text-primary mb-0">
-                  Escalation Keywords
-                </h6>
-              </Col>
+                  const numericValue = value === "" ? "" : Number(value);
+                  setSettings({
+                    ...settings,
+                    contextTimeout: numericValue,
+                  });
+                  if (numericValue !== "" && numericValue < 5) {
+                    setContextTimeoutError(
+                      "Context timeout must be at least 5 minutes"
+                    );
+                  } else if (numericValue > 120) {
+                    setContextTimeoutError(
+                      "Context timeout cannot exceed 120 minutes"
+                    );
+                  } else {
+                    setContextTimeoutError("");
+                  }
+                }}
+              />
 
-              <Col xs={4} md={6} className="text-end">
-                <Button
-                  size="sm"
-                  variant="primary"
-                  onClick={() => setShowKeywordModal(true)}
-                >
-                  Add Keyword
-                </Button>
-              </Col>
-            </Row>
+              {contextTimeoutError && (
+                <Form.Control.Feedback type="invalid">
+                  {contextTimeoutError}
+                </Form.Control.Feedback>
+              )}
+            </Col>
 
-            {settings.escalationKeywords.map((item, index) => (
+            <Col md={6} className="mb-3">
+              <Form.Label>Max Conversation Length</Form.Label>
 
+              <Form.Control
+                type="number"
+                value={settings.maxConversationLength}
+                isInvalid={!!maxConversationError}
+                onChange={(e) => {
+                  const value = e.target.value; // keep as string
 
-              <Row key={index} className="align-items-center mb-1">
-                <Col xs="auto" className="pe-2">
-                  {item.label}
+                  // Always update state (allows free typing)
+                  setSettings({
+                    ...settings,
+                    maxConversationLength: value,
+                  });
+
+                  // Validation
+                  if (value === "") {
+                    setMaxConversationError("");
+                    return;
+                  }
+
+                  const num = Number(value);
+
+                  if (num < 10) {
+                    setMaxConversationError(
+                      "Conversation length must be at least 10 messages"
+                    );
+                  } else if (num > 500) {
+                    setMaxConversationError(
+                      "Conversation length cannot exceed 500 messages"
+                    );
+                  } else {
+                    setMaxConversationError("");
+                  }
+                }}
+              />
+
+              {maxConversationError && (
+                <Form.Control.Feedback type="invalid">
+                  {maxConversationError}
+                </Form.Control.Feedback>
+              )}
+            </Col>
+
+            <Col md={6} className="d-flex align-items-center">
+              <Form.Check
+                type="switch"
+                label="Enable Sentiment Analysis"
+                checked={settings.enableSentiment}
+                onChange={(e) =>
+                  setSettings({
+                    ...settings,
+                    enableSentiment: e.target.checked,
+                  })
+                }
+              />
+            </Col>
+          </Row>
+
+          <hr />
+
+          {/* AUTO ESCALATION */}
+          <h6 className="text-primary mb-3">Auto-Escalation Rules</h6>
+
+          <Form.Check
+            type="switch"
+            label="Enable Auto-Escalation"
+            checked={settings.enableAutoEscalation}
+            onChange={(e) =>
+              setSettings({
+                ...settings,
+                enableAutoEscalation: e.target.checked,
+              })
+            }
+          />
+
+          {settings.enableAutoEscalation && (
+            <>
+              {/* MEDIUM PRIORITY */}
+              <Row className="mb-3 mt-3">
+                <Col md={6}>
+                  <Form.Label>
+                    Escalate after X failed attempts
+                  </Form.Label>
+                  <Form.Control
+                    type="number"
+                    min={1}
+                    value={settings.escalationAttempts}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        escalationAttempts: Number(e.target.value),
+                      })
+                    }
+                  />
+                </Col>
+              </Row>
+              <Row className="mb-4">
+                <Col md={12}>
+                  <Form.Check
+                    type="checkbox"
+                    label="Escalate on negative sentiment"
+                  />
+                </Col>
+              </Row>
+              <hr />
+              <Row className="align-items-center mb-2">
+                <Col xs={8} md={6}>
+                  <h6 className="text-primary mb-0">
+                    Escalation Keywords
+                  </h6>
                 </Col>
 
-                <Col>
-                  <div className="d-flex align-items-center gap-2">
-                    <Form.Select
-                      size="sm"
-                      value={item.priority}
-                      onChange={(e) =>
-                        updatePriority(index, e.target.value)
-                      }
-                    >
-                      <option value="HIGH">High</option>
-                      <option value="MEDIUM">Medium</option>
-                      <option value="LOW">Low</option>
-                    </Form.Select>
-
-                    <Button
-                      size="sm"
-                      variant="outline-danger"
-                      onClick={() => removeKeyword(index)}
-                      title="Delete"
-                    >
-                      <FaTrash />
-                    </Button>
-                  </div>
+                <Col xs={4} md={6} className="text-end">
+                  <Button
+                    size="sm"
+                    variant="primary"
+                    onClick={() => setShowKeywordModal(true)}
+                  >
+                    Add Keyword
+                  </Button>
                 </Col>
               </Row>
 
+              {settings.escalationKeywords.map((item, index) => (
 
-            ))}
-          </>
-        )}
-        <Modal
-          show={showKeywordModal}
-          onHide={() => setShowKeywordModal(false)}
-          centered
-        >
-          <Modal.Header closeButton>
-            <Modal.Title>Add Escalation Keyword</Modal.Title>
-          </Modal.Header>
 
-          <Modal.Body>
-            <Form.Group className="mb-3">
-              <Form.Label>Keyword</Form.Label>
-              <Form.Control
-                placeholder='e.g. "agent"'
-                value={newKeyword}
-                onChange={(e) => setNewKeyword(e.target.value)}
-              />
-            </Form.Group>
+                <Row key={index} className="align-items-center mb-1">
+                  <Col xs="auto" className="pe-2">
+                    {item.label}
+                  </Col>
 
-            <Form.Group>
-              <Form.Label>Priority</Form.Label>
-              <Form.Select
-                value={newPriority}
-                onChange={(e) => setNewPriority(e.target.value)}
+                  <Col>
+                    <div className="d-flex align-items-center gap-2">
+                      <Form.Select
+                        size="sm"
+                        value={item.priority}
+                        onChange={(e) =>
+                          updatePriority(index, e.target.value)
+                        }
+                      >
+                        <option value="HIGH">High</option>
+                        <option value="MEDIUM">Medium</option>
+                        <option value="LOW">Low</option>
+                      </Form.Select>
+
+                      <Button
+                        size="sm"
+                        variant="outline-danger"
+                        onClick={() => removeKeyword(index)}
+                        title="Delete"
+                      >
+                        <FaTrash />
+                      </Button>
+                    </div>
+                  </Col>
+                </Row>
+
+
+              ))}
+            </>
+          )}
+          <Modal
+            show={showKeywordModal}
+            onHide={() => setShowKeywordModal(false)}
+            centered
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>Add Escalation Keyword</Modal.Title>
+            </Modal.Header>
+
+            <Modal.Body>
+              <Form.Group className="mb-3">
+                <Form.Label>Keyword</Form.Label>
+                <Form.Control
+                  placeholder='e.g. "agent"'
+                  value={newKeyword}
+                  onChange={(e) => setNewKeyword(e.target.value)}
+                />
+              </Form.Group>
+
+              <Form.Group>
+                <Form.Label>Priority</Form.Label>
+                <Form.Select
+                  value={newPriority}
+                  onChange={(e) => setNewPriority(e.target.value)}
+                >
+                  <option value="HIGH">High</option>
+                  <option value="MEDIUM">Medium</option>
+                  <option value="LOW">Low</option>
+                </Form.Select>
+              </Form.Group>
+            </Modal.Body>
+
+            <Modal.Footer>
+              <Button
+                variant="secondary"
+                onClick={() => setShowKeywordModal(false)}
               >
-                <option value="HIGH">High</option>
-                <option value="MEDIUM">Medium</option>
-                <option value="LOW">Low</option>
-              </Form.Select>
-            </Form.Group>
-          </Modal.Body>
+                Cancel
+              </Button>
+              <Button variant="primary" onClick={addKeyword}>
+                Save
+              </Button>
+            </Modal.Footer>
+          </Modal>
 
-          <Modal.Footer>
-            <Button
-              variant="secondary"
-              onClick={() => setShowKeywordModal(false)}
-            >
-              Cancel
-            </Button>
-            <Button variant="primary" onClick={addKeyword}>
-              Save
-            </Button>
-          </Modal.Footer>
-        </Modal>
+        </div>
         <hr />
 
-<div className="d-flex justify-content-between align-items-center">
-  <div className="text-muted small">
-    {lastSavedAt && (
-      <>Last saved at {lastSavedAt.toLocaleTimeString()}</>
-    )}
-  </div>
+        <Row className="align-items-center mt-3">
+          <Col md={6} className="text-muted">
+            {lastSavedAt
+              ? <>Last saved: <strong>{lastSavedAt.toLocaleString()}</strong></>
+              : "Not saved yet"}
+          </Col>
 
-  <div className="d-flex gap-2">
-    <Button
-      size="sm"
-      variant="danger"
-      onClick={handleDiscard}
-      disabled={!hasChanges}
-    >
-      Discard
-    </Button>
+          <Col md={6} className="d-flex justify-content-end gap-2">
+            <Button
+              size="sm"
+              variant="danger"
+              onClick={handleDiscard}
+              disabled={!hasChanges}
+            >
+              Discard
+            </Button>
 
-    <Button
-      size="sm"
-      variant="primary"
-      onClick={handleSave}
-      disabled={!hasChanges}
-    >
-      Save Changes
-    </Button>
-  </div>
-</div>
-
-
-
-
+            <Button
+              size="sm"
+              variant="primary"
+              onClick={handleSave}
+              disabled={!hasChanges}
+            >
+              Save Changes
+            </Button>
+          </Col>
+        </Row>
 
       </Card.Body>
     </Card>
