@@ -1,11 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Table, Button, Modal, Form, Card, Row, Col } from "react-bootstrap";
 import { Edit2, Trash2 } from "lucide-react";
 import "bootstrap/dist/css/bootstrap.min.css";
+import APICall from "../../APICalls/APICall";
 
 /* =======================
    PERMISSION MATRIX
 ======================= */
+
+const MENU_ID_MAP = {
+    dashboard: 1,
+    conversations: 2,
+    intents: 3,
+    knowledgeBase: 4,
+    settings: 5,
+    users: 6,
+};
+
 
 const PERMISSION_MATRIX = {
     dashboard: {
@@ -34,63 +45,16 @@ const PERMISSION_MATRIX = {
     },
 };
 
-/* =======================
-   PREDEFINED ROLES
-======================= */
 
-const INITIAL_ROLES = [
-    {
-        key: "SUPER_ADMIN",
-        name: "Super Admin",
-        permissions: {
-            dashboard: ["viewAnalytics", "exportReports"],
-            conversations: ["viewConversations", "exportConversations", "deleteConversations"],
-            intents: ["viewIntents", "editIntents", "deleteIntents", "trainModel"],
-            knowledgeBase: ["viewArticles", "editArticles", "publishArticles"],
-            settings: ["viewSettings", "modifySettings"],
-            users: ["viewUsers", "editUsers", "deleteUsers"],
-        },
-    },
-    {
-        key: "ADMIN",
-        name: "Admin",
-        permissions: {
-            dashboard: ["viewAnalytics", "exportReports"],
-            conversations: ["viewConversations", "exportConversations", "deleteConversations"],
-            intents: ["viewIntents", "editIntents", "deleteIntents", "trainModel"],
-            knowledgeBase: ["viewArticles", "editArticles", "publishArticles"],
-            settings: ["viewSettings"],
-            users: ["viewUsers", "editUsers"],
-        },
-    },
-    {
-        key: "EDITOR",
-        name: "Editor",
-        permissions: {
-            intents: ["viewIntents", "editIntents"],
-            knowledgeBase: ["viewArticles", "editArticles"],
-        },
-    },
-    {
-        key: "VIEWER",
-        name: "Viewer",
-        permissions: {
-            dashboard: ["viewAnalytics"],
-            conversations: ["viewConversations"],
-            intents: ["viewIntents"],
-            knowledgeBase: ["viewArticles"],
-            settings: ["viewSettings"],
-            users: ["viewUsers"],
-        },
-    },
-];
+
+
 
 /* =======================
    COMPONENT
 ======================= */
 
 export default function RolesTab() {
-    const [roles, setRoles] = useState(INITIAL_ROLES);
+    const [roles, setRoles] = useState([]);
     const [editingRole, setEditingRole] = useState(null);
     const [tempPermissions, setTempPermissions] = useState({});
     const [showModal, setShowModal] = useState(false);
@@ -108,6 +72,57 @@ export default function RolesTab() {
     };
 
 
+
+    // fetch roles from API (if needed)
+
+
+
+    const mapBackendPermissions = (permissionsArray) => {
+        const result = {};
+
+        permissionsArray.forEach((perm) => {
+            const menuKey = MENU_ID_MAP[perm.menu];
+            if (!menuKey) return;
+
+            result[menuKey] = [];
+
+            if (perm.view) result[menuKey].push("view");
+            if (perm.add) result[menuKey].push("add");
+            if (perm.edit) result[menuKey].push("edit");
+            if (perm.delete) result[menuKey].push("delete");
+        });
+
+        return result;
+    };
+
+
+
+    const fetchRoles = async () => {
+        try {
+            const response = await APICall.getT("/hrms/roles");
+            console.log("Fetched rolesssssssss:", response);
+
+
+            const rolesArray = Array.isArray(response) ? response : [];
+
+            const formattedRoles = rolesArray.map((role) => ({
+                key: role.id,
+                name: role.name,
+                status: role.status === "ACTIVE",
+                permissions: mapBackendPermissions(role.permissions || []),
+            }));
+
+            setRoles(formattedRoles);
+        } catch (error) {
+            console.error("Failed to fetch roles:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchRoles();
+    }, []);
+
+
     /* ---------- TOGGLE PERMISSION ---------- */
     const togglePermission = (menu, action) => {
         setTempPermissions((prev) => {
@@ -121,48 +136,64 @@ export default function RolesTab() {
     };
 
     /* ---------- SAVE ---------- */
-    const savePermissions = () => {
-        setRoles((prev) => {
-            const roleExists = prev.some(r => r.key === editingRole.key);
 
-            if (roleExists) {
-                // Update existing role
-                return prev.map((r) =>
-                    r.key === editingRole.key
-                        ? {
-                            ...r,
-                            name: editingRole.name,
-                            permissions: tempPermissions,
-                            status: editingRole.status,
-                            emailNotifications: editingRole.emailNotifications,
-                        }
-                        : r
-                );
-            } else {
-                // Add new role
-                return [
-                    ...prev,
-                    {
-                        key: editingRole.key,
-                        name: editingRole.name,
-                        permissions: tempPermissions,
-                        status: editingRole.status,
-                        emailNotifications: editingRole.emailNotifications,
-                    }
-                ];
-            }
-        });
+    const buildPermissionsPayload = () => {
+        return Object.entries(tempPermissions)
+            .map(([menuKey, actions]) => ({
+                menu: MENU_ID_MAP[menuKey],
+                view: actions.some(a => a.toLowerCase().includes("view")),
+                add: actions.some(a => a.toLowerCase().includes("add")),
+                edit: actions.some(a => a.toLowerCase().includes("edit")),
+                delete: actions.some(a => a.toLowerCase().includes("delete")),
+            }))
+            .filter(p => p.menu); // remove invalid menus
+    };
 
-        setShowModal(false);
+
+    const savePermissions = async () => {
+        if (!editingRole?.name?.trim()) {
+            alert("Role name is required");
+            return;
+        }
+
+        const payload = {
+            name: editingRole.name,
+            permissions: buildPermissionsPayload()
+        };
+
+        try {
+            // 👉 API call
+            const response = await APICall.postT("/hrms/role", payload);
+            console.log("Payload sent:", payload);
+            console.log("Save role response:", response);
+
+           
+
+             await fetchRoles();
+                setShowModal(false);
+            
+        } catch (error) {
+            console.error("Save role failed:", error);
+            alert("Failed to save role");
+        }
     };
 
 
 
 
-    /* ---------- DELETE ROLE ---------- */
-    const deleteRole = (roleKey) => {
+
+    const deleteRole = async (roleKey) => {
         if (!window.confirm("Are you sure you want to delete this role?")) return;
-        setRoles((prev) => prev.filter((r) => r.key !== roleKey));
+
+        try {
+            const response = await APICall.postT(`/hrms/delete_role/${roleKey}`);
+            console.log("Delete response:", response);
+
+            await fetchRoles();
+        } catch (error) {
+            console.error("Delete role failed:", error);
+            alert("Failed to delete role");
+        }
     };
 
 

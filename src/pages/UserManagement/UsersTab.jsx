@@ -1,6 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Edit2, Eye, EyeOff, Plus, RefreshCw, Search, Trash2, } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge, Button, Card, Col, Form, Image, Modal, Row, Table } from "react-bootstrap";
 import APICall from "../../APICalls/APICall";
 import "./UserMgmt.css";
@@ -55,6 +55,8 @@ const initialUsers = [
     status: false,
   },
 ];
+
+
 
 const fileToBase64 = (file) => {
   if (!(file instanceof File)) {
