@@ -80,6 +80,7 @@ const IntentTable = ({
           <tbody>
             {paginatedIntents.map(intent => (
               <tr key={intent.id}>
+
                 <td>
                   <input
                     type="checkbox"
@@ -93,10 +94,11 @@ const IntentTable = ({
                   className="text-primary fw-bold cursor-pointer"
                   onClick={() => onEdit(intent)}
                 >
-                  {intent.name}
+                  {intent.intent_name}
                 </td>
 
-                <td>{intent.displayName}</td>
+                <td>{intent.name}</td>
+
 
                 <td className="col-category">
                   <span className="badge badge-category">
@@ -104,31 +106,27 @@ const IntentTable = ({
                   </span>
                 </td>
 
-                <td className="col-phrases">{intent.trainingPhrases}</td>
+                <td className="col-phrases">{intent.phrases}</td>
                 <td className="col-responses">{intent.responses}</td>
 
                 <td>{intent.usage}</td>
                 <td className="col-confidence">{intent.confidence}%</td>
 
                 <td>
-                  <div
-                    className="form-check form-switch"
-                    onClick={e => e.stopPropagation()}
+                  <span
+                    className={`badge ${intent.status === "ACTIVE"
+                      ? "bg-success"
+                      : "bg-danger"
+                      }`}
                   >
-                    <input
-                      className="form-check-input"
-                      type="checkbox"
-                      role="switch"
-                      checked={intent.status === 'Active'}
-                      readOnly
-                    />
-                    <label className="form-check-label small ms-1 text-secondary">
-                      {intent.status}
-                    </label>
-                  </div>
+                    {intent.status}
+                  </span>
+
                 </td>
 
-                <td className="col-lastModified">{intent.lastModified}</td>
+                <td className="col-lastModified">
+                  {new Date(intent.last_modified).toLocaleString()}
+                </td>
 
                 <td className="text-end">
                   <div className="d-flex gap-3 justify-content-end">

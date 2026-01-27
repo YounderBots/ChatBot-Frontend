@@ -1,27 +1,54 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import IntentGrid from '../components/IntentGrid/IntentGrid'
 import IntentModal from '../components/IntentModel/IntentModel'
 import IntentTable from '../components/IntentTable/IntentTable'
 import TestPanel from '../components/Testpanel/TestPanel'
-import { INITIAL_INTENTS } from '../Dummy'
 
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../Theme.css'
+
+import APICall from '../../../APICalls/APICall'
 
 const IntentContainer = () => {
   const [viewMode, setViewMode] = useState('table')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isTestPanelOpen, setIsTestPanelOpen] = useState(false)
   const [selectedIntent, setSelectedIntent] = useState(null)
-  const [intents, setIntents] = useState(INITIAL_INTENTS)
+  const [intents, setIntents] = useState([])
+  const [loading, setLoading] = useState(true)
+
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [intentToDelete, setIntentToDelete] = useState(null)
   const [selectedIds, setSelectedIds] = useState([])
   const [showBulkMenu, setShowBulkMenu] = useState(false)
   const [bulkMenuPos, setBulkMenuPos] = useState({ top: 0, left: 0 })
 
+  /* ------------------ Fetch ------------------ */
 
+  const fetchIntents = async () => {
+    try {
+      const res = await APICall.getT("/intents/intents")
+      setIntents(res || [])
+      console.log(res);
+
+    } catch (err) {
+      alert(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchIntents()
+  }, [])
+
+  /* Close bulk menu on outside click */
+  useEffect(() => {
+    const close = () => setShowBulkMenu(false)
+    document.addEventListener("click", close)
+    return () => document.removeEventListener("click", close)
+  }, [])
 
   /* ------------------ Actions ------------------ */
 
@@ -40,10 +67,16 @@ const IntentContainer = () => {
     setShowDeleteModal(true)
   }
 
-  const confirmDelete = () => {
-    setIntents(prev => prev.filter(i => i.id !== intentToDelete.id))
-    setShowDeleteModal(false)
-    setIntentToDelete(null)
+  const confirmDelete = async () => {
+    if (!intentToDelete?.id) return
+    try {
+      await APICall.postT(`/intents/deleteintent/${intentToDelete.id}`)
+      fetchIntents()
+      setShowDeleteModal(false)
+      setIntentToDelete(null)
+    } catch (err) {
+      alert(err.message)
+    }
   }
 
   const cancelDelete = () => {
@@ -51,6 +84,7 @@ const IntentContainer = () => {
     setIntentToDelete(null)
   }
 
+  // UI-only duplicate
   const handleDuplicate = (intent) => {
     const duplicated = {
       ...intent,
@@ -63,6 +97,8 @@ const IntentContainer = () => {
     setIntents(prev => [...prev, duplicated])
   }
 
+  /* ------------------ Selection ------------------ */
+
   const isAllSelected =
     intents.length > 0 && selectedIds.length === intents.length
 
@@ -72,22 +108,45 @@ const IntentContainer = () => {
 
   const toggleSelectOne = (id) => {
     setSelectedIds(prev =>
-      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+      prev.includes(id)
+        ? prev.filter(x => x !== id)
+        : [...prev, id]
     )
   }
 
-  const bulkDelete = () => {
-    setIntents(prev => prev.filter(i => !selectedIds.includes(i.id)))
-    setSelectedIds([])
+  /* ------------------ Bulk ------------------ */
+
+  const bulkDelete = async () => {
+    try {
+      await Promise.all(
+        selectedIds.map(id =>
+          APICall.postT(`/intents/deleteintent/${id}`)
+        )
+      )
+      fetchIntents()
+      setSelectedIds([])
+      setShowBulkMenu(false)
+    } catch (err) {
+      alert(err.message)
+    }
   }
 
   const bulkUpdateStatus = (status) => {
     setIntents(prev =>
       prev.map(i =>
-        selectedIds.includes(i.id) ? { ...i, status } : i
+        selectedIds.includes(i.id)
+          ? { ...i, status }
+          : i
       )
     )
     setSelectedIds([])
+    setShowBulkMenu(false)
+  }
+
+  /* ------------------ UI ------------------ */
+
+  if (loading) {
+    return <div className="text-center p-5">Loading intents...</div>
   }
 
   /* ------------------ UI ------------------ */
@@ -133,74 +192,73 @@ const IntentContainer = () => {
 
           {/* Bulk Actions */}
           {selectedIds.length > 0 && (
-              <div className="input-group bg-white border rounded-3 shadow-sm px-2 py-1 position-relative">
-                <button
-                  className="form-select form-select-sm border-0 bg-transparent"
-                  onClick={(e) => {
-                    const rect = e.currentTarget.getBoundingClientRect()
-                    setBulkMenuPos({
-                      top: rect.bottom + 6,
-                      left: rect.left
-                    })
-                    setShowBulkMenu(prev => !prev)
-                    
+            <div className="input-group bg-white border rounded-3 shadow-sm px-2 py-1 position-relative">
+              <button
+                className="form-select form-select-sm border-0 bg-transparent"
+                onClick={(e) => {
+                  e.stopPropagation();   // ← THIS LINE FIXES EVERYTHING
+                  const rect = e.currentTarget.getBoundingClientRect()
+                  setBulkMenuPos({
+                    top: rect.bottom + 6,
+                    left: rect.left
+                  })
+                  setShowBulkMenu(prev => !prev)
+                }}
+              >
+                Bulk actions
+              </button>
+
+              {showBulkMenu && (
+                <ul
+                  className="dropdown-menu show shadow-sm"
+                  style={{
+                    position: 'fixed',
+                    top: bulkMenuPos.top,
+                    left: bulkMenuPos.left,
+                    zIndex: 3000
                   }}
                 >
-                  Bulk actions
-                </button>
+                  <li>
+                    <button
+                      className="dropdown-item text-danger"
+                      onClick={() => {
+                        bulkDelete()
+                        setShowBulkMenu(false)
+                      }}
+                    >
+                      <i className="bi bi-trash me-2"></i> Delete
+                    </button>
+                  </li>
 
+                  <li>
+                    <button
+                      className="dropdown-item"
+                      onClick={() => {
+                        bulkUpdateStatus('Active')
+                        setShowBulkMenu(false)
+                      }}
+                    >
+                      <i className="bi bi-check-circle text-success me-2"></i>
+                      Activate
+                    </button>
+                  </li>
 
-                {showBulkMenu && (
-                  <ul
-                    className="dropdown-menu show shadow-sm"
-                     style={{
-                      position: 'fixed',
-                      top: bulkMenuPos.top,
-                      left: bulkMenuPos.left,
-                      zIndex: 3000
-                    }}
-                  >
-                    <li>
-                      <button
-                        className="dropdown-item text-danger"
-                        onClick={() => {
-                          bulkDelete()
-                          setShowBulkMenu(false)
-                        }}
-                      >
-                        <i className="bi bi-trash me-2"></i> Delete
-                      </button>
-                    </li>
-
-                    <li>
-                      <button
-                        className="dropdown-item"
-                        onClick={() => {
-                          bulkUpdateStatus('Active')
-                          setShowBulkMenu(false)
-                        }}
-                      >
-                        <i className="bi bi-check-circle text-success me-2"></i>
-                        Activate
-                      </button>
-                    </li>
-
-                    <li>
-                      <button
-                        className="dropdown-item"
-                        onClick={() => {
-                          bulkUpdateStatus('Inactive')
-                          setShowBulkMenu(false)
-                        }}
-                      >
-                        <i className="bi bi-slash-circle text-warning me-2"></i>
-                        Deactivate
-                      </button>
-                    </li>
-                  </ul>
-                )}
-              </div>
-            )}
+                  <li>
+                    <button
+                      className="dropdown-item"
+                      onClick={() => {
+                        bulkUpdateStatus('Inactive')
+                        setShowBulkMenu(false)
+                      }}
+                    >
+                      <i className="bi bi-slash-circle text-warning me-2"></i>
+                      Deactivate
+                    </button>
+                  </li>
+                </ul>
+              )}
+            </div>
+          )}
 
 
           {/* View Toggle */}
@@ -241,7 +299,7 @@ const IntentContainer = () => {
           <IntentTable
             intents={intents}
             selectedIds={selectedIds}
-            
+
             onToggleAll={toggleSelectAll}
             onToggleOne={toggleSelectOne}
             onEdit={handleEdit}

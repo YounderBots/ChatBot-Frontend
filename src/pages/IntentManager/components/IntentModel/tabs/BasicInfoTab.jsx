@@ -1,17 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import APICall from "../../../../../APICalls/APICall";
 
 const BasicInfoTab = ({ intent, onChange }) => {
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
   const [newCategory, setNewCategory] = useState("");
-  const [categories, setCategories] = useState([
-    "General",
-    "Account",
-    "Payments",
-    "Support",
-  ]);
+  const [categories, setCategories] = useState([]);
   const [nameError, setNameError] = useState("");
 
   const isActive = intent.status !== "Inactive";
+
+  /* ---------- Helpers ---------- */
 
   const update = (key, value) => {
     onChange(prev => ({ ...prev, [key]: value }));
@@ -31,6 +29,23 @@ const BasicInfoTab = ({ intent, onChange }) => {
     update("name", name);
   };
 
+  /* ---------- Fetch categories ---------- */
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await APICall.getT("/intents/category");
+        setCategories(res || []);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  /* ---------- Category logic ---------- */
+
   const handleCategoryChange = (e) => {
     const value = e.target.value;
 
@@ -41,14 +56,27 @@ const BasicInfoTab = ({ intent, onChange }) => {
     }
   };
 
-  const handleSaveNewCategory = () => {
+  const handleSaveNewCategory = async () => {
     if (!newCategory.trim()) return;
 
-    setCategories(prev => [...prev, newCategory]);
-    update("category", newCategory);
-    setNewCategory("");
-    setShowAddCategoryModal(false);
+    try {
+      await APICall.postT("/intents/category", {
+        name: newCategory,
+        description: ""
+      });
+
+      const res = await APICall.getT("/intents/category");
+      setCategories(res || []);
+      update("category", newCategory);
+
+      setNewCategory("");
+      setShowAddCategoryModal(false);
+    } catch (err) {
+      console.error(err);
+    }
   };
+
+  /* ---------- UI ---------- */
 
   return (
     <>
@@ -94,11 +122,12 @@ const BasicInfoTab = ({ intent, onChange }) => {
       )}
 
       {/* -------- Form -------- */}
+
       <div className="mb-3">
         <label className="form-label fw-bold small">Intent Name</label>
         <input
           className={`form-control ${nameError ? "is-invalid" : ""}`}
-          value={intent.name}
+          value={intent.name || ""}
           onChange={(e) => validateName(e.target.value)}
         />
         {nameError && (
@@ -110,7 +139,7 @@ const BasicInfoTab = ({ intent, onChange }) => {
         <label className="form-label fw-bold small">Display Name</label>
         <input
           className="form-control"
-          value={intent.displayName}
+          value={intent.displayName || ""}
           onChange={(e) => update("displayName", e.target.value)}
         />
       </div>
@@ -120,7 +149,7 @@ const BasicInfoTab = ({ intent, onChange }) => {
         <textarea
           className="form-control"
           rows="3"
-          value={intent.description}
+          value={intent.description || ""}
           onChange={(e) => update("description", e.target.value)}
         />
       </div>
@@ -129,12 +158,14 @@ const BasicInfoTab = ({ intent, onChange }) => {
         <label className="form-label fw-bold small">Category</label>
         <select
           className="form-select"
-          value={intent.category}
+          value={intent.category || ""}
           onChange={handleCategoryChange}
         >
           <option value="">Select</option>
           {categories.map(cat => (
-            <option key={cat} value={cat}>{cat}</option>
+            <option key={cat.id} value={cat.name}>
+              {cat.name}
+            </option>
           ))}
           <option value="add-new">+ Add New</option>
         </select>
@@ -144,7 +175,7 @@ const BasicInfoTab = ({ intent, onChange }) => {
         <label className="form-label fw-bold small">Priority</label>
         <select
           className="form-select"
-          value={intent.priority}
+          value={intent.priority || "Medium"}
           onChange={(e) => update("priority", e.target.value)}
         >
           <option>High</option>
@@ -156,7 +187,9 @@ const BasicInfoTab = ({ intent, onChange }) => {
       <div className="mb-3">
         <label className="form-label fw-bold small mb-2">Status</label>
         <div className="d-flex align-items-center gap-3">
-          <span className={!isActive ? "text-danger" : "text-muted"}>Inactive</span>
+          <span className={!isActive ? "text-danger" : "text-muted"}>
+            Inactive
+          </span>
           <input
             type="checkbox"
             className="form-check-input"
@@ -165,7 +198,9 @@ const BasicInfoTab = ({ intent, onChange }) => {
               update("status", e.target.checked ? "Active" : "Inactive")
             }
           />
-          <span className={isActive ? "text-success" : "text-muted"}>Active</span>
+          <span className={isActive ? "text-success" : "text-muted"}>
+            Active
+          </span>
         </div>
       </div>
     </>

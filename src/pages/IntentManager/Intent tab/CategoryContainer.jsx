@@ -2,143 +2,132 @@ import React, { useEffect, useState, useCallback } from "react";
 import { Edit2, Trash2 } from "lucide-react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
+import APICall from "../../../APICalls/APICall";
 
-/* ================= API LAYER ================= */
-
-const CategoryAPI = {
-  fetchAll: async () => [
-    {
-      id: 1,
-      name: "Authentication",
-      description: "Login, signup, OTP flows",
-      lastModified: "2026-01-15"
-    },
-    {
-      id: 2,
-      name: "Payments",
-      description: "UPI, cards, wallets",
-      lastModified: "2026-01-10"
-    },
-    {
-      id: 2,
-      name: "Payments",
-      description: "UPI, cards, wallets",
-      lastModified: "2026-01-10"
-    },
-    {
-      id: 2,
-      name: "Payments",
-      description: "UPI, cards, wallets",
-      lastModified: "2026-01-10"
-    },
-    {
-      id: 2,
-      name: "Payments",
-      description: "UPI, cards, wallets",
-      lastModified: "2026-01-10"
-    }
-  ],
-
-  create: async payload => ({
-    ...payload,
-    id: Date.now(),
-    lastModified: new Date().toISOString().split("T")[0]
-  }),
-
-  update: async payload => payload,
-
-  remove: async () => true
-};
 
 /* ================= COMPONENT ================= */
 
 const CategoryContainer = () => {
-  const [categories, setCategories] = useState([]);
-  const [activeCategory, setActiveCategory] = useState(null);
+  const [categories, setCategories] = useState([])
+  const [activeCategory, setActiveCategory] = useState(null)
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [categoryToDelete, setCategoryToDelete] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [categoryToDelete, setCategoryToDelete] = useState(null)
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true)
+
+  /* ================= API LAYER ================= */
+
+  const CategoryAPI = {
+    fetchAll: async () => {
+      const res = await APICall.getT("/intents/category")
+      return res || []
+    },
+
+    create: async payload => {
+      const res = await APICall.postT("/intents/category", payload)
+      return res 
+    },
+
+    update: async payload => {
+      const res = await APICall.postT(
+        `/intents/updatecategory/${payload.id}`,
+        payload
+      )
+      return res
+    },
+
+    remove: async id => {
+      await APICall.postT(`/intents/deletecategory/${id}`)
+      return true
+    }
+  }
 
   /* ================= FETCH ================= */
 
   const loadCategories = useCallback(async () => {
     try {
-      setLoading(true);
-      const data = await CategoryAPI.fetchAll();
-      setCategories(data);
+      setLoading(true)
+      const data = await CategoryAPI.fetchAll()
+      // console.log("API DATA:", data)
+      setCategories(Array.isArray(data) ? data : [])
+    } catch (err) {
+      console.error("Failed to load categories", err)
+      setCategories([])
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  }, []);
+  }, [])
 
   useEffect(() => {
-    loadCategories();
-  }, [loadCategories]);
+    loadCategories()
+  }, [loadCategories])
 
   /* ================= ADD / EDIT ================= */
 
   const handleAdd = () => {
-    setActiveCategory({ name: "", description: "" });
-    setIsModalOpen(true);
-  };
+    setActiveCategory({ name: "", description: "" })
+    setIsModalOpen(true)
+  }
 
   const handleEdit = category => {
-    setActiveCategory(category);
-    setIsModalOpen(true);
-  };
+    setActiveCategory(category)
+    setIsModalOpen(true)
+  }
 
   const handleSave = async () => {
-    if (!activeCategory?.name?.trim()) return;
+  if (!activeCategory?.name?.trim()) return
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true)
 
-      if (activeCategory.id) {
-        const updated = await CategoryAPI.update(activeCategory);
-        setCategories(prev =>
-          prev.map(c => (c.id === updated.id ? updated : c))
-        );
-      } else {
-        const created = await CategoryAPI.create(activeCategory);
-        setCategories(prev => [...prev, created]);
-      }
-
-      setIsModalOpen(false);
-    } finally {
-      setLoading(false);
+    if (activeCategory.id) {
+      await CategoryAPI.update(activeCategory)
+    } else {
+      await CategoryAPI.create(activeCategory)
     }
-  };
+
+    await loadCategories()
+    setIsModalOpen(false)
+    setActiveCategory(null)
+  } catch (err) {
+    console.error("Save failed", err)
+  } finally {
+    setLoading(false)
+  }
+}
+
 
   /* ================= DELETE ================= */
 
   const handleDelete = category => {
-    setCategoryToDelete(category);
-    setShowDeleteModal(true);
-  };
+    setCategoryToDelete(category)
+    setShowDeleteModal(true)
+  }
 
   const confirmDelete = async () => {
-    if (!categoryToDelete) return;
+    if (!categoryToDelete) return
 
     try {
-      setLoading(true);
-      await CategoryAPI.remove(categoryToDelete.id);
+      setLoading(true)
+      await CategoryAPI.remove(categoryToDelete.id)
       setCategories(prev =>
         prev.filter(c => c.id !== categoryToDelete.id)
-      );
+      )
+    } catch (err) {
+      console.error("Delete failed", err)
     } finally {
-      setShowDeleteModal(false);
-      setCategoryToDelete(null);
-      setLoading(false);
+      setShowDeleteModal(false)
+      setCategoryToDelete(null)
+      setLoading(false)
     }
-  };
+  }
 
   /* ================= UI ================= */
 
   return (
-    <div className="p-4 h-100 d-flex flex-column gap-4 ">
+    <div className="p-4 h-100 d-flex flex-column gap-4">
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center">
         <h1 className="fw-bold mb-0">Categories</h1>
@@ -160,6 +149,7 @@ const CategoryContainer = () => {
             <tr>
               <th style={{ width: "60px" }}>S.No</th>
               <th>Name</th>
+              <th>Description</th>
               <th>Last Modified</th>
               <th className="text-end">Action</th>
             </tr>
@@ -168,13 +158,13 @@ const CategoryContainer = () => {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="4" className="text-center py-4">
+                <td colSpan="5" className="text-center py-4">
                   Loading...
                 </td>
               </tr>
             ) : categories.length === 0 ? (
               <tr>
-                <td colSpan="4" className="text-center py-4 text-muted">
+                <td colSpan="5" className="text-center py-4 text-muted">
                   No categories found
                 </td>
               </tr>
@@ -185,14 +175,19 @@ const CategoryContainer = () => {
                     {index + 1}
                   </td>
 
-                  <td>
-                    <div className="fw-semibold">{cat.name}</div>
-                    <small className="text-muted">
-                      {cat.description}
-                    </small>
+                  <td className="fw-semibold">
+                    {cat.name}
                   </td>
 
-                  <td>{cat.lastModified}</td>
+                  <td className="Description">
+                    {cat.description}
+                  </td>
+
+                  <td>
+                    {cat.last_modified
+                      ? new Date(cat.last_modified).toLocaleString()
+                      : cat.lastModified}
+                  </td>
 
                   <td className="text-end">
                     <div className="d-flex gap-4 justify-content-end">
