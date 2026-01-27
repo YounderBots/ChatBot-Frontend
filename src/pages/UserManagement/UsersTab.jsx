@@ -1,14 +1,11 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Edit2, Eye, EyeOff, Plus, RefreshCw, Search, Trash2, } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge, Button, Card, Col, Form, Image, Modal, Row, Table } from "react-bootstrap";
 import APICall from "../../APICalls/APICall";
 import "./UserMgmt.css";
 
-const apiDeleteUser = async (id) => {
-  console.log("Deleting user on server:", id);
-  return new Promise((resolve) => setTimeout(() => resolve(true), 500));
-};
+
 
 const getPasswordStrength = (password) => {
   let score = 0;
@@ -35,27 +32,6 @@ const roles = [
 ];
 
 
-const initialUsers = [
-  {
-    id: 1,
-    avatar: "https://i.pravatar.cc/40?img=1",
-    name: "Admin One",
-    email: "admin1@mail.com",
-    role: "Admin",
-    lastLogin: "2026-01-12",
-    status: true,
-  },
-  {
-    id: 2,
-    avatar: "https://i.pravatar.cc/40?img=2",
-    name: "Admin Two",
-    email: "admin2@mail.com",
-    role: "Viewer",
-    lastLogin: "2026-01-10",
-    status: false,
-  },
-];
-
 const fileToBase64 = (file) => {
   if (!(file instanceof File)) {
     return Promise.resolve(null);
@@ -71,7 +47,7 @@ const fileToBase64 = (file) => {
 
 
 export default function UsersTab() {
-  const [users, setUsers] = useState(initialUsers);
+  const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
   const [showModal, setShowModal] = useState(false);
@@ -106,15 +82,19 @@ export default function UsersTab() {
       return b.name.localeCompare(a.name);
     });
 
+
   const deleteUser = async (id) => {
-    try {
-      await apiDeleteUser(id);
-      setUsers(users.filter((u) => u.id !== id));
-    } catch (error) {
-      console.error("Error deleting user:", error);
-      alert("Failed to delete user. Check console.");
-    }
-  };
+  if (!window.confirm("Delete this user?")) return;
+
+  try {
+    await APICall.postT(`/hrms/delete_user/${id}`);
+    await fetchUsers();
+  } catch (error) {
+    console.error("Delete failed:", error);
+    alert("Failed to delete user");
+  }
+};
+
 
   // const openAddUser = () => {
   //   setEditingUser(null);
@@ -141,6 +121,40 @@ export default function UsersTab() {
     });
     setShowModal(true);
   };
+
+
+
+  // fetch user
+
+
+
+ const fetchUsers = async () => {
+    try {
+      const response = await APICall.getT("/hrms/users");
+      console.log("Fetched users:", response);  
+
+      const mappedUsers = response.map((u) => ({
+        id: u.id,
+        avatar: u.profile_image || null,
+        name: u.fullname,
+        email: u.email,
+        role: u.role,
+        lastLogin: u.last_login || "-",
+        status: u.status,
+        emailNotifications: u.email_notification,
+      }));
+
+      setUsers(mappedUsers);
+    } catch (error) {
+      console.error("Fetch users failed:", error);
+      alert("Failed to load users");
+    }
+  };
+
+      useEffect(() => {
+        fetchUsers();
+    }, []);
+
 
 
   const saveUser = async () => {
@@ -181,6 +195,7 @@ export default function UsersTab() {
 
       setShowModal(false);
       resetForm();
+      await fetchUsers();
     } catch (error) {
       console.error("Error saving user:", error);
       alert(error.message || "Failed to save user");
@@ -272,18 +287,17 @@ export default function UsersTab() {
             {filteredUsers.map((u) => (
               <tr key={u.id}>
                 <td>
-                  {u.avatar ? (
-                    <Image src={u.avatar} roundedCircle width={32} height={32} />
-                  ) : (
-                    <div
-                      style={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: "50%",
-                        background: "#e2e8f0",
-                      }}
-                    />
-                  )}
+                  <Image
+  src={u.avatar && u.avatar.trim() ? u.avatar : "src/layout/assets/dpPlaceholder.png"}
+  roundedCircle
+  width={32}
+  height={32}
+  onError={(e) => {
+    e.target.onerror = null;
+    e.target.src = "/dummy-avatar.png";
+  }}
+/>
+
                 </td>
 
                 <td>{u.name}</td>
