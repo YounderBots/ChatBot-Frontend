@@ -42,6 +42,12 @@ const TicketManagementContent = () => {
     const [tickets, setTickets] = useState(INITIAL_TICKETS);
     const [editingTicket, setEditingTicket] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [filters, setFilters] = useState({
+        ticketId: "",
+        status: "",
+        fromDate: "",
+        toDate: "",
+    });
 
     const openEdit = (ticket) => {
         setEditingTicket({ ...ticket });
@@ -62,18 +68,77 @@ const TicketManagementContent = () => {
         setTickets((prev) => prev.filter((t) => t.ticketId !== id));
     };
 
+    const filteredTickets = tickets.filter((t) => {
+        const matchTicket =
+            t.ticketId.toLowerCase().includes(filters.ticketId.toLowerCase());
+
+        const matchStatus =
+            !filters.status || t.status === filters.status;
+
+        const ticketDate = new Date(t.date);
+        const fromDate = filters.fromDate ? new Date(filters.fromDate) : null;
+        const toDate = filters.toDate ? new Date(filters.toDate) : null;
+
+        const matchDate =
+            (!fromDate || ticketDate >= fromDate) &&
+            (!toDate || ticketDate <= toDate);
+
+        return matchTicket && matchStatus && matchDate;
+    });
+
+
     return (
         <>
-            <Card className="mb-3 shadow-sm border-0">
+            <Card className="shadow-sm border-0 mb-3">
                 <Card.Body>
-                    <Row className="align-items-center g-2">
-                        <Col md={6}>
-                            <h5 className="mb-0 text-primary">Ticket Management</h5>
+                    <Row className="g-2 align-items-end">
+                        <Col lg={3} md={6}>
+                            <Form.Control
+                                placeholder="Search Ticket ID"
+                                value={filters.ticketId}
+                                onChange={(e) =>
+                                    setFilters({ ...filters, ticketId: e.target.value })
+                                }
+                            />
+                        </Col>
+
+                        <Col lg={3} md={6}>
+                            <Form.Select
+                                value={filters.status}
+                                onChange={(e) =>
+                                    setFilters({ ...filters, status: e.target.value })
+                                }
+                            >
+                                <option value="">All</option>
+                                <option>Open</option>
+                                <option>In Progress</option>
+                                <option>Closed</option>
+                            </Form.Select>
+                        </Col>
+
+                        <Col lg={3} md={6}>
+                            <Form.Control
+                                type="date"
+                                value={filters.fromDate}
+                                onChange={(e) =>
+                                    setFilters({ ...filters, fromDate: e.target.value })
+                                }
+                            />
+                        </Col>
+
+                        <Col lg={3} md={6}>
+                            <Form.Control
+                                type="date"
+                                value={filters.toDate}
+                                onChange={(e) =>
+                                    setFilters({ ...filters, toDate: e.target.value })
+                                }
+                            />
                         </Col>
                     </Row>
                 </Card.Body>
             </Card>
-            <hr />
+
             <Card className="shadow-sm border-0 mt-2">
                 <Table hover responsive className="mb-0 align-middle">
                     <thead className="table-light">
@@ -89,7 +154,7 @@ const TicketManagementContent = () => {
                     </thead>
 
                     <tbody>
-                        {tickets.map((t) => (
+                        {filteredTickets.map((t) => (
                             <tr key={t.ticketId}>
                                 <td><strong>{t.ticketId}</strong></td>
                                 <td>{t.convoId}</td>
@@ -114,6 +179,7 @@ const TicketManagementContent = () => {
                             </tr>
                         ))}
                     </tbody>
+
                 </Table>
             </Card>
 
