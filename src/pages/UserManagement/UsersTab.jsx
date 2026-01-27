@@ -277,7 +277,7 @@ export default function UsersTab() {
               <th>Role</th>
               <th>Last Login</th>
               <th>Status</th>
-              <th>Actions</th>
+              <th className="text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -308,8 +308,8 @@ export default function UsersTab() {
                     onChange={() => setUsers(users.map(x => x.id === u.id ? { ...x, status: !x.status } : x))}
                   />
                 </td>
-                <td>
-                  <div className="d-flex flex-wrap justify-content-center align-items-center gap-2">
+                <td className='text-center'>
+                  <div className="d-flex justify-content-center gap-3">
                     <Edit2 size={16} className="cursorPointer" onClick={() => openEditUser(u)} />
                     <Trash2
                       size={16}
