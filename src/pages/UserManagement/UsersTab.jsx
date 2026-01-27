@@ -84,16 +84,16 @@ export default function UsersTab() {
 
 
   const deleteUser = async (id) => {
-  if (!window.confirm("Delete this user?")) return;
+    if (!window.confirm("Delete this user?")) return;
 
-  try {
-    await APICall.postT(`/hrms/delete_user/${id}`);
-    await fetchUsers();
-  } catch (error) {
-    console.error("Delete failed:", error);
-    alert("Failed to delete user");
-  }
-};
+    try {
+      await APICall.postT(`/hrms/delete_user/${id}`);
+      await fetchUsers();
+    } catch (error) {
+      console.error("Delete failed:", error);
+      alert("Failed to delete user");
+    }
+  };
 
 
   // const openAddUser = () => {
@@ -128,10 +128,10 @@ export default function UsersTab() {
 
 
 
- const fetchUsers = async () => {
+  const fetchUsers = async () => {
     try {
       const response = await APICall.getT("/hrms/users");
-      console.log("Fetched users:", response);  
+      console.log("Fetched users:", response);
 
       const mappedUsers = response.map((u) => ({
         id: u.id,
@@ -151,9 +151,9 @@ export default function UsersTab() {
     }
   };
 
-      useEffect(() => {
-        fetchUsers();
-    }, []);
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
 
 
@@ -161,9 +161,8 @@ export default function UsersTab() {
     try {
       let avatarBase64 = null;
 
-      // Convert ONLY if File
-      if (form.avatar instanceof File) {
-        avatarBase64 = await fileToBase64(form.avatar);
+      if (form.avatarFile instanceof File) {
+        avatarBase64 = await fileToBase64(form.avatarFile);
       }
 
       const payload = {
@@ -173,12 +172,10 @@ export default function UsersTab() {
         email_notification: form.emailNotifications,
       };
 
-      // Only send password on CREATE
       if (!editingUser) {
         payload.password = form.password;
       }
 
-      // Only send image if new one selected
       if (avatarBase64) {
         payload.profile_image = avatarBase64;
       }
@@ -288,15 +285,15 @@ export default function UsersTab() {
               <tr key={u.id}>
                 <td>
                   <Image
-  src={u.avatar && u.avatar.trim() ? u.avatar : "src/layout/assets/dpPlaceholder.png"}
-  roundedCircle
-  width={32}
-  height={32}
-  onError={(e) => {
-    e.target.onerror = null;
-    e.target.src = "/dummy-avatar.png";
-  }}
-/>
+                    src={u.avatar && u.avatar.trim() ? u.avatar : "src/layout/assets/dpPlaceholder.png"}
+                    roundedCircle
+                    width={32}
+                    height={32}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "/dummy-avatar.png";
+                    }}
+                  />
 
                 </td>
 
@@ -382,7 +379,11 @@ export default function UsersTab() {
                 onChange={(e) => {
                   const file = e.target.files[0];
                   if (file) {
-                    setForm({ ...form, avatar: URL.createObjectURL(file) });
+                    setForm((prev) => ({
+                      ...prev,
+                      avatarFile: file,
+                      avatar: URL.createObjectURL(file),
+                    }));
                   }
                 }}
               />
@@ -392,7 +393,11 @@ export default function UsersTab() {
                   size="sm"
                   variant="link"
                   className="text-danger p-0 mt-1"
-                  onClick={() => setForm({ ...form, avatar: null })}
+                  onClick={() => setForm((prev) => ({
+                    ...prev,
+                    avatar: null,
+                    avatarFile: null,
+                  }))}
                 >
                   Remove
                 </Button>

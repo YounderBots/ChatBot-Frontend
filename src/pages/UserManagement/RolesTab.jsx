@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { Table, Button, Modal, Form, Card, Row, Col } from "react-bootstrap";
-import { Edit2, Trash2 } from "lucide-react";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { Edit2, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Button, Card, Col, Form, Modal, Row, Table } from "react-bootstrap";
 import APICall from "../../APICalls/APICall";
 
 /* =======================
@@ -77,34 +77,34 @@ export default function RolesTab() {
 
 
 
-  const MENU_ID_TO_KEY = {
-  1: "dashboard",
-  2: "conversations",
-  3: "intents",
-  4: "knowledgeBase",
-  5: "settings",
-  6: "users",
-};
+    const MENU_ID_TO_KEY = {
+        1: "dashboard",
+        2: "conversations",
+        3: "intents",
+        4: "knowledgeBase",
+        5: "settings",
+        6: "users",
+    };
 
-const mapBackendPermissions= (permissions = []) => {
-  const result = {};
+    const mapBackendPermissions = (permissions = []) => {
+        const result = {};
 
-  if (!Array.isArray(permissions)) return permissions;
+        if (!Array.isArray(permissions)) return permissions;
 
-  permissions.forEach((perm) => {
-    const menuKey = MENU_ID_TO_KEY[perm.menu];
-    if (!menuKey) return;
+        permissions.forEach((perm) => {
+            const menuKey = MENU_ID_TO_KEY[perm.menu];
+            if (!menuKey) return;
 
-    result[menuKey] = [];
+            result[menuKey] = [];
 
-    if (perm.view) result[menuKey].push("view");
-    if (perm.add) result[menuKey].push("add");
-    if (perm.edit) result[menuKey].push("edit");
-    if (perm.delete) result[menuKey].push("delete");
-  });
+            if (perm.view) result[menuKey].push("view");
+            if (perm.add) result[menuKey].push("add");
+            if (perm.edit) result[menuKey].push("edit");
+            if (perm.delete) result[menuKey].push("delete");
+        });
 
-  return result;
-};
+        return result;
+    };
 
 
 
@@ -136,59 +136,61 @@ const mapBackendPermissions= (permissions = []) => {
 
 
     /* ---------- TOGGLE PERMISSION ---------- */
-   const togglePermission = (menuKey, type) => {
-  setTempPermissions((prev) => {
-    const current = prev[menuKey] || [];
+    const togglePermission = (menuKey, type) => {
+        setTempPermissions((prev) => {
+            const current = prev[menuKey] || [];
 
-    const updated = current.includes(type)
-      ? current.filter(p => p !== type)
-      : [...current, type];
+            const updated = current.includes(type)
+                ? current.filter(p => p !== type)
+                : [...current, type];
 
-    return { ...prev, [menuKey]: updated };
-  });
-};
+            return { ...prev, [menuKey]: updated };
+        });
+    };
 
     /* ---------- SAVE ---------- */
 
-const buildPermissionsPayload = () => {
-  return Object.entries(tempPermissions).map(([menuKey, actions]) => ({
-    menu: MENU_ID_MAP[menuKey],
-    view: actions.includes("view"),
-    add: actions.includes("add"),
-    edit: actions.includes("edit"),
-    delete: actions.includes("delete"),
-  }));
-};
+    const buildPermissionsPayload = () => {
+        return Object.entries(tempPermissions).map(([menuKey, actions]) => ({
+            menu: MENU_ID_MAP[menuKey],
+            view: actions.includes("view"),
+            add: actions.includes("add"),
+            edit: actions.includes("edit"),
+            delete: actions.includes("delete"),
+        }));
+    };
 
 
 
-const savePermissions = async () => {
-  if (!editingRole?.name?.trim()) {
-    alert("Role name is required");
-    return;
-  }
+    const savePermissions = async () => {
+        if (!editingRole?.name?.trim()) {
+            alert("Role name is required");
+            return;
+        }
 
-  const payload = {
-    name: editingRole.name,
-    permissions: buildPermissionsPayload(),
-  };
+        console.log(editingRole.key);
 
-  try {
-    // UPDATE if ID exists, else CREATE
-    if (editingRole.id) {
-      await APICall.putT(`/hrms/role/${editingRole.id}`, payload);
-    } else {
-      await APICall.postT("/hrms/role", payload);
-    }
+        const payload = {
+            name: editingRole.name,
+            permissions: buildPermissionsPayload(),
+        };
 
-    await fetchRoles(); // 🔥 ALWAYS refresh after save
-    setShowModal(false);
+        try {
+            // UPDATE if ID exists, else CREATE
+            if (editingRole.key) {
+                await APICall.postT(`/hrms/update_role/${editingRole.key}`, payload);
+            } else {
+                await APICall.postT("/hrms/role", payload);
+            }
 
-  } catch (error) {
-    console.error("Save role failed:", error);
-    alert("Failed to save role");
-  }
-};
+            await fetchRoles(); // 🔥 ALWAYS refresh after save
+            setShowModal(false);
+
+        } catch (error) {
+            console.error("Save role failed:", error);
+            alert("Failed to save role");
+        }
+    };
 
 
 

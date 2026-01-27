@@ -1,4 +1,4 @@
-export const baseURL = "http://192.168.1.11:8002";
+export const baseURL = "http://192.168.70.155:8002";
 
 const getAuthHeader = () => ({
     Authorization: `Bearer ${localStorage.getItem("token")}`,
