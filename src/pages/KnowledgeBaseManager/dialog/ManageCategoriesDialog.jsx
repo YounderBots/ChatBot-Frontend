@@ -12,6 +12,7 @@ import APICall from "../../../APICalls/APICall";
 export default function ManageCategoriesDialog({
   categories,
   setCategories,
+  fetchCategory,
   onClose,
 }) {
   const [newCategory, setNewCategory] = useState("");
@@ -37,23 +38,6 @@ export default function ManageCategoriesDialog({
   };
 
   /* ================= ADD ================= */
-  const fetchCategory = async () => {
-    if (!newCategory.trim()) return;
-
-    try {
-      const payload = {
-        name: newCategory.trim(),
-        order: categories.length + 1,
-      };
-
-      const res = await APICall.postT("/knowledgebase/category", payload);
-
-    } catch (err) {
-      alert(err.message || "Failed to add category");
-    }
-  };
-
-  /* ================= ADD ================= */
   const handleAdd = async () => {
     if (!newCategory.trim()) return;
 
@@ -64,6 +48,9 @@ export default function ManageCategoriesDialog({
       };
 
       const res = await APICall.postT("/knowledgebase/category", payload);
+      if (res.status == "Success") {
+        fetchCategory();
+      }
 
     } catch (err) {
       alert(err.message || "Failed to add category");
@@ -80,7 +67,8 @@ export default function ManageCategoriesDialog({
     try {
       await APICall.postT(`/knowledgebase/deletecategory/${category.id}`);
 
-      setCategories((prev) => prev.filter((_, i) => i !== index));
+      fetchCategory();
+
     } catch (err) {
       alert(err.message || "Failed to delete category");
     }
@@ -104,11 +92,7 @@ export default function ManageCategoriesDialog({
         order: category.order,
       });
 
-      setCategories((prev) =>
-        prev.map((c, idx) =>
-          idx === i ? { ...c, name: editingValue.trim() } : c
-        )
-      );
+      fetchCategory();
 
       setEditingIndex(null);
       setEditingValue("");

@@ -46,7 +46,6 @@ const APICall = {
     // -------------------------
     postT: async (endpoint, payload = {}) => {
         try {
-            console.log(localStorage.getItem("token"));
             const response = await fetch(`${baseURL}${endpoint}`, {
                 method: "POST",
                 headers: {

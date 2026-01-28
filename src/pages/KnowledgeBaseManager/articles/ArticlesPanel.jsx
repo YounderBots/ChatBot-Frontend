@@ -1,5 +1,5 @@
 import { Copy, Edit, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import APICall from "../../../APICalls/APICall";
 import DuplicateArticleDialog from "../dialog/DuplicateArticleDialog";
 import NewArticleDialog from "../dialog/NewArticleDialog";
@@ -23,27 +23,11 @@ const MOCK_ARTICLES = Array.from({ length: 50 }).map((_, i) => ({
   content: "",
 }));
 
-const mapArticleToCreatePayload = (article, overrides = {}) => ({
-  title: overrides.title ?? article.title,
-  url: overrides.url ?? article.url,
-  category_id: article.category_id,
-  tags: article.tags || "",
-  contents: article.contents || "",
-  meta_description: article.meta_description || "",
-  featured_image: article.featured_image || null,
-  feature_article: article.feature_article ?? false,
-  publish_date: article.publish_date || null,
-  article_status: article.article_status || "DRAFT",
-  related_questions: (article.related_questions || []).map((q) => ({
-    question: q.question ?? q,
-  })),
-});
-
 
 const PAGE_SIZE = 5;
 
 export default function ArticlesPanel({ activeCategory = "All" }) {
-  const [articles, setArticles] = useState(MOCK_ARTICLES);
+  const [articles, setArticles] = useState([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [sort, setSort] = useState("updated");
@@ -105,6 +89,47 @@ export default function ArticlesPanel({ activeCategory = "All" }) {
     (_, i) => page + i
   );
 
+  const fetchArticles = async () => {
+    try {
+      const res = await APICall.getT("/knowledgebase/article");
+
+      const mappedArticles = res.map((item) => ({
+        id: item.id,
+        title: item.title ?? "",
+        slug: item.url ?? "",
+        slugTouched: true,
+        category: item.category_id ?? "",
+        categoryName: item.category ?? "",
+        tags: item.tags
+          ? Array.isArray(item.tags)
+            ? item.tags
+            : item.tags.split(",").map(t => t.trim()).filter(Boolean)
+          : [],
+        content: item.contents ?? "",
+        metaDescription: item.meta_description ?? "",
+        featuredImage: item.featured_image ?? "",
+        status: item.article_status ?? "Draft",
+        featured: Boolean(item.featured_article) ?? false,
+        publishDate: item.publish_date ?? "",
+        relatedQuestions: item.questions
+          ? item.questions.map((q) =>
+            typeof q === "string" ? q : q.question
+          )
+          : [],
+        updatedAt: item.updated_at,
+        author: item.author,
+        views: 247
+      }));
+
+      setArticles(mappedArticles);
+
+
+    } catch (err) {
+      alert(err.message || "Failed to fetch articles");
+    }
+  };
+
+
   /* ================= ACTIONS ================= */
   const handleEdit = (article) => {
     setEditingArticle(article);
@@ -118,71 +143,56 @@ export default function ArticlesPanel({ activeCategory = "All" }) {
 
   const handleSaveArticle = async (data) => {
     try {
-      // -------------------------------
-      // EDIT (local only for now)
-      // -------------------------------
-      if (data.id) {
-        setArticles((prev) =>
-          prev.map((a) => (a.id === data.id ? { ...a, ...data } : a))
-        );
-        return;
-      }
 
-      // -------------------------------
-      // CREATE / DUPLICATE → API PAYLOAD
-      // -------------------------------
       const payload = {
         title: data.title,
-        url: data.url,
-        category_id: data.category_id,
+        url: data.slug,
+        category_id: parseInt(data.category),
         tags: data.tags || "",
-        contents: data.contents || "",
-        meta_description: data.meta_description || "",
-        featured_image: data.featured_image || null,
-        feature_article: data.feature_article ?? false,
-        publish_date: data.publish_date || null,
-        article_status: data.article_status || "DRAFT",
-        related_questions: (data.related_questions || []).map((q) => ({
+        contents: data.content || "",
+        meta_description: data.metaDescription || "",
+        featured_image: data.featuredImage || null,
+        featured_article: data.featured ?? false,
+        publish_date: data.publishDate || null,
+        article_status: data.status || "DRAFT",
+        related_questions: (data.relatedQuestions || []).map((q) => ({
           question: q.question ?? q,
         })),
       };
 
-      console.log("data", data);
-      console.log(payload);
+      if (data.id) {
+        await APICall.postT(`/knowledgebase/article/${data.id}`, payload);
 
+        fetchArticles();
 
-      // -------------------------------
-      // API CALL
-      // -------------------------------
+        setDialogOpen(false);
+        setEditingArticle(null);
+        return;
+      }
+
       const res = await APICall.postT("/knowledgebase/article", payload);
 
-      // -------------------------------
-      // UPDATE UI STATE
-      // -------------------------------
-      const newArticle = {
-        id: res.article_id,        // from backend
-        title: payload.title,
-        category: data.category,   // display name
-        category_id: payload.category_id,
-        status: payload.article_status,
-        updatedAt: new Date().toISOString().slice(0, 10),
-        views: 0,
-        helpful: 0,
-        author: "Admin",
-        ...payload,
-      };
+      if (res.status == "Success") {
+        fetchArticles();
+      }
 
-      setArticles((prev) => [newArticle, ...prev]);
     } catch (err) {
       console.error("Failed to save article:", err);
       alert(err.message || "Failed to save article");
     }
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (!window.confirm("Delete this article?")) return;
-    setArticles((prev) => prev.filter((a) => a.id !== id));
+
+    await APICall.postT(`/knowledgebase/article/delete/${id}`);
+
+    fetchArticles();
   };
+
+  useEffect(() => {
+    fetchArticles();
+  }, [])
 
   /* ================= RENDER ================= */
   return (
@@ -263,7 +273,7 @@ export default function ArticlesPanel({ activeCategory = "All" }) {
                     </button>
                   </td>
                   <td>
-                    <span className="category-badge">{a.category}</span>
+                    <span className="category-badge">{a.categoryName}</span>
                   </td>
                   <td>
                     <span className={`status ${a.status.toLowerCase()}`}>
@@ -341,10 +351,11 @@ export default function ArticlesPanel({ activeCategory = "All" }) {
         <NewArticleDialog
           article={editingArticle}
           onClose={() => {
-            // setDialogOpen(false);
-            // setEditingArticle(null);
+            setDialogOpen(false);
+            setEditingArticle(null);
           }}
           onSave={handleSaveArticle}
+          onDelete={handleDelete}
         />
       )}
 
@@ -352,8 +363,8 @@ export default function ArticlesPanel({ activeCategory = "All" }) {
         <DuplicateArticleDialog
           article={articleToDuplicate}
           onClose={() => {
-            // setDuplicateDialogOpen(false);
-            // setArticleToDuplicate(null);
+            setDuplicateDialogOpen(false);
+            setArticleToDuplicate(null);
           }}
           onSave={handleSaveArticle}
         />

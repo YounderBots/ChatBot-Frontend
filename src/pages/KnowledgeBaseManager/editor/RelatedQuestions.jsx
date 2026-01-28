@@ -1,16 +1,29 @@
-const RelatedQuestions = ({ questions, setQuestions }) => {
+import { Trash2 } from "lucide-react";
+
+const RelatedQuestions = ({ form, setForm }) => {
+  const questions = form.relatedQuestions || [];
+
   const addQuestion = () => {
-    setQuestions((prev) => [...prev, ""]);
+    setForm((prev) => ({
+      ...prev,
+      relatedQuestions: [...questions, ""],
+    }));
   };
 
   const updateQuestion = (index, value) => {
-    setQuestions((prev) =>
-      prev.map((q, i) => (i === index ? value : q))
-    );
+    setForm((prev) => ({
+      ...prev,
+      relatedQuestions: questions.map((q, i) =>
+        i === index ? value : q
+      ),
+    }));
   };
 
   const removeQuestion = (index) => {
-    setQuestions((prev) => prev.filter((_, i) => i !== index));
+    setForm((prev) => ({
+      ...prev,
+      relatedQuestions: questions.filter((_, i) => i !== index),
+    }));
   };
 
   return (
@@ -28,13 +41,19 @@ const RelatedQuestions = ({ questions, setQuestions }) => {
             placeholder="Alternate user question"
             onChange={(e) => updateQuestion(i, e.target.value)}
           />
-          <button type="button" onClick={() => removeQuestion(i)}>
-            ❌
-          </button>
+          <div
+            className="btn-danger p-2 rounded mc-icon danger"
+            onClick={() => removeQuestion(i)}>
+            <Trash2 size={16} />
+          </div>
         </div>
       ))}
 
-      <button type="button" className="add-question-btn" onClick={addQuestion}>
+      <button
+        type="button"
+        className="add-question-btn"
+        onClick={addQuestion}
+      >
         + Add Question
       </button>
     </section>

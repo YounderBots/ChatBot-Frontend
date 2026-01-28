@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { baseURL } from "../../../APICalls/APICall";
 
 const MAX_META = 160;
 
@@ -81,7 +82,7 @@ const ArticleSEOSection = ({
             onClick={() => fileInputRef.current?.click()}
           >
             {form.featuredImage ? (
-              <img src={form.featuredImage} alt="Preview" />
+              <img src={`${baseURL}/admin/${form.featuredImage.replace(/^\.\/?/, "")}`} alt="Preview" />
             ) : (
               <>
                 <strong>Upload featured image</strong>

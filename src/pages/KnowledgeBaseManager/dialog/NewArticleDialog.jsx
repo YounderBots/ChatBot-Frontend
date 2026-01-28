@@ -2,9 +2,13 @@ import ArticleEditor from "../editor/ArticleEditor";
 import "./new-article-dialog.css";
 
 
-const NewArticleDialog = ({ onClose, article, onSave }) => {
+const NewArticleDialog = ({ onClose, article, onSave, onDelete }) => {
   const handleSave = (data) => {
     onSave?.(data);
+    onClose();
+  };
+  const handleDelete = (data) => {
+    onDelete?.(data);
     onClose();
   };
 
@@ -23,10 +27,7 @@ const NewArticleDialog = ({ onClose, article, onSave }) => {
             article={article}
             onCancel={onClose}
             onSave={handleSave}
-            onDelete={(id) => {
-              console.log("DELETE ARTICLE", id);
-              onClose();
-            }}
+            onDelete={handleDelete}
           />
         </div>
       </div>

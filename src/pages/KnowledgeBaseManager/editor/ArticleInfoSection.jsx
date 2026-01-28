@@ -15,7 +15,6 @@ const ArticleInfoSection = ({
   setForm,
   errors = {},
   categories = [],
-  setCategories = () => {},
   allTags = [],
 }) => {
   const [tagInput, setTagInput] = useState("");
@@ -54,24 +53,6 @@ const ArticleInfoSection = ({
       ...prev,
       tags: prev.tags.filter((t) => t !== tag),
     }));
-  };
-
-  /* ---------------- CATEGORY ---------------- */
-
-  const createCategory = () => {
-    if (!newCategory.trim()) return;
-
-    if (!categories.includes(newCategory)) {
-      setCategories((prev) => [...prev, newCategory]);
-    }
-
-    setForm((prev) => ({
-      ...prev,
-      category: newCategory,
-    }));
-
-    setNewCategory("");
-    setShowCatInput(false);
   };
 
   /* ---------------- RENDER ---------------- */
@@ -135,32 +116,11 @@ const ArticleInfoSection = ({
           >
             <option value="">Select category</option>
             {categories.map((c) => (
-              <option key={c} value={c}>
-                {c}
+              <option key={c.id} value={c.id}>
+                {c.name}
               </option>
             ))}
-            <option value="__new__">+ Create new category</option>
           </select>
-
-          {showCatInput && (
-            <div className="inline-create">
-              <input
-                placeholder="New category name"
-                value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value)}
-              />
-              <button type="button" onClick={createCategory}>
-                Add
-              </button>
-              <button
-                type="button"
-                className="link-btn"
-                onClick={() => setShowCatInput(false)}
-              >
-                Cancel
-              </button>
-            </div>
-          )}
         </div>
 
         {/* TAGS */}

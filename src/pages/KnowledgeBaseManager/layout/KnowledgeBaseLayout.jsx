@@ -96,6 +96,7 @@ export default function KnowledgeBaseLayout() {
         <ManageCategoriesDialog
           categories={categories}
           setCategories={setCategories}
+          fetchCategory={fetchCategory}
           onClose={() => setManageOpen(false)}
         />
       )}

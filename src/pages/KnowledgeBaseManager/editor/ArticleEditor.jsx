@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
+import APICall from "../../../APICalls/APICall";
 import ArticleContentSection from "./ArticleContentSection";
-import ArticleSEOSection from "./ArticleSEOSection";
 import ArticleInfoSection from "./ArticleInfoSection";
+import ArticleSEOSection from "./ArticleSEOSection";
 import RelatedQuestions from "./RelatedQuestions";
 
 const TABS = {
@@ -29,6 +30,7 @@ const EMPTY_FORM = {
   status: "Draft",
   featured: false,
   publishDate: "",
+  relatedQuestions: [],
 };
 
 const ArticleEditor = ({
@@ -41,13 +43,8 @@ const ArticleEditor = ({
   const [activeTab, setActiveTab] = useState(TABS.INFO);
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
-  const [relatedQuestions, setRelatedQuestions] = useState([]);
 
-  const [categories, setCategories] = useState([
-    "Getting Started",
-    "Account & Billing",
-    "Technical Support",
-  ]);
+  const [categories, setCategories] = useState([]);
 
   const allTags = ["login", "billing", "api", "setup", "pricing", "error"];
 
@@ -62,6 +59,10 @@ const ArticleEditor = ({
     }
   }, [article]);
 
+  useEffect(() => {
+    fetchCategory();
+  }, []);
+
   /* ---------- SLUG AUTO ---------- */
   useEffect(() => {
     if (form.title && !form.slugTouched) {
@@ -69,6 +70,20 @@ const ArticleEditor = ({
     }
   }, [form.title, form.slugTouched]);
 
+  const fetchCategory = async () => {
+    try {
+
+      const res = await APICall.getT("/knowledgebase/category");
+      const sortedCategories = [...res].sort(
+        (a, b) => a.order - b.order
+      );
+
+      setCategories(sortedCategories)
+
+    } catch (err) {
+      alert(err.message || "Failed to add category");
+    }
+  };
   /* ---------- VALIDATION ---------- */
   const validate = () => {
     const err = {};
@@ -87,7 +102,7 @@ const ArticleEditor = ({
     if (!validate()) return;
     onSave?.({
       ...form,
-      relatedQuestions,
+      relatedQuestions: form.relatedQuestions,
     });
   };
 
@@ -129,7 +144,6 @@ const ArticleEditor = ({
             setForm={setForm}
             errors={errors}
             categories={categories}
-            setCategories={setCategories}
             allTags={allTags}
           />
         )}
@@ -141,8 +155,8 @@ const ArticleEditor = ({
               <small className="error">{errors.content}</small>
             )}
             <RelatedQuestions
-              questions={relatedQuestions}
-              setQuestions={setRelatedQuestions}
+              form={form}
+              setForm={setForm}
             />
           </>
         )}
@@ -164,7 +178,6 @@ const ArticleEditor = ({
               <button type="button" className="btn-delete" onClick={handleDelete}>
                 Delete Article
               </button>
-              <button type="button" className="btn-link">Preview</button>
             </>
           )}
         </div>

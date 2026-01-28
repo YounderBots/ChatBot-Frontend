@@ -30,8 +30,6 @@ const Login = () => {
       password,
     });
 
-    console.log(data)
-
     login(data);
 
     const redirectPath = data.menus?.[0]?.path || "/";
