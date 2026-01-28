@@ -4,9 +4,12 @@
   import ResponsesTab from "./tabs/ResponsesTab";
   import QuickRepliesTab from "./tabs/QuickRepliesTab";
   import AdvancedTab from "./tabs/AdvancedTab";
+import APICall from "../../../../APICalls/APICall";
 
-  const IntentModal = ({ isOpen, onClose, intent, onSaveAndTest }) => {
+  const IntentModal = ({ isOpen, onClose, intent, onSaveAndTest, mode }) => {
 
+
+console.log("Rendering IntentModal with intent:", intent);
     // ✅ ALL HOOKS AT TOP (NO CONDITIONS)
     const [activeTab, setActiveTab] = useState("basic");
     const [responses, setResponses] = useState([]);
@@ -23,33 +26,96 @@
       enabled: intent?.advanced?.enabled ?? true,
     });
     const [intentDraft, setIntentDraft] = useState({
-      name: intent?.name || "",
-      displayName: intent?.displayName || "",
+      
+      intent_name: intent?.name || "",
+      name: intent?.displayName || "",
       description: intent?.description || "",
-      category: intent?.category || "",
-      priority: intent?.priority || "Medium",
+      category: intent?.category.id || "",
+      priority: intent?.priority || "Medium", 
       status: intent?.status || "Active",
     });
+   
+
+    console.log("Intent Modal Opened with intentDraft:", intentDraft);
     
     // ✅ SAFE early return AFTER hooks
     if (!isOpen) return null;
 
-    const handleSave = async () => {
-        const payload = {
-          ...intentDraft,
-          responses,
-          trainingPhrases,
-          advanced: advancedConfig,
-          updatedAt: new Date().toISOString(),
-        };
+  
 
-        console.log("FINAL BACKEND PAYLOAD 👉", payload);
 
-        // 🔜 Future API call
-        // await api.saveIntent(payload);
+const buildBackendPayload = () => {
+  return {
+    // BASIC
+    name: intentDraft.name,
+    intent_name: intentDraft.intent_name,
+    description: intentDraft.description,
 
-        onClose();
-      };
+    // CATEGORY → integer
+    category: intentDraft.category
+      ? Number(intentDraft.category)
+      : null,
+
+    // ENUMS
+    priority: intentDraft.priority.toUpperCase(), // HIGH
+    status: intentDraft.status.toUpperCase(),     // ACTIVE
+    response_status: "ACTIVE",
+
+    // ADVANCED
+    fallback: advancedConfig.fallback || "clarify",
+    confidence: Number(advancedConfig.threshold),
+
+    context_requirement: advancedConfig.contextsRequired || [],
+    context_output: advancedConfig.contextsSet || [],
+
+    // TRAINING PHRASES
+    phrases: trainingPhrases.map(p => ({
+      phrase: p.phrase || p.text || p,
+      language: p.language || "en"
+    })),
+
+    // RESPONSES + QUICK REPLIES
+    responses: responses.map((res, index) => ({
+      response_text: res.response_text || res.content,
+      response_type: res.response_type || "text",
+      priority: index + 1,
+
+      quick_reply: (res.quick_reply || res.quickReplies || []).map(qr => ({
+        button_text: qr.button_text || qr.label,
+        action_type: qr.action_type || qr.actionType || "POSTBACK",
+        message_value: qr.message_value || qr.value
+      }))
+    }))
+  };
+};
+
+
+
+const handleSave = async () => {
+  const payload = buildBackendPayload();
+
+  console.log("FINAL BACKEND PAYLOAD 👉", payload);
+
+  try {
+    const response = await APICall.postT(
+      "/intents/intents",
+      payload
+    );
+
+    console.log("API intent RESPONSE ✅", response);
+    onClose();
+  } catch (error) {
+    console.error("Save Intent Failed ", error);
+    alert(
+      error?.response?.data?.message ||
+      "Failed to save intent. Please try again."
+    );
+  }
+};
+
+// show Existing Code
+
+
 
 
     const handleSaveAndTest = async () => {
@@ -73,6 +139,10 @@
       console.log("Delete intent");
     };
 
+
+
+    
+
     return (
       <>
         <div className="modal-backdrop show" style={{ opacity: 0.5 }} />
@@ -83,7 +153,9 @@
               {/* Header */}
               <div className="modal-header px-4">
                 <h5 className="fw-bold">
-                  {intent ? "Edit Intent" : "Add Intent"}
+                 {mode === "add" && "Add Intent"}
+  {mode === "edit" && "Edit Intent"}
+  {mode === "duplicate" && "Duplicate Intent"}
                 </h5>
                 <button className="btn-close" onClick={onClose} />
               </div>

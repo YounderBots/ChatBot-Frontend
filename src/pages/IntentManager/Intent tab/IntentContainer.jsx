@@ -23,6 +23,9 @@ const IntentContainer = () => {
   const [selectedIds, setSelectedIds] = useState([])
   const [showBulkMenu, setShowBulkMenu] = useState(false)
   const [bulkMenuPos, setBulkMenuPos] = useState({ top: 0, left: 0 })
+  const [intentMode, setIntentMode] = useState("add"); 
+// add | edit | duplicate
+
 
   /* ------------------ Fetch ------------------ */
 
@@ -30,7 +33,7 @@ const IntentContainer = () => {
     try {
       const res = await APICall.getT("/intents/intents")
       setIntents(res || [])
-      console.log(res);
+      console.log("res",	 res);
 
     } catch (err) {
       alert(err.message)
@@ -55,16 +58,19 @@ const IntentContainer = () => {
   const handleAdd = () => {
     setSelectedIntent(null)
     setIsModalOpen(true)
+      setIntentMode("add");
   }
 
   const handleEdit = (intent) => {
     setSelectedIntent(intent)
     setIsModalOpen(true)
+      setIntentMode("edit");
   }
 
   const handleDelete = (intent) => {
     setIntentToDelete(intent)
     setShowDeleteModal(true)
+     setIntentMode("duplicate");
   }
 
   const confirmDelete = async () => {
@@ -85,17 +91,23 @@ const IntentContainer = () => {
   }
 
   // UI-only duplicate
-  const handleDuplicate = (intent) => {
-    const duplicated = {
-      ...intent,
-      id: Date.now(),
-      usage: 0,
-      confidence: 0,
-      status: 'Inactive',
-      lastModified: new Date().toISOString().split('T')[0]
-    }
-    setIntents(prev => [...prev, duplicated])
-  }
+const handleDuplicate = (intent) => {
+  const duplicatedIntent = {
+    ...intent,
+    id: undefined,
+    name: `${intent.name} - Copy`,
+    displayName: `${intent.displayName} - Copy`,
+    intent_name: `${intent.intent_name}_copy`,
+    status: "Inactive",
+  };
+
+  setSelectedIntent(duplicatedIntent);
+  setIntentMode("duplicate");
+  setIsModalOpen(true);
+};
+
+
+  
 
   /* ------------------ Selection ------------------ */
 
@@ -351,15 +363,17 @@ const IntentContainer = () => {
       )}
 
       {/* Modals */}
-      <IntentModal
-        isOpen={isModalOpen}
-        intent={selectedIntent}
-        onClose={() => setIsModalOpen(false)}
-        onSaveAndTest={() => {
-          setIsModalOpen(false)
-          setIsTestPanelOpen(true)
-        }}
-      />
+  <IntentModal
+  isOpen={isModalOpen}
+  intent={selectedIntent}
+  mode={intentMode}
+  onClose={() => setIsModalOpen(false)}
+  onSaveAndTest={() => {
+    setIsModalOpen(false)
+    setIsTestPanelOpen(true)
+  }}
+/>
+
 
       <TestPanel
         isOpen={isTestPanelOpen}

@@ -163,7 +163,7 @@ const BasicInfoTab = ({ intent, onChange }) => {
         >
           <option value="">Select</option>
           {categories.map(cat => (
-            <option key={cat.id} value={cat.name}>
+            <option key={cat.id} value={cat.id}>
               {cat.name}
             </option>
           ))}
