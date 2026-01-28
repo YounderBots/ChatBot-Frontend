@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import APICall from "../../../../../APICalls/APICall";
 
 const BasicInfoTab = ({ intent, onChange }) => {
@@ -26,7 +26,7 @@ const BasicInfoTab = ({ intent, onChange }) => {
       return;
     }
     setNameError("");
-    update("name", name);
+    update("intent_name", name);
   };
 
   /* ---------- Fetch categories ---------- */
@@ -80,54 +80,13 @@ const BasicInfoTab = ({ intent, onChange }) => {
 
   return (
     <>
-      {/* -------- Add Category Modal -------- */}
-      {showAddCategoryModal && (
-        <>
-          <div className="modal-backdrop show" style={{ opacity: 0.5 }} />
-          <div className="modal d-block">
-            <div className="modal-dialog modal-dialog-centered modal-sm">
-              <div className="modal-content rounded-4">
-                <div className="modal-header">
-                  <h6 className="fw-bold">Add New Category</h6>
-                  <button
-                    className="btn-close"
-                    onClick={() => setShowAddCategoryModal(false)}
-                  />
-                </div>
-                <div className="modal-body">
-                  <input
-                    className="form-control"
-                    value={newCategory}
-                    onChange={(e) => setNewCategory(e.target.value)}
-                  />
-                </div>
-                <div className="modal-footer">
-                  <button
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => setShowAddCategoryModal(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    className="btn btn-primary btn-sm"
-                    onClick={handleSaveNewCategory}
-                  >
-                    Save
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-
       {/* -------- Form -------- */}
 
       <div className="mb-3">
         <label className="form-label fw-bold small">Intent Name</label>
         <input
           className={`form-control ${nameError ? "is-invalid" : ""}`}
-          value={intent.name || ""}
+          value={intent.intent_name || ""}
           onChange={(e) => validateName(e.target.value)}
         />
         {nameError && (
@@ -167,7 +126,6 @@ const BasicInfoTab = ({ intent, onChange }) => {
               {cat.name}
             </option>
           ))}
-          <option value="add-new">+ Add New</option>
         </select>
       </div>
 

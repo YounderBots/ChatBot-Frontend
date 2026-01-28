@@ -1,4 +1,3 @@
-import React from "react";
 
 const VARIABLES = [
   "{user_name}",
@@ -37,7 +36,7 @@ const ResponsesTab = ({
       normalizePriority([
         ...prev,
         {
-          id: crypto.randomUUID(),
+          id: Date.now() + "-" + Math.random().toString(36).slice(2),
           content: "",
           type: "text",
           preview: false,

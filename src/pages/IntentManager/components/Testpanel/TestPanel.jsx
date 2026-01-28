@@ -1,8 +1,8 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
 import { X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const createMessage = (role, text, actions = []) => ({
-    id: crypto.randomUUID(),
+    id: Date.now() + "-" + Math.random().toString(36).slice(2),
     role,
     text,
     actions
@@ -59,7 +59,7 @@ const TestPanel = ({ isOpen, onClose }) => {
             {/* Header */}
             <div className="support-header">
                 <div className="d-flex align-items-center gap-2">
-                     <span>Support Bot</span>
+                    <span>Support Bot</span>
                 </div>
                 <X size={18} onClick={onClose} className="cursor-pointer" />
             </div>

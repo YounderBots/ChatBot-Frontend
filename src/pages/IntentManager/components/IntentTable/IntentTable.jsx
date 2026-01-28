@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react'
-import { Edit2, Trash2, Copy } from "lucide-react"
+import { Copy, Edit2, Trash2 } from "lucide-react"
+import { useEffect, useMemo, useState } from 'react'
 
 const ITEMS_PER_PAGE = 10
 const PAGE_WINDOW = 3
@@ -73,7 +73,7 @@ const IntentTable = ({
               <th>Status</th>
               <th className="col-lastModified">Last Modified</th>
 
-              <th className="text-end">Actions</th>
+              <th className="text-center">Actions</th>
             </tr>
           </thead>
 
@@ -102,7 +102,7 @@ const IntentTable = ({
 
                 <td className="col-category">
                   <span className="badge badge-category">
-                    {intent.category}
+                    {intent.category_name}
                   </span>
                 </td>
 

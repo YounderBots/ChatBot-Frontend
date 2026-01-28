@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 const MIN_PHRASES = 10;
 const MAX_CHARS = 100;
@@ -24,7 +24,7 @@ const TrainingPhrasesTab = ({ phrases, setPhrases }) => {
     setPhrases(prev => [
       ...prev,
       {
-        id: crypto.randomUUID(),
+        id: Date.now() + "-" + Math.random().toString(36).slice(2),
         text: newPhrase,
         language: newLanguage,
       },

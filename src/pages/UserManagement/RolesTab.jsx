@@ -4,33 +4,6 @@ import { useEffect, useState } from "react";
 import { Button, Card, Col, Form, Modal, Row, Table } from "react-bootstrap";
 import APICall from "../../APICalls/APICall";
 
-/* =======================
-   PERMISSION MATRIX
-======================= */
-
-const MENU_ID_MAP = {
-    dashboard: 1,
-    conversations: 2,
-    intents: 3,
-    knowledgeBase: 4,
-    settings: 5,
-    users: 6,
-};
-
-
-const PERMISSION_MATRIX = {
-    dashboard: { label: "Dashboard" },
-    conversations: { label: "Conversations" },
-    intents: { label: "Intents" },
-    knowledgeBase: { label: "Knowledge Base" },
-    settings: { label: "Settings" },
-    users: { label: "Users" },
-};
-
-
-
-
-
 
 /* =======================
    COMPONENT
@@ -41,52 +14,42 @@ export default function RolesTab() {
     const [editingRole, setEditingRole] = useState(null);
     const [tempPermissions, setTempPermissions] = useState({});
     const [showModal, setShowModal] = useState(false);
+    const [menus, setMenus] = useState([]);
 
 
-    
+
     /* ---------- OPEN EDIT ---------- */
     const openEdit = (role) => {
-        if (!role.permissions) role.permissions = {}; // safety
+        const permissions = role.permissions || {};
+
+
         setEditingRole({
-            ...role,
+            id: role.id,
+            key: role.key,
+            name: role.name,
             status: role.status ?? true,
-            emailNotifications: role.emailNotifications ?? false,
         });
-        setTempPermissions(JSON.parse(JSON.stringify(role.permissions)));
+
+        // IMPORTANT: clone permissions so switches work independently
+        setTempPermissions(JSON.parse(JSON.stringify(permissions)));
+
         setShowModal(true);
-    };
-
-    console.log('tempPermissions', tempPermissions);
-
-
-
-
-    // fetch roles from API (if needed)
-
-
-
-    const MENU_ID_TO_KEY = {
-        1: "dashboard",
-        2: "conversations",
-        3: "intents",
-        4: "knowledgeBase",
-        5: "settings",
-        6: "users",
     };
 
     const mapBackendPermissions = (permissions = []) => {
         const result = {};
 
         permissions.forEach((perm) => {
-            const menuKey = MENU_ID_TO_KEY[perm.menu];
-            if (!menuKey) return;
+            // ✅ ALWAYS USE menu_id
+            const menuId = Number(perm.menu_id);
+            if (!menuId) return;
 
-            result[menuKey] = [];
+            result[menuId] = [];
 
-            if (perm.view) result[menuKey].push("view");
-            if (perm.add) result[menuKey].push("add");
-            if (perm.edit) result[menuKey].push("edit");
-            if (perm.delete) result[menuKey].push("delete");
+            if (perm.view) result[menuId].push("view");
+            if (perm.add) result[menuId].push("add");
+            if (perm.edit) result[menuId].push("edit");
+            if (perm.delete) result[menuId].push("delete");
         });
 
         return result;
@@ -96,11 +59,10 @@ export default function RolesTab() {
 
 
 
+
     const fetchRoles = async () => {
         try {
             const response = await APICall.getT("/hrms/roles");
-            console.log("Fetched rolesssssssss:", response);
-
 
             const rolesArray = Array.isArray(response) ? response : [];
 
@@ -109,30 +71,41 @@ export default function RolesTab() {
                 key: role.id,
                 name: role.name,
                 status: role.status === "ACTIVE",
-                permissions: mapBackendPermissions(role.permissions || []),
+                permissions: mapBackendPermissions(role.permission || []),
             }));
+
 
             setRoles(formattedRoles);
         } catch (error) {
             console.error("Failed to fetch roles:", error);
         }
     };
+    const fetchMenus = async () => {
+        try {
+            const response = await APICall.getT("/hrms/menus");
+            setMenus(Array.isArray(response) ? response : []);
+        } catch (err) {
+            console.error("Failed to fetch menus", err);
+        }
+    };
+
 
     useEffect(() => {
         fetchRoles();
+        fetchMenus();
     }, []);
 
 
     /* ---------- TOGGLE PERMISSION ---------- */
-    const togglePermission = (menuKey, type) => {
+    const togglePermission = (menuId, type) => {
         setTempPermissions((prev) => {
-            const current = prev[menuKey] || [];
+            const current = prev[menuId] || [];
 
             const updated = current.includes(type)
                 ? current.filter((p) => p !== type)
                 : [...current, type];
 
-            return { ...prev, [menuKey]: updated };
+            return { ...prev, [menuId]: updated };
         });
     };
 
@@ -140,14 +113,15 @@ export default function RolesTab() {
     /* ---------- SAVE ---------- */
 
     const buildPermissionsPayload = () => {
-        return Object.entries(tempPermissions).map(([menuKey, actions]) => ({
-            menu: MENU_ID_MAP[menuKey],
+        return Object.entries(tempPermissions).map(([menuId, actions]) => ({
+            menu: Number(menuId),
             view: actions.includes("view"),
             add: actions.includes("add"),
             edit: actions.includes("edit"),
             delete: actions.includes("delete"),
         }));
     };
+
 
 
     const savePermissions = async () => {
@@ -189,7 +163,6 @@ export default function RolesTab() {
 
         try {
             const response = await APICall.postT(`/hrms/delete_role/${roleKey}`);
-            console.log("Delete response:", response);
 
             await fetchRoles();
         } catch (error) {
@@ -312,22 +285,24 @@ export default function RolesTab() {
                         </thead>
 
                         <tbody>
-                            {Object.entries(PERMISSION_MATRIX).map(([menuKey, menu]) => (
-                                <tr key={menuKey}>
-                                    <td><strong>{menu.label}</strong></td>
+                            {menus.map((menu) => (
+                                <tr key={menu.id}>
+                                    <td><strong>{menu.menu}</strong></td>
 
                                     {["view", "add", "edit", "delete"].map((type) => (
                                         <td key={type} className="text-center">
                                             <Form.Check
                                                 type="switch"
-                                                checked={tempPermissions[menuKey]?.includes(type) || false}
-                                                onChange={() => togglePermission(menuKey, type)}
+                                                checked={Array.isArray(tempPermissions[menu.id]) &&
+                                                    tempPermissions[menu.id].includes(type)}
+                                                onChange={() => togglePermission(menu.id, type)}
                                             />
                                         </td>
                                     ))}
                                 </tr>
                             ))}
                         </tbody>
+
 
                     </Table>
 

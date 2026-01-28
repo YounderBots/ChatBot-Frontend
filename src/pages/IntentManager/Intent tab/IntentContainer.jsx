@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import IntentGrid from '../components/IntentGrid/IntentGrid'
 import IntentModal from '../components/IntentModel/IntentModel'
 import IntentTable from '../components/IntentTable/IntentTable'
@@ -23,8 +23,8 @@ const IntentContainer = () => {
   const [selectedIds, setSelectedIds] = useState([])
   const [showBulkMenu, setShowBulkMenu] = useState(false)
   const [bulkMenuPos, setBulkMenuPos] = useState({ top: 0, left: 0 })
-  const [intentMode, setIntentMode] = useState("add"); 
-// add | edit | duplicate
+  const [intentMode, setIntentMode] = useState("add");
+  // add | edit | duplicate
 
 
   /* ------------------ Fetch ------------------ */
@@ -33,7 +33,6 @@ const IntentContainer = () => {
     try {
       const res = await APICall.getT("/intents/intents")
       setIntents(res || [])
-      console.log("res",	 res);
 
     } catch (err) {
       alert(err.message)
@@ -58,19 +57,19 @@ const IntentContainer = () => {
   const handleAdd = () => {
     setSelectedIntent(null)
     setIsModalOpen(true)
-      setIntentMode("add");
+    setIntentMode("add");
   }
 
   const handleEdit = (intent) => {
     setSelectedIntent(intent)
     setIsModalOpen(true)
-      setIntentMode("edit");
+    setIntentMode("edit");
   }
 
   const handleDelete = (intent) => {
     setIntentToDelete(intent)
     setShowDeleteModal(true)
-     setIntentMode("duplicate");
+    setIntentMode("duplicate");
   }
 
   const confirmDelete = async () => {
@@ -91,23 +90,23 @@ const IntentContainer = () => {
   }
 
   // UI-only duplicate
-const handleDuplicate = (intent) => {
-  const duplicatedIntent = {
-    ...intent,
-    id: undefined,
-    name: `${intent.name} - Copy`,
-    displayName: `${intent.displayName} - Copy`,
-    intent_name: `${intent.intent_name}_copy`,
-    status: "Inactive",
+  const handleDuplicate = (intent) => {
+    const duplicatedIntent = {
+      ...intent,
+      id: undefined,
+      name: `${intent.name} - Copy`,
+      displayName: `${intent.displayName} - Copy`,
+      intent_name: `${intent.intent_name}_copy`,
+      status: "Inactive",
+    };
+
+    setSelectedIntent(duplicatedIntent);
+    setIntentMode("duplicate");
+    setIsModalOpen(true);
   };
 
-  setSelectedIntent(duplicatedIntent);
-  setIntentMode("duplicate");
-  setIsModalOpen(true);
-};
 
 
-  
 
   /* ------------------ Selection ------------------ */
 
@@ -344,7 +343,7 @@ const handleDuplicate = (intent) => {
                 </div>
                 <div className="modal-body text-center">
                   <p>
-                    <strong>{intentToDelete?.displayName}</strong> will be
+                    <strong>{intentToDelete?.name}</strong> intent will be
                     permanently removed.
                   </p>
                 </div>
@@ -363,16 +362,16 @@ const handleDuplicate = (intent) => {
       )}
 
       {/* Modals */}
-  <IntentModal
-  isOpen={isModalOpen}
-  intent={selectedIntent}
-  mode={intentMode}
-  onClose={() => setIsModalOpen(false)}
-  onSaveAndTest={() => {
-    setIsModalOpen(false)
-    setIsTestPanelOpen(true)
-  }}
-/>
+      <IntentModal
+        isOpen={isModalOpen}
+        intent={selectedIntent}
+        mode={intentMode}
+        onClose={() => setIsModalOpen(false)}
+        onSaveAndTest={() => {
+          setIsModalOpen(false)
+          setIsTestPanelOpen(true)
+        }}
+      />
 
 
       <TestPanel

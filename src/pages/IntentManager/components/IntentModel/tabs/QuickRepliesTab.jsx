@@ -1,4 +1,3 @@
-import React from "react";
 
 const MAX_BUTTONS = 5;
 
@@ -38,7 +37,7 @@ const QuickRepliesTab = ({
     updateButtons([
       ...buttons,
       {
-        id: crypto.randomUUID(),
+        id: Date.now() + "-" + Math.random().toString(36).slice(2),
         text: "",
         actionType: "message",
         value: "",
@@ -92,11 +91,10 @@ const QuickRepliesTab = ({
             {quickResponses.map((r, index) => (
               <button
                 key={r.id}
-                className={`btn btn-sm ${
-                  r.id === activeResponseId
-                    ? "btn-primary"
-                    : "btn-outline-primary"
-                }`}
+                className={`btn btn-sm ${r.id === activeResponseId
+                  ? "btn-primary"
+                  : "btn-outline-primary"
+                  }`}
                 onClick={() =>
                   onSelectQuickResponse?.(r.id)
                 }
