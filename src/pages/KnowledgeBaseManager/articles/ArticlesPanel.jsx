@@ -1,5 +1,6 @@
 import { Copy, Edit, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
+import APICall from "../../../APICalls/APICall";
 import DuplicateArticleDialog from "../dialog/DuplicateArticleDialog";
 import NewArticleDialog from "../dialog/NewArticleDialog";
 
@@ -21,6 +22,23 @@ const MOCK_ARTICLES = Array.from({ length: 50 }).map((_, i) => ({
   author: i % 2 === 0 ? "Admin" : "Support",
   content: "",
 }));
+
+const mapArticleToCreatePayload = (article, overrides = {}) => ({
+  title: overrides.title ?? article.title,
+  url: overrides.url ?? article.url,
+  category_id: article.category_id,
+  tags: article.tags || "",
+  contents: article.contents || "",
+  meta_description: article.meta_description || "",
+  featured_image: article.featured_image || null,
+  feature_article: article.feature_article ?? false,
+  publish_date: article.publish_date || null,
+  article_status: article.article_status || "DRAFT",
+  related_questions: (article.related_questions || []).map((q) => ({
+    question: q.question ?? q,
+  })),
+});
+
 
 const PAGE_SIZE = 5;
 
@@ -98,23 +116,66 @@ export default function ArticlesPanel({ activeCategory = "All" }) {
     setDuplicateDialogOpen(true);
   };
 
-  const handleSaveArticle = (data) => {
-    if (data.id) {
-      // Edit existing
-      setArticles((prev) =>
-        prev.map((a) => (a.id === data.id ? { ...a, ...data } : a))
-      );
-    } else {
-      // Creative new or Duplicate
-      const newArticle = {
-        ...data,
-        id: Date.now(),
-        updatedAt: new Date().toISOString().slice(0, 10),
-        views: data.views || 0,
-        helpful: data.helpful || 0,
-        author: data.author || "Admin",
+  const handleSaveArticle = async (data) => {
+    try {
+      // -------------------------------
+      // EDIT (local only for now)
+      // -------------------------------
+      if (data.id) {
+        setArticles((prev) =>
+          prev.map((a) => (a.id === data.id ? { ...a, ...data } : a))
+        );
+        return;
+      }
+
+      // -------------------------------
+      // CREATE / DUPLICATE → API PAYLOAD
+      // -------------------------------
+      const payload = {
+        title: data.title,
+        url: data.url,
+        category_id: data.category_id,
+        tags: data.tags || "",
+        contents: data.contents || "",
+        meta_description: data.meta_description || "",
+        featured_image: data.featured_image || null,
+        feature_article: data.feature_article ?? false,
+        publish_date: data.publish_date || null,
+        article_status: data.article_status || "DRAFT",
+        related_questions: (data.related_questions || []).map((q) => ({
+          question: q.question ?? q,
+        })),
       };
+
+      console.log("data", data);
+      console.log(payload);
+
+
+      // -------------------------------
+      // API CALL
+      // -------------------------------
+      const res = await APICall.postT("/knowledgebase/article", payload);
+
+      // -------------------------------
+      // UPDATE UI STATE
+      // -------------------------------
+      const newArticle = {
+        id: res.article_id,        // from backend
+        title: payload.title,
+        category: data.category,   // display name
+        category_id: payload.category_id,
+        status: payload.article_status,
+        updatedAt: new Date().toISOString().slice(0, 10),
+        views: 0,
+        helpful: 0,
+        author: "Admin",
+        ...payload,
+      };
+
       setArticles((prev) => [newArticle, ...prev]);
+    } catch (err) {
+      console.error("Failed to save article:", err);
+      alert(err.message || "Failed to save article");
     }
   };
 
@@ -280,8 +341,8 @@ export default function ArticlesPanel({ activeCategory = "All" }) {
         <NewArticleDialog
           article={editingArticle}
           onClose={() => {
-            setDialogOpen(false);
-            setEditingArticle(null);
+            // setDialogOpen(false);
+            // setEditingArticle(null);
           }}
           onSave={handleSaveArticle}
         />
@@ -291,8 +352,8 @@ export default function ArticlesPanel({ activeCategory = "All" }) {
         <DuplicateArticleDialog
           article={articleToDuplicate}
           onClose={() => {
-            setDuplicateDialogOpen(false);
-            setArticleToDuplicate(null);
+            // setDuplicateDialogOpen(false);
+            // setArticleToDuplicate(null);
           }}
           onSave={handleSaveArticle}
         />

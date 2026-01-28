@@ -37,6 +37,23 @@ export default function ManageCategoriesDialog({
   };
 
   /* ================= ADD ================= */
+  const fetchCategory = async () => {
+    if (!newCategory.trim()) return;
+
+    try {
+      const payload = {
+        name: newCategory.trim(),
+        order: categories.length + 1,
+      };
+
+      const res = await APICall.postT("/knowledgebase/category", payload);
+
+    } catch (err) {
+      alert(err.message || "Failed to add category");
+    }
+  };
+
+  /* ================= ADD ================= */
   const handleAdd = async () => {
     if (!newCategory.trim()) return;
 
