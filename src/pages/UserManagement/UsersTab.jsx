@@ -48,8 +48,6 @@ export default function UsersTab() {
   const [sortBy, setSortBy] = useState("");
   const [roles, setRoles] = useState([]);
 
-  console.log("Roles in UsersTab:", roles);
-
   const [form, setForm] = useState({
     avatar: null,
     name: "",
@@ -61,8 +59,6 @@ export default function UsersTab() {
     emailNotifications: false
   });
 
-  console.log("Form State:", form);
-  
   const passwordStrength = getPasswordStrength(form.password);
 
   const filteredUsers = users.filter((u) => {
@@ -80,36 +76,6 @@ export default function UsersTab() {
       return b.name.localeCompare(a.name);
     });
 
-
-  const MENU_ID_TO_KEY = {
-    1: "dashboard",
-    2: "conversations",
-    3: "intents",
-    4: "knowledgeBase",
-    5: "settings",
-    6: "users",
-  };
-
-
-
-  const mapBackendPermissions = (permissions = []) => {
-    const result = {};
-
-    permissions.forEach((perm) => {
-      const menuKey = MENU_ID_TO_KEY[perm.menu];
-      if (!menuKey) return;
-
-      result[menuKey] = [];
-
-      if (perm.view) result[menuKey].push("view");
-      if (perm.add) result[menuKey].push("add");
-      if (perm.edit) result[menuKey].push("edit");
-      if (perm.delete) result[menuKey].push("delete");
-    });
-
-    return result;
-  };
-
   // Fetch Roles
 
   const fetchRoles = async () => {
@@ -123,7 +89,6 @@ export default function UsersTab() {
         key: role.id,
         name: role.name,
         status: role.status === "ACTIVE",
-        permissions: mapBackendPermissions(role.permissions || []),
       }));
 
       setRoles(formattedRoles);
@@ -166,8 +131,8 @@ export default function UsersTab() {
       password: "",
       confirmPassword: "",
       role: user.role,
-      status: user.status ?? true,                    
-      emailNotifications: user.emailNotifications ?? false 
+      status: user.status ?? true,
+      emailNotifications: user.emailNotifications ?? false
     });
     setShowModal(true);
   };
@@ -185,6 +150,7 @@ export default function UsersTab() {
         name: u.fullname,
         email: u.email,
         role: u.role,
+        roleName: u.roleName,
         lastLogin: u.last_login || "-",
         status: u.status,
         emailNotifications: u.email_notification,
@@ -201,6 +167,31 @@ export default function UsersTab() {
     fetchUsers();
   }, []);
 
+  const toggleUserStatus = async (user) => {
+    const newStatus = user.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === user.id ? { ...u, status: newStatus } : u
+      )
+    );
+
+    try {
+      await APICall.postT(`/hrms/update_user_status/${user.id}`, {
+        status: newStatus,
+      });
+    } catch (error) {
+      console.error("Failed to update user status", error);
+
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === user.id ? { ...u, status: user.status } : u
+        )
+      );
+
+      alert("Failed to update user status");
+    }
+  };
 
 
   const saveUser = async () => {
@@ -235,8 +226,6 @@ export default function UsersTab() {
         response = await APICall.postT("/hrms/user", payload);
       }
 
-      console.log("User saved:", response);
-
       setShowModal(false);
       resetForm();
       await fetchUsers();
@@ -255,7 +244,7 @@ export default function UsersTab() {
       email: "",
       password: "",
       confirmPassword: "",
-      role: "Admin",
+      role: 0,
     });
   };
   const handleRoleChange = (role) => {
@@ -346,13 +335,13 @@ export default function UsersTab() {
 
                 <td>{u.name}</td>
                 <td>{u.email}</td>
-                <td><Badge bg="info">{u.role}</Badge></td>
+                <td><Badge bg="info">{u.roleName}</Badge></td>
                 <td>{u.lastLogin}</td>
                 <td>
                   <Form.Check
                     type="switch"
-                    checked={u.status}
-                    onChange={() => setUsers(users.map(x => x.id === u.id ? { ...x, status: !x.status } : x))}
+                    checked={u.status == "ACTIVE"}
+                    onChange={() => toggleUserStatus(u)}
                   />
                 </td>
                 <td className='text-center'>
@@ -553,14 +542,14 @@ export default function UsersTab() {
             <Col md={12}>
               <Form.Group className="mb-3 roleSelection">
                 {roles.map((role) => (
-                  
+
                   <Form.Check
                     key={role.id}
                     type="radio"
                     name="role"
                     id={`role-${role.id}`}
                     label={role.name}
-                    checked={form.role === role.id}
+                    checked={role.id === form.role}
                     onChange={() => handleRoleChange(role.id)}
                     className="mb-1"
                   />
