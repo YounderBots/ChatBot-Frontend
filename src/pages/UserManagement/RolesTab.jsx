@@ -19,31 +19,14 @@ const MENU_ID_MAP = {
 
 
 const PERMISSION_MATRIX = {
-    dashboard: {
-        label: "Dashboard",
-        actions: ["viewAnalytics", "exportReports"],
-    },
-    conversations: {
-        label: "Conversations",
-        actions: ["viewConversations", "exportConversations", "deleteConversations"],
-    },
-    intents: {
-        label: "Intents",
-        actions: ["viewIntents", "editIntents", "deleteIntents", "trainModel"],
-    },
-    knowledgeBase: {
-        label: "Knowledge Base",
-        actions: ["viewArticles", "editArticles", "publishArticles"],
-    },
-    settings: {
-        label: "Settings",
-        actions: ["viewSettings", "modifySettings"],
-    },
-    users: {
-        label: "Users",
-        actions: ["viewUsers", "editUsers", "deleteUsers"],
-    },
+    dashboard: { label: "Dashboard" },
+    conversations: { label: "Conversations" },
+    intents: { label: "Intents" },
+    knowledgeBase: { label: "Knowledge Base" },
+    settings: { label: "Settings" },
+    users: { label: "Users" },
 };
+
 
 
 
@@ -59,6 +42,8 @@ export default function RolesTab() {
     const [tempPermissions, setTempPermissions] = useState({});
     const [showModal, setShowModal] = useState(false);
 
+
+    
     /* ---------- OPEN EDIT ---------- */
     const openEdit = (role) => {
         if (!role.permissions) role.permissions = {}; // safety
@@ -70,6 +55,9 @@ export default function RolesTab() {
         setTempPermissions(JSON.parse(JSON.stringify(role.permissions)));
         setShowModal(true);
     };
+
+    console.log('tempPermissions', tempPermissions);
+
 
 
 
@@ -89,8 +77,6 @@ export default function RolesTab() {
     const mapBackendPermissions = (permissions = []) => {
         const result = {};
 
-        if (!Array.isArray(permissions)) return permissions;
-
         permissions.forEach((perm) => {
             const menuKey = MENU_ID_TO_KEY[perm.menu];
             if (!menuKey) return;
@@ -109,6 +95,7 @@ export default function RolesTab() {
 
 
 
+
     const fetchRoles = async () => {
         try {
             const response = await APICall.getT("/hrms/roles");
@@ -118,6 +105,7 @@ export default function RolesTab() {
             const rolesArray = Array.isArray(response) ? response : [];
 
             const formattedRoles = rolesArray.map((role) => ({
+                id: role.id,
                 key: role.id,
                 name: role.name,
                 status: role.status === "ACTIVE",
@@ -141,12 +129,13 @@ export default function RolesTab() {
             const current = prev[menuKey] || [];
 
             const updated = current.includes(type)
-                ? current.filter(p => p !== type)
+                ? current.filter((p) => p !== type)
                 : [...current, type];
 
             return { ...prev, [menuKey]: updated };
         });
     };
+
 
     /* ---------- SAVE ---------- */
 
@@ -161,14 +150,11 @@ export default function RolesTab() {
     };
 
 
-
     const savePermissions = async () => {
         if (!editingRole?.name?.trim()) {
             alert("Role name is required");
             return;
         }
-
-        console.log(editingRole.key);
 
         const payload = {
             name: editingRole.name,
@@ -176,21 +162,22 @@ export default function RolesTab() {
         };
 
         try {
-            // UPDATE if ID exists, else CREATE
-            if (editingRole.key) {
-                await APICall.postT(`/hrms/update_role/${editingRole.key}`, payload);
+            if (editingRole.id) {
+                await APICall.postT(`/hrms/update_role/${editingRole.id}`, payload);
             } else {
                 await APICall.postT("/hrms/role", payload);
             }
 
-            await fetchRoles(); // 🔥 ALWAYS refresh after save
+            await fetchRoles();
             setShowModal(false);
-
+            setEditingRole(null);
         } catch (error) {
             console.error("Save role failed:", error);
             alert("Failed to save role");
         }
     };
+
+
 
 
 
@@ -214,7 +201,7 @@ export default function RolesTab() {
 
     const openAddRole = () => {
         setEditingRole({
-            key: Date.now(), // temporary key
+            id: null,
             name: "",
             permissions: {},
             status: true,
@@ -329,52 +316,15 @@ export default function RolesTab() {
                                 <tr key={menuKey}>
                                     <td><strong>{menu.label}</strong></td>
 
-                                    {["view", "add", "edit", "delete"].map((type) => {
-                                        // All actions of this type for this menu
-                                        let actionsOfType = menu.actions.filter(a => a.toLowerCase().includes(type));
-
-                                        // Always allow toggle, even if no existing actions
-                                        if (actionsOfType.length === 0) {
-                                            // create a placeholder action
-                                            actionsOfType = [type + "Custom"];
-                                            // Also add it to PERMISSION_MATRIX dynamically if needed
-                                            if (!menu.actions.includes(actionsOfType[0])) menu.actions.push(actionsOfType[0]);
-                                        }
-
-                                        // Initialize menu permissions if missing
-                                        if (!tempPermissions[menuKey]) tempPermissions[menuKey] = [];
-
-                                        const currentPerms = tempPermissions[menuKey];
-
-                                        // Toggle ON if any action of this type is present
-                                        const isChecked = actionsOfType.some(a => currentPerms.includes(a));
-
-                                        const handleToggle = () => {
-                                            setTempPermissions(prev => {
-                                                const current = prev[menuKey] || [];
-                                                let updated;
-                                                if (isChecked) {
-                                                    // Remove all actions of this type
-                                                    updated = current.filter(a => !actionsOfType.includes(a));
-                                                } else {
-                                                    // Add all actions of this type
-                                                    updated = Array.from(new Set([...current, ...actionsOfType]));
-                                                }
-                                                return { ...prev, [menuKey]: updated };
-                                            });
-                                        };
-
-                                        return (
-                                            <td key={type} className="text-center">
-                                                <Form.Check
-                                                    type="switch"
-                                                    checked={isChecked}
-                                                    onChange={handleToggle}
-                                                />
-                                            </td>
-                                        );
-                                    })}
-
+                                    {["view", "add", "edit", "delete"].map((type) => (
+                                        <td key={type} className="text-center">
+                                            <Form.Check
+                                                type="switch"
+                                                checked={tempPermissions[menuKey]?.includes(type) || false}
+                                                onChange={() => togglePermission(menuKey, type)}
+                                            />
+                                        </td>
+                                    ))}
                                 </tr>
                             ))}
                         </tbody>

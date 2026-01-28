@@ -2,7 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { Edit2, Eye, EyeOff, Plus, RefreshCw, Search, Trash2, } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Badge, Button, Card, Col, Form, Image, Modal, Row, Table } from "react-bootstrap";
-import APICall from "../../APICalls/APICall";
+import APICall, { baseURL } from "../../APICalls/APICall";
 import "./UserMgmt.css";
 
 
@@ -22,14 +22,6 @@ const getPasswordStrength = (password) => {
 
 const generatePassword = () =>
   Math.random().toString(36).slice(-10) + "@A1";
-
-const roles = [
-  { id: 1, name: "Super Admin" },
-  { id: 2, name: "Admin" },
-  { id: 3, name: "Editor" },
-  { id: 4, name: "Viewer" },
-  { id: 5, name: "Custom" },
-];
 
 
 const fileToBase64 = (file) => {
@@ -54,6 +46,9 @@ export default function UsersTab() {
   const [editingUser, setEditingUser] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [sortBy, setSortBy] = useState("");
+  const [roles, setRoles] = useState([]);
+
+  console.log("Roles in UsersTab:", roles);
 
   const [form, setForm] = useState({
     avatar: null,
@@ -65,6 +60,9 @@ export default function UsersTab() {
     status: true,
     emailNotifications: false
   });
+
+  console.log("Form State:", form);
+  
   const passwordStrength = getPasswordStrength(form.password);
 
   const filteredUsers = users.filter((u) => {
@@ -83,6 +81,62 @@ export default function UsersTab() {
     });
 
 
+  const MENU_ID_TO_KEY = {
+    1: "dashboard",
+    2: "conversations",
+    3: "intents",
+    4: "knowledgeBase",
+    5: "settings",
+    6: "users",
+  };
+
+
+
+  const mapBackendPermissions = (permissions = []) => {
+    const result = {};
+
+    permissions.forEach((perm) => {
+      const menuKey = MENU_ID_TO_KEY[perm.menu];
+      if (!menuKey) return;
+
+      result[menuKey] = [];
+
+      if (perm.view) result[menuKey].push("view");
+      if (perm.add) result[menuKey].push("add");
+      if (perm.edit) result[menuKey].push("edit");
+      if (perm.delete) result[menuKey].push("delete");
+    });
+
+    return result;
+  };
+
+  // Fetch Roles
+
+  const fetchRoles = async () => {
+    try {
+      const response = await APICall.getT("/hrms/roles");
+
+      const rolesArray = Array.isArray(response) ? response : [];
+
+      const formattedRoles = rolesArray.map((role) => ({
+        id: role.id,
+        key: role.id,
+        name: role.name,
+        status: role.status === "ACTIVE",
+        permissions: mapBackendPermissions(role.permissions || []),
+      }));
+
+      setRoles(formattedRoles);
+    } catch (error) {
+      console.error("Failed to fetch roles:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchRoles();
+  }, []);
+
+
   const deleteUser = async (id) => {
     if (!window.confirm("Delete this user?")) return;
 
@@ -96,11 +150,7 @@ export default function UsersTab() {
   };
 
 
-  // const openAddUser = () => {
-  //   setEditingUser(null);
-  //   setForm({ avatar: "", name: "", email: "", password: "", confirmPassword: "", role: "Admin" });
-  //   setShowModal(true);
-  // };
+
 
   const openAddUser = () => {
     resetForm();
@@ -116,8 +166,8 @@ export default function UsersTab() {
       password: "",
       confirmPassword: "",
       role: user.role,
-      status: user.status ?? true,                     // ✅ ADD
-      emailNotifications: user.emailNotifications ?? false // ✅ ADD
+      status: user.status ?? true,                    
+      emailNotifications: user.emailNotifications ?? false 
     });
     setShowModal(true);
   };
@@ -125,13 +175,9 @@ export default function UsersTab() {
 
 
   // fetch user
-
-
-
   const fetchUsers = async () => {
     try {
       const response = await APICall.getT("/hrms/users");
-      console.log("Fetched users:", response);
 
       const mappedUsers = response.map((u) => ({
         id: u.id,
@@ -146,7 +192,7 @@ export default function UsersTab() {
 
       setUsers(mappedUsers);
     } catch (error) {
-      console.error("Fetch users failed:", error);
+
       alert("Failed to load users");
     }
   };
@@ -169,6 +215,7 @@ export default function UsersTab() {
         fullname: form.name,
         email: form.email,
         role: form.role,
+        status: form.status,
         email_notification: form.emailNotifications,
       };
 
@@ -285,7 +332,7 @@ export default function UsersTab() {
               <tr key={u.id}>
                 <td>
                   <Image
-                    src={u.avatar && u.avatar.trim() ? u.avatar : "src/layout/assets/dpPlaceholder.png"}
+                    src={u.avatar && u.avatar.trim() ? `${baseURL}/admin/${u.avatar.replace(/^\.\/?/, "")}` : "src/layout/assets/dpPlaceholder.png"}
                     roundedCircle
                     width={32}
                     height={32}
@@ -347,7 +394,8 @@ export default function UsersTab() {
               <div className="mb-2 d-flex justify-content-center ">
                 {form.avatar ? (
                   <Image
-                    src={form.avatar}
+                    src={`${baseURL}/admin/${form.avatar.replace(/^\.\/?/, "")}`
+                    }
                     roundedCircle
                     width={80}
                     height={80}
@@ -505,6 +553,7 @@ export default function UsersTab() {
             <Col md={12}>
               <Form.Group className="mb-3 roleSelection">
                 {roles.map((role) => (
+                  
                   <Form.Check
                     key={role.id}
                     type="radio"
