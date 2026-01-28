@@ -118,6 +118,7 @@ export default function RolesTab() {
             const rolesArray = Array.isArray(response) ? response : [];
 
             const formattedRoles = rolesArray.map((role) => ({
+                id: role.id,
                 key: role.id,
                 name: role.name,
                 status: role.status === "ACTIVE",
@@ -168,29 +169,30 @@ export default function RolesTab() {
             return;
         }
 
-        console.log(editingRole.key);
-
         const payload = {
             name: editingRole.name,
             permissions: buildPermissionsPayload(),
         };
 
         try {
-            // UPDATE if ID exists, else CREATE
-            if (editingRole.key) {
-                await APICall.postT(`/hrms/update_role/${editingRole.key}`, payload);
-            } else {
+            if (editingRole.id) {
+                //  UPDATE
+                await APICall.postT( `/hrms/update_role/${editingRole.id}`, payload); } 
+                else {
+                //  ADD
                 await APICall.postT("/hrms/role", payload);
             }
 
-            await fetchRoles(); // 🔥 ALWAYS refresh after save
+            await fetchRoles();   // refresh UI from backend
             setShowModal(false);
+            setEditingRole(null);
 
         } catch (error) {
             console.error("Save role failed:", error);
             alert("Failed to save role");
         }
     };
+
 
 
 
@@ -214,7 +216,7 @@ export default function RolesTab() {
 
     const openAddRole = () => {
         setEditingRole({
-            key: Date.now(), // temporary key
+            id: null,
             name: "",
             permissions: {},
             status: true,
