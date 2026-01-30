@@ -25,16 +25,8 @@ const ResponsesTab = ({
   // console.log("safeResponses", safeResponses);
 
 
-const normalizedResponses = responses.map(r => ({
-  id: r.id,
-  content: r.response_text,     // map text
-  type: r.response_type,        // 🔥 THIS FIXES DROPDOWN
-  preview: false,
-  priority: r.priority,
-  quickReplies: [],
-}));
+console.log("responses",responses);
 
-setResponses(normalizedResponses);
 
   /* ---------- HELPERS ---------- */
   const normalizePriority = (list) =>
@@ -63,7 +55,7 @@ setResponses(normalizedResponses);
       ])
     );
   };
-  
+
 
   const deleteResponse = (id) => {
     setResponses(prev =>

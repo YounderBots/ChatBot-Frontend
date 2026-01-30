@@ -9,7 +9,7 @@ const TrainingPhrasesTab = ({ phrases, setPhrases }) => {
   const [error, setError] = useState("");
   const [dragIndex, setDragIndex] = useState(null);
 
-  console.log("phrases", phrases);
+  // console.log("phrases", phrases);
   
 
   const handleAddPhrase = () => {

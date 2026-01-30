@@ -62,6 +62,23 @@ const normalizeAdvanced = (intent) => {
   };
 };
 
+const normalizeResponses = (responses = []) => {
+  if (!Array.isArray(responses)) return [];
+  return responses.map((r, index) => ({
+    id: r.id || `${Date.now()}-${index}`,
+    content: r.response_text || "",          // ✅ editor
+    type: r.response_type || "text",          // ✅ dropdown
+    preview: false,
+    priority: r.priority || index + 1,
+    quickReplies: (r.quick_reply || []).map(qr => ({
+      id: qr.id || `${Math.random()}`,
+      text: qr.button_text || "",
+      value: qr.message_value || "",
+      actionType: qr.action_type || "POSTBACK",
+    })),
+  }));
+};
+
 
 
 useEffect(() => {
@@ -70,7 +87,9 @@ useEffect(() => {
       context_requirement: intent.context_requirement,
       context_output: intent.context_output,
       confidence: intent.confidence,
-      response_status: intent.response_status
+      response_status: intent.response_status,
+      responses: intent.responses
+
     });
   }
 }, [intent]);
@@ -96,13 +115,11 @@ useEffect(() => {
     status: intent.status || intent.response_status || "ACTIVE",
   });
 
-
 const normalizeArray = (val) => {
   if (Array.isArray(val)) return val;
   if (val && typeof val === "object") return Object.values(val);
   return [];
 };
-
 
 const rawPhrases = normalizeArray(
   intent.phrases ?? intent.trainingPhrases
@@ -116,7 +133,8 @@ setTrainingPhrases(
 );
 
 
- setResponses(normalizeArray(intent.responses));
+setResponses(normalizeResponses(intent.responses));
+
 
 
   setAdvancedConfig(normalizeAdvanced(intent));
@@ -172,31 +190,6 @@ setTrainingPhrases(
     };
   };
 
-
-
-  // const handleSave = async () => {
-  //   const payload = buildBackendPayload();
-
-
-
-  //   try {
-  //     const response = await APICall.postT(
-  //       "/intents/intents",
-  //       payload
-  //     );
-
-  //     console.log("API intent RESPONSE ✅", response);
-  //     onClose();
-  //     fetchIntents()
-
-  //   } catch (error) {
-  //     console.error("Save Intent Failed ", error);
-  //     alert(
-  //       error?.response?.data?.message ||
-  //       "Failed to save intent. Please try again."
-  //     );
-  //   }
-  // };
 
 
 const handleSave = async () => {
