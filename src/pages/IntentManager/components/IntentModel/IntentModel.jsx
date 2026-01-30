@@ -6,7 +6,7 @@ import QuickRepliesTab from "./tabs/QuickRepliesTab";
 import ResponsesTab from "./tabs/ResponsesTab";
 import TrainingPhrasesTab from "./tabs/TrainingPhrasesTab";
 
-const IntentModal = ({ isOpen, onClose, intent, onSaveAndTest, mode }) => {
+const IntentModal = ({ isOpen, onClose, fetchIntents, intent, onSaveAndTest, mode }) => {
 
 
   // console.log("Rendering IntentModal with intent:", intent);
@@ -18,48 +18,111 @@ const IntentModal = ({ isOpen, onClose, intent, onSaveAndTest, mode }) => {
   const [trainingPhrases, setTrainingPhrases] = useState(
     intent?.trainingPhrases || []
   );
-  const [advancedConfig, setAdvancedConfig] = useState({
-    contextsRequired: intent?.advanced?.contextsRequired || [],
-    contextsSet: intent?.advanced?.contextsSet || [],
-    fallback: intent?.advanced?.fallback || "clarify",
-    threshold: intent?.advanced?.threshold || 60,
-    enabled: intent?.advanced?.enabled ?? true,
-  });
-  const [intentDraft, setIntentDraft] = useState({
 
-    intent_name: intent?.name || "",
-    displayName: intent?.displayName || "",
-    description: intent?.description || "",
-    category: intent?.category.id || "",
-    priority: intent?.priority || "Medium",
-    status: intent?.status || "Active",
-  });
 
-  useEffect(() => {
-    if (!intent) return;
+const DEFAULT_INTENT = {
+  intent_name: "",
+  displayName: "",
+  description: "",
+  category: "",
+  priority: "Medium",
+  status: "ACTIVE",
+};
 
-    setIntentDraft({
-      intent_name: intent.intent_name || "",
-      displayName: intent.name || "",
-      description: intent.description || "",
-      category: intent.category || "",
-      priority: intent.priority || "Medium",
-      status: intent.status || intent.response_status || "ACTIVE",
+const DEFAULT_ADVANCED = {
+  contextsRequired: [],
+  contextsSet: [],
+  fallback: "clarify",
+  threshold: 60,
+  enabled: true,
+};
+
+  const [advancedConfig, setAdvancedConfig] = useState(DEFAULT_ADVANCED);
+
+  const [intentDraft, setIntentDraft] = useState(DEFAULT_INTENT);
+
+
+
+
+const normalizeAdvanced = (intent) => {
+  return {
+    contextsRequired: intent.context_requirement || [],
+    contextsSet: intent.context_output || [],
+
+    fallback:
+      intent.fallback === "YES"
+        ? "clarify"
+        : intent.fallback === "ESCALATE"
+        ? "escalate"
+        : "generic",
+
+    threshold: Number(intent.confidence ?? 60),
+
+    enabled: intent.response_status === "ACTIVE",
+  };
+};
+
+
+
+useEffect(() => {
+  if (intent) {
+    console.log("RAW ADVANCED FROM BACKEND 👉", {
+      context_requirement: intent.context_requirement,
+      context_output: intent.context_output,
+      confidence: intent.confidence,
+      response_status: intent.response_status
     });
-
-    setTrainingPhrases(intent.trainingPhrases || []);
-
-    setAdvancedConfig({
-      contextsRequired: intent.contextsRequired || [],
-      contextsSet: intent.contextsSet || [],
-      fallback: intent.fallback === "1" ? "fallback" : "clarify",
-      threshold: intent.confidence ?? 60,
-      enabled: intent.response_status === "ACTIVE",
-    });
-  }, [intent]);
+  }
+}, [intent]);
 
 
-  // console.log("Intent Modal Opened with intentDraft:", intentDraft);
+useEffect(() => {
+  if (!intent) {
+    // ADD MODE → reset everything
+    setIntentDraft(DEFAULT_INTENT);
+    setTrainingPhrases([]);
+    setResponses([]);
+    setAdvancedConfig(DEFAULT_ADVANCED);
+    return;
+  }
+
+  // EDIT MODE → populate fields
+  setIntentDraft({
+    intent_name: intent.intent_name || "",
+    displayName: intent.name || intent.displayName || "",
+    description: intent.description || "",
+    category: intent.category?.id || intent.category || "",
+    priority: intent.priority || "Medium",
+    status: intent.status || intent.response_status || "ACTIVE",
+  });
+
+
+const normalizeArray = (val) => {
+  if (Array.isArray(val)) return val;
+  if (val && typeof val === "object") return Object.values(val);
+  return [];
+};
+
+
+const rawPhrases = normalizeArray(
+  intent.phrases ?? intent.trainingPhrases
+);
+
+setTrainingPhrases(
+  rawPhrases.map(p => ({
+    text: typeof p === "string" ? p : p.phrase || p.text || "",
+    language: p.language || "en",
+  }))
+);
+
+
+ setResponses(normalizeArray(intent.responses));
+
+
+  setAdvancedConfig(normalizeAdvanced(intent));
+}, [intent, mode]);
+
+
 
   // ✅ SAFE early return AFTER hooks
   if (!isOpen) return null;
@@ -111,32 +174,70 @@ const IntentModal = ({ isOpen, onClose, intent, onSaveAndTest, mode }) => {
 
 
 
-  const handleSave = async () => {
-    const payload = buildBackendPayload();
+  // const handleSave = async () => {
+  //   const payload = buildBackendPayload();
 
-    // console.log("FINAL BACKEND PAYLOAD 👉", payload);
 
-    try {
-      const response = await APICall.postT(
+
+  //   try {
+  //     const response = await APICall.postT(
+  //       "/intents/intents",
+  //       payload
+  //     );
+
+  //     console.log("API intent RESPONSE ✅", response);
+  //     onClose();
+  //     fetchIntents()
+
+  //   } catch (error) {
+  //     console.error("Save Intent Failed ", error);
+  //     alert(
+  //       error?.response?.data?.message ||
+  //       "Failed to save intent. Please try again."
+  //     );
+  //   }
+  // };
+
+
+const handleSave = async () => {
+  const payload = buildBackendPayload();
+  console.log("SAVE PAYLOAD 👉", payload);
+
+  try {
+    let response;
+    
+
+    if (intent?.id) {
+      // 🔄 UPDATE
+      response = await APICall.postT(
+        `/intents/intents/${intent.id}`,
+        payload
+      );
+      console.log("API intent UPDATED ✅", response);
+    } else {
+      // ➕ CREATE
+      response = await APICall.postT(
         "/intents/intents",
         payload
       );
-
-      // console.log("API intent RESPONSE ✅", response);
-      // onClose();
-    } catch (error) {
-      console.error("Save Intent Failed ", error);
-      alert(
-        error?.response?.data?.message ||
-        "Failed to save intent. Please try again."
-      );
+      console.log("API intent CREATED ✅", response);
     }
-  };
+
+    onClose();
+    fetchIntents();
+
+  } catch (error) {
+    console.error("Save Intent Failed ", error);
+    alert(
+      error?.response?.data?.message ||
+      "Failed to save intent. Please try again."
+    );
+  }
+};
+
+
 
   // show Existing Code
-
-
-
 
   const handleSaveAndTest = async () => {
     const payload = {

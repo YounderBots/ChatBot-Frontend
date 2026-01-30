@@ -48,6 +48,8 @@ const BasicInfoTab = ({ intent, onChange }) => {
 
   const handleCategoryChange = (e) => {
     const value = e.target.value;
+    console.log("value:", value);
+    
 
     if (value === "add-new") {
       setShowAddCategoryModal(true);
@@ -121,6 +123,7 @@ const BasicInfoTab = ({ intent, onChange }) => {
           onChange={handleCategoryChange}
         >
           <option value="">Select</option>
+          
           {categories.map(cat => (
             <option key={cat.id} value={cat.id}>
               {cat.name}

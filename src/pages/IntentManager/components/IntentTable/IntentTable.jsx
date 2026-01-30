@@ -106,8 +106,8 @@ const IntentTable = ({
                   </span>
                 </td>
 
-                <td className="col-phrases">{intent.phrases}</td>
-                <td className="col-responses">{intent.responses}</td>
+                <td className="col-phrases">{intent.phrases_count}</td>
+                <td className="col-responses">{intent.responses_count}</td>
 
                 <td>{intent.usage}</td>
                 <td className="col-confidence">{intent.confidence}%</td>

@@ -13,13 +13,29 @@ const AdvancedTab = forwardRef(({ value, onChange }, ref) => {
   };
 
   const toggleMulti = (key, item) => {
+    const list = Array.isArray(value[key]) ? value[key] : [];
     update(
       key,
-      value[key].includes(item)
-        ? value[key].filter(v => v !== item)
-        : [...value[key], item]
+      list.includes(item)
+        ? list.filter(v => v !== item)
+        : [...list, item]
     );
   };
+
+
+  const getAllContexts = (value) =>
+    Array.from(
+      new Set([
+        ...(value?.contextsRequired || []),
+        ...(value?.contextsSet || []),
+        "auth",
+        "order",
+        "payment",
+        "profile",
+        "support",
+      ])
+    );
+
 
   useImperativeHandle(ref, () => ({
     getAdvancedConfig: () => value
@@ -37,7 +53,7 @@ const AdvancedTab = forwardRef(({ value, onChange }, ref) => {
               Context Requirements
             </Form.Label>
             <div className="d-flex flex-wrap gap-2">
-              {MOCK_CONTEXTS.map(ctx => (
+              {getAllContexts(value).map(ctx => (
                 <Badge
                   key={ctx}
                   bg={value.contextsRequired.includes(ctx) ? "primary" : "light"}
@@ -57,7 +73,7 @@ const AdvancedTab = forwardRef(({ value, onChange }, ref) => {
               Context Output
             </Form.Label>
             <div className="d-flex flex-wrap gap-2">
-              {MOCK_CONTEXTS.map(ctx => (
+              {getAllContexts(value).map(ctx => (
                 <Badge
                   key={ctx}
                   bg={value.contextsSet.includes(ctx) ? "success" : "light"}
@@ -68,6 +84,7 @@ const AdvancedTab = forwardRef(({ value, onChange }, ref) => {
                   {ctx}
                 </Badge>
               ))}
+
             </div>
           </Form.Group>
 

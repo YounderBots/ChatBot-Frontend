@@ -1,13 +1,16 @@
 import { useState } from "react";
 
 const MIN_PHRASES = 10;
-const MAX_CHARS = 100;
+const MAX_CHARS = 10000;
 
 const TrainingPhrasesTab = ({ phrases, setPhrases }) => {
   const [newPhrase, setNewPhrase] = useState("");
   const [newLanguage, setNewLanguage] = useState("en");
   const [error, setError] = useState("");
   const [dragIndex, setDragIndex] = useState(null);
+
+  console.log("phrases", phrases);
+  
 
   const handleAddPhrase = () => {
     if (!newPhrase.trim()) return;
@@ -138,7 +141,7 @@ const TrainingPhrasesTab = ({ phrases, setPhrases }) => {
             </span>
 
             <span className="text-muted small me-3">
-              {phrase.text.length}/{MAX_CHARS}
+              {phrase.text}
             </span>
 
             <button

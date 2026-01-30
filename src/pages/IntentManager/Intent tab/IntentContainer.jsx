@@ -3,7 +3,6 @@ import IntentGrid from '../components/IntentGrid/IntentGrid'
 import IntentModal from '../components/IntentModel/IntentModel'
 import IntentTable from '../components/IntentTable/IntentTable'
 import TestPanel from '../components/Testpanel/TestPanel'
-
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../Theme.css'
@@ -17,21 +16,19 @@ const IntentContainer = () => {
   const [selectedIntent, setSelectedIntent] = useState(null)
   const [intents, setIntents] = useState([])
   const [loading, setLoading] = useState(true)
-
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [intentToDelete, setIntentToDelete] = useState(null)
   const [selectedIds, setSelectedIds] = useState([])
   const [showBulkMenu, setShowBulkMenu] = useState(false)
   const [bulkMenuPos, setBulkMenuPos] = useState({ top: 0, left: 0 })
   const [intentMode, setIntentMode] = useState("add");
-  // add | edit | duplicate
-
 
   /* ------------------ Fetch ------------------ */
 
   const fetchIntents = async () => {
     try {
       const res = await APICall.getT("/intents/intents")
+      console.log("Fetched intents:", res);
       setIntents(res || [])
 
     } catch (err) {
@@ -61,6 +58,7 @@ const IntentContainer = () => {
   }
 
   const handleEdit = (intent) => {
+    console.log("Editing intent:", intent)
     setSelectedIntent(intent)
     setIsModalOpen(true)
     setIntentMode("edit");
@@ -310,7 +308,6 @@ const IntentContainer = () => {
           <IntentTable
             intents={intents}
             selectedIds={selectedIds}
-
             onToggleAll={toggleSelectAll}
             onToggleOne={toggleSelectOne}
             onEdit={handleEdit}
@@ -367,6 +364,7 @@ const IntentContainer = () => {
         intent={selectedIntent}
         mode={intentMode}
         onClose={() => setIsModalOpen(false)}
+        fetchIntents={fetchIntents}
         onSaveAndTest={() => {
           setIsModalOpen(false)
           setIsTestPanelOpen(true)

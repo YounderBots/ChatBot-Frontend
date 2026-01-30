@@ -13,11 +13,28 @@ const RESPONSE_TYPES = [
   { value: "card", label: "Card" },
 ];
 
+
+
 const ResponsesTab = ({
   responses,
   setResponses,
   onSelectQuickResponse,
 }) => {
+
+  // const safeResponses = Array.isArray(responses) ? responses : [];
+  // console.log("safeResponses", safeResponses);
+
+
+const normalizedResponses = responses.map(r => ({
+  id: r.id,
+  content: r.response_text,     // map text
+  type: r.response_type,        // 🔥 THIS FIXES DROPDOWN
+  preview: false,
+  priority: r.priority,
+  quickReplies: [],
+}));
+
+setResponses(normalizedResponses);
 
   /* ---------- HELPERS ---------- */
   const normalizePriority = (list) =>
@@ -46,6 +63,7 @@ const ResponsesTab = ({
       ])
     );
   };
+  
 
   const deleteResponse = (id) => {
     setResponses(prev =>

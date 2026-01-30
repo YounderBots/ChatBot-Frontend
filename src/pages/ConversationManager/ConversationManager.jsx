@@ -21,6 +21,7 @@ const ConversationManager = () => {
 
 
 
+
   const totalPages = 10
 
   const conversations = [
@@ -70,18 +71,14 @@ const ConversationManager = () => {
       user: "Smith",
       avatar: "S",
       firstMessage: "Payment not reflecting",
-
       startDate: "2026-01-13",
       endDate: "2026-01-13",
       lastTimestamp: "2026-01-13 18:20",
-
       intent: "Payment",
       confidence: 90,
       sentiment: "Neutral",
-
       unread: false,
       status: "Resolved",
-
       messages: [
         {
           type: "user",
@@ -660,7 +657,6 @@ const ConversationManager = () => {
                     <div className="d-flex gap-2 flex-wrap">
                       <div style={{ minWidth: "140px" }}>
                         <Select
-
                           placeholder="Export"
                           value={Value}
                           options={[
