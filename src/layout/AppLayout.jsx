@@ -223,7 +223,7 @@ const BigScreenSideBar = ({ isExpanded, setIsExpanded, activeMenu, setActiveMenu
         />
       </div>
 
-      {isExpanded && <div>Footer Space</div>}
+      {isExpanded && <div></div>}
     </div>
   );
 };
@@ -232,7 +232,7 @@ const BigScreenSideBar = ({ isExpanded, setIsExpanded, activeMenu, setActiveMenu
 const ContentArea = () => <Outlet />;
 
 /* -------------------- Footer -------------------- */
-const FooterNote = () => <>Footer Content</>;
+const FooterNote = () => <></>;
 
 /* -------------------- App Layout -------------------- */
 const AppLayout = () => {

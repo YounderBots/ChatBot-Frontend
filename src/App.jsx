@@ -2,7 +2,7 @@ import './App.css'
 import AppLayout from './layout/AppLayout'
 
 
-import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
+import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom'
 import Login from './BasePages/Login'
 import Analytics from './pages/Analytics/Analytics'
 import ConversationManager from './pages/ConversationManager/ConversationManager'
@@ -18,9 +18,10 @@ import UserMgmt from './pages/UserManagement/UserMgmt'
 
 const App = () => {
   return (
-    <Router>
+    <Router basename='/admin'>
       {/* <ChatbotWidget /> */}
       <Routes>
+        <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
         <Route element={<AppLayout />}>
           <Route path="/Dashboard" element={<Dashboard />} />
