@@ -1,7 +1,8 @@
 import { Search, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Card, Col, Form, InputGroup, Modal, Row } from "react-bootstrap";
 import Select from "react-select";
+import APICall from "../../APICalls/APICall";
 
 const ConversationManager = () => {
   const [startDate, setStartDate] = useState("");
@@ -15,180 +16,102 @@ const ConversationManager = () => {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [showConfidenceModal, setShowConfidenceModal] = useState(false);
-  // const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(7);
   const [selectedConversation, setSelectedConversation] = useState(null);
+  const [conversations, setConversations] = useState([]);
+  const [filteredConversations, setFilteredConversations] = useState(conversations);
   const [Value, setValue] = useState(null);
 
 
+  useEffect(() => {
+    fetchConversations();
+  }, []);
+
+  const fetchConversations = async () => {
+    try {
+
+      const data = await APICall.getT('/conversation/conversations')
+      // const data = await res.json();
+      console.log(data);
 
 
-  const totalPages = 10
+      const normalized = data.map(mapSessionToConversation);
+      setConversations(normalized);
+      setFilteredConversations(normalized);
+    } catch (err) {
+      console.error("Failed to fetch conversations", err);
+    } finally {
+    }
+  };
 
-  const conversations = [
-    {
-      id: "sess1",
-      user: "Johnson",
-      avatar: "J",
-      firstMessage: "Hi, I need help with my order",
+  const mapSessionToConversation = (session) => {
+    const msgs = session.conversations || [];
 
-      startDate: "2026-01-14",
-      endDate: "2026-01-14",
-      lastTimestamp: "2026-01-14 10:35",
+    const firstUserMsg =
+      msgs.find(m => m.sender === "user")?.message_text ||
+      msgs[0]?.message_text ||
+      "";
 
-      intent: "Order",
-      confidence: 82,
-      sentiment: "Positive",
+    const lastMsg = msgs[msgs.length - 1];
 
-      unread: true,
-      status: "Pending",
+    const lastBotWithIntent = [...msgs]
+      .reverse()
+      .find(m => m.intent_detected);
 
-      messages: [
-        {
-          type: "user",
-          text: "Hi, I need help with my order",
-          timestamp: "10:01",
-          intent: "Order Status",
-          confidence: 82,
-          sentiment: "Positive",
-          entities: ["OrderID"],
-        },
-        { type: "bot", text: "Sure! Can you provide your order ID?", timestamp: "10:02" },
-        {
-          type: "user",
-          text: "Order12345",
-          timestamp: "10:03",
-          intent: "Order Status",
-          confidence: 95,
-          sentiment: "Positive",
-          entities: [],
-        },
-        { type: "agent", text: "Checking your order details...", timestamp: "10:05" },
-      ],
-    },
+    return {
+      id: session.session_key,
+      user: session.user_name || "Anonymous",
+      avatar: (session.user_name?.[0] || "U").toUpperCase(),
 
-    {
-      id: "sess2",
-      user: "Smith",
-      avatar: "S",
-      firstMessage: "Payment not reflecting",
-      startDate: "2026-01-13",
-      endDate: "2026-01-13",
-      lastTimestamp: "2026-01-13 18:20",
-      intent: "Payment",
-      confidence: 90,
-      sentiment: "Neutral",
-      unread: false,
-      status: "Resolved",
-      messages: [
-        {
-          type: "user",
-          text: "Payment not reflecting",
-          timestamp: "09:45",
-          intent: "Payment Issue",
-          confidence: 90,
-          sentiment: "Neutral",
-          entities: [],
-        },
-        { type: "bot", text: "Please provide transaction ID", timestamp: "09:46" },
-      ],
-    },
+      firstMessage: firstUserMsg,
 
-    {
-      id: "sess3",
-      user: "Caroline",
-      avatar: "C",
-      firstMessage: "I was charged twice",
+      startDate: session.started_at?.split("T")[0],
+      endDate: session.ended_at?.split("T")[0] || null,
 
-      startDate: "2026-01-12",
-      endDate: "2026-01-12",
-      lastTimestamp: "2026-01-12 14:10",
+      lastTimestamp: lastMsg
+        ? new Date(lastMsg.created_at).toLocaleString()
+        : "",
 
-      intent: "Complaint",
-      confidence: 65,
-      sentiment: "Negative",
+      intent: lastBotWithIntent?.intent_detected || "Unknown",
+      confidence: lastBotWithIntent?.confidence_score
+        ? Math.round(lastBotWithIntent.confidence_score * 100)
+        : 0,
+
+      sentiment: lastBotWithIntent?.sentiment || "Neutral",
 
       unread: true,
-      status: "Escalated",
+      status: session.status === "ACTIVE" ? "Pending" : session.status,
 
-      messages: [
-        {
-          type: "user",
-          text: "I was charged twice for my order",
-          timestamp: "14:01",
-          intent: "Billing Issue",
-          confidence: 65,
-          sentiment: "Negative",
-          entities: ["Amount"],
-        },
-        { type: "bot", text: "Sorry for the inconvenience. Let me check.", timestamp: "14:02" },
-        { type: "agent", text: "Escalating this issue to billing team.", timestamp: "14:05" },
-      ],
-    },
+      messages: msgs.map(m => ({
+        type:
+          m.sender === "user"
+            ? "user"
+            : m.sender === "bot"
+              ? "bot"
+              : "agent",
 
-    {
-      id: "sess4",
-      user: "Lee",
-      avatar: "L",
-      firstMessage: "App is crashing on login",
+        text: m.message_text,
+        timestamp: new Date(m.created_at).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit"
+        }),
 
-      startDate: "2026-01-11",
-      endDate: "2026-01-11",
-      lastTimestamp: "2026-01-11 11:50",
+        intent: m.intent_detected,
+        confidence: m.confidence_score
+          ? Math.round(m.confidence_score * 100)
+          : null,
 
-      intent: "Greeting",
-      confidence: 72,
-      sentiment: "Negative",
+        sentiment: m.sentiment,
+        entities: []
+      }))
+    };
+  };
 
-      unread: false,
-      status: "Failed",
 
-      messages: [
-        {
-          type: "user",
-          text: "App crashes every time I login",
-          timestamp: "11:45",
-          intent: "Technical Issue",
-          confidence: 72,
-          sentiment: "Negative",
-          entities: ["Device"],
-        },
-        { type: "bot", text: "Please try clearing cache or reinstalling the app.", timestamp: "11:46" },
-      ],
-    },
 
-    {
-      id: "sess5",
-      user: "Brown",
-      avatar: "B",
-      firstMessage: "Thanks, issue resolved",
+  const totalPages = Math.ceil(filteredConversations.length / itemsPerPage);
 
-      startDate: "2026-01-10",
-      endDate: "2026-01-10",
-      lastTimestamp: "2026-01-10 16:30",
 
-      intent: "Order",
-      confidence: 88,
-      sentiment: "Positive",
-
-      unread: false,
-      status: "Resolved",
-
-      messages: [
-        {
-          type: "user",
-          text: "Thanks, my issue is resolved now",
-          timestamp: "16:25",
-          intent: "General Inquiry",
-          confidence: 88,
-          sentiment: "Positive",
-          entities: [],
-        },
-        { type: "agent", text: "Glad to hear that!", timestamp: "16:26" },
-      ],
-    },
-  ];
-
-  const [filteredConversations, setFilteredConversations] = useState(conversations);
   const handleApplyFilters = () => {
 
     let filtered = [...conversations];
@@ -233,6 +156,7 @@ const ConversationManager = () => {
     );
 
     setFilteredConversations(filtered);
+    setCurrentPage(1);
     console.log(filtered);
   };
 
@@ -246,6 +170,7 @@ const ConversationManager = () => {
     setStatusFilter([]);
     setSentiment("All");
     setSearch("");
+    setCurrentPage(1);
   };
 
   const handlePageChange = (page) => {
@@ -339,6 +264,30 @@ const ConversationManager = () => {
 
   };
 
+  const paginatedConversations = filteredConversations.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const formatChatText = (text) => {
+    if (!text) return "";
+
+    return text
+      // Bold **text**
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+      // New line AFTER colon :
+      .replace(/:\s*/g, ":")
+
+      // New line BEFORE emojis / icons
+      .replace(
+        /(\p{Extended_Pictographic})/gu,
+        "<br />$1"
+      )
+      .replace(
+        /\u2022/gu,
+        "<br /> &bull;"
+      );
+  };
 
   return (
 
@@ -509,7 +458,7 @@ const ConversationManager = () => {
           <div className="d-flex flex-column flex-lg-row gap-2 w-100 mt-3">
             <Col xs={12} lg={4} className="bg-light border rounded mt-3 " style={{ overflowY: "auto" }}>
               <div className="">
-                {filteredConversations
+                {paginatedConversations
                   .filter(conv =>
                     conv.user.toLowerCase().includes(search.toLowerCase()) ||
                     conv.id.toLowerCase().includes(search.toLowerCase()) ||
@@ -594,9 +543,7 @@ const ConversationManager = () => {
                   ))}
               </div>
 
-              <div className="sticky-bottom bg-light"
-
-              >
+              <div className="sticky-bottom bg-light">
 
                 {totalPages > 1 && (
                   <div className="pagination-bar p-3">
@@ -714,7 +661,12 @@ const ConversationManager = () => {
                             maxWidth: "85%",
                           }}
                         >
-                          <p className="mb-1">{msg.text}</p>
+                          <p
+                            className="mb-1 chat-text"
+                            dangerouslySetInnerHTML={{
+                              __html: formatChatText(msg.text),
+                            }}
+                          />
 
                           {msg.type === "user" && (
                             <small className="d-block text-light">
