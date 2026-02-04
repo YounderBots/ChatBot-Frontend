@@ -16,7 +16,7 @@ const ConversationManager = () => {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [showConfidenceModal, setShowConfidenceModal] = useState(false);
-  const [itemsPerPage, setItemsPerPage] = useState(7);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [conversations, setConversations] = useState([]);
   const [filteredConversations, setFilteredConversations] = useState(conversations);
