@@ -32,7 +32,6 @@ const ConversationManager = () => {
 
       const data = await APICall.getT('/conversation/conversations')
       // const data = await res.json();
-      console.log(data);
 
 
       const normalized = data.map(mapSessionToConversation);
