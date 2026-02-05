@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Button, Card, Col, Form, InputGroup, Modal, Row } from "react-bootstrap";
 import Select from "react-select";
 import APICall from "../../APICalls/APICall";
+import "./Conversation.css";
 
 const ConversationManager = () => {
   const [startDate, setStartDate] = useState("");
@@ -32,6 +33,8 @@ const ConversationManager = () => {
 
       const data = await APICall.getT('/conversation/conversations')
       // const data = await res.json();
+      console.log(data);
+
 
 
       const normalized = data.map(mapSessionToConversation);
@@ -268,24 +271,55 @@ const ConversationManager = () => {
     currentPage * itemsPerPage
   );
 
+  // const formatChatText = (text) => {
+  //   if (!text) return "";
+
+  //   return text
+  //     // Bold **text**
+  //     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+  //     // New line AFTER colon :
+  //     .replace(/:\s*/g, ":")
+
+  //     // New line BEFORE emojis / icons
+  //     .replace(
+  //       /(\p{Extended_Pictographic})/gu,
+  //       "<br />$1"
+  //     )
+  //     .replace(
+  //       /\u2022/gu,
+  //       "<br /> &bull;"
+  //     );
+  // };
+
+
   const formatChatText = (text) => {
     if (!text) return "";
 
     return text
+      // Escape HTML for safety
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+
       // Bold **text**
       .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-      // New line AFTER colon :
-      .replace(/:\s*/g, ":")
 
-      // New line BEFORE emojis / icons
+      // Headings (**Title:**)
       .replace(
-        /(\p{Extended_Pictographic})/gu,
-        "<br />$1"
+        /^<strong>(.+?):<\/strong>$/gm,
+        "<div class='chat-heading'>$1:</div>"
       )
+
+      // Normalize bullets: ? or • → bullet row
       .replace(
-        /\u2022/gu,
-        "<br /> &bull;"
-      );
+        /^[?•]\s*(.+)$/gm,
+        "<div class='chat-bullet'>• $1</div>"
+      )
+
+      // Paragraph spacing (double newline)
+      .replace(/\n{2,}/g, "<div class='chat-gap'></div>")
+
+      // Single newline
+      .replace(/\n/g, "<br />");
   };
 
   return (
@@ -660,7 +694,7 @@ const ConversationManager = () => {
                             maxWidth: "85%",
                           }}
                         >
-                          <p
+                          <div
                             className="mb-1 chat-text"
                             dangerouslySetInnerHTML={{
                               __html: formatChatText(msg.text),
