@@ -1,4 +1,4 @@
-import { Search, X } from "lucide-react";
+import { RefreshCcwIcon, Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button, Card, Col, Form, InputGroup, Modal, Row } from "react-bootstrap";
 import Select from "react-select";
@@ -45,6 +45,13 @@ const ConversationManager = () => {
     } finally {
     }
   };
+
+  const refreshConversations = async () => {
+    fetchConversations();
+    console.log(selectedConversation);
+
+    setSelectedConversation(null);
+  }
 
   const mapSessionToConversation = (session) => {
     const msgs = session.conversations || [];
@@ -248,23 +255,33 @@ const ConversationManager = () => {
         exportJSON();
         break;
 
-      case "flag":
-        flagConversation();
-        break;
-
-      case "delete":
-        deleteConversation();
-        break;
-
-      case "escalate":
-        escalateConversation();
-        break;
-
       default:
         break;
     }
 
   };
+
+  const handleEscalate = async (row) => {
+    if (!window.confirm("Escalate this conversation to a human agent?")) return;
+
+    try {
+      await APICall.postWT("/conversation/escalation", {
+        session_id: row.sessionId,          // 🔴 required
+        conversation_id: row.convoId,       // 🔴 required
+        priority: "HIGH",
+        reason: "Manual escalation from dashboard",
+      });
+
+      alert("Escalated successfully");
+
+      // Refresh table
+      fetchEscalations();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to escalate");
+    }
+  };
+
 
   const paginatedConversations = filteredConversations.slice(
     (currentPage - 1) * itemsPerPage,
@@ -485,6 +502,14 @@ const ConversationManager = () => {
               <Button variant="p-1" style={{ width: "100px", height: "40px", backgroundColor: "#cbd5e1" }} className="" onClick={resetFilters}>
                 Reset
               </Button>
+              <Button
+                className="p-1 gap-2"
+                style={{ width: "150px", height: "40px" }}
+                onClick={refreshConversations}
+              >
+                Refresh <RefreshCcwIcon size={16} />
+              </Button>
+
             </div>
           </Col>
 
@@ -651,19 +676,22 @@ const ConversationManager = () => {
                       </div>
 
                       <div style={{ minWidth: "140px" }}>
-                        <Select
-                          placeholder="Actions"
-                          value={Value}
-                          options={[
-                            { value: "flag", label: "Flag" },
-                            { value: "delete", label: "Delete" },
-                            { value: "escalate", label: "Escalate" },
-                          ]}
-                          onChange={(selected) => {
-                            handleAction(selected);
-                            setValue(null);
-                          }}
-                        />
+                        <Button
+                          size="sm"
+                          variant="warning"
+                          className="d-flex align-items-center justify-content-center gap-2"
+                          disabled={
+                            selectedConversation.status === "PENDING" ||
+                            selectedConversation.status === "ESCALATED"
+                          }
+                          onClick={async () => {
+                            if (!window.confirm("Escalate this conversation to a human agent?")) return;
+                            {
+                              await handleEscalate(selectedConversation);
+                            }
+                          }}>
+                          Escalate
+                        </Button>
                       </div>
                     </div>
                   </div>

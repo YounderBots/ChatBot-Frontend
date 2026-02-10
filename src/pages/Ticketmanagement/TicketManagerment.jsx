@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { Card, Table, Button, Modal, Form, Row, Col } from "react-bootstrap";
 import { Edit2, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Button, Card, Col, Form, Modal, Row, Table } from "react-bootstrap";
+import APICall from "../../APICalls/APICall";
 import NormalLayout from "../../components/NormalLayout";
 
 const INITIAL_TICKETS = [
@@ -39,7 +40,8 @@ const AGENTS = [
 ];
 
 const TicketManagementContent = () => {
-    const [tickets, setTickets] = useState(INITIAL_TICKETS);
+    const [tickets, setTickets] = useState([]);
+    const [agents, setAgents] = useState([]);
     const [editingTicket, setEditingTicket] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [filters, setFilters] = useState({
@@ -54,23 +56,50 @@ const TicketManagementContent = () => {
         setShowModal(true);
     };
 
-    const saveTicket = () => {
-        setTickets((prev) =>
-            prev.map((t) =>
-                t.ticketId === editingTicket.ticketId ? editingTicket : t
-            )
-        );
-        setShowModal(false);
+    const saveTicket = async () => {
+        try {
+            await APICall.postT(
+                `/conversation/update_escalation/${editingTicket.escalationId}`,
+                {
+                    assigned_to: editingTicket.assignedTo,
+                    priority: editingTicket.priority || "MEDIUM",
+                    conversation_id: editingTicket.convoId,
+                    reason: editingTicket.reason,
+                }
+            );
+
+            setShowModal(false);
+            setEditingTicket(null);
+
+            fetchEscalations();
+        } catch (err) {
+            alert("Failed to update escalation");
+            console.error(err);
+        }
     };
 
-    const deleteTicket = (id) => {
+
+    const deleteTicket = async (escalationId) => {
         if (!window.confirm("Delete this ticket?")) return;
-        setTickets((prev) => prev.filter((t) => t.ticketId !== id));
+
+        try {
+            await APICall.postT(
+                `/conversation/delete_escalation/${escalationId}`
+            );
+
+            fetchEscalations();
+        } catch (err) {
+            alert("Failed to delete escalation");
+            console.error(err);
+        }
     };
+
 
     const filteredTickets = tickets.filter((t) => {
+        const ticketId = String(t.ticketId || "");
+
         const matchTicket =
-            t.ticketId.toLowerCase().includes(filters.ticketId.toLowerCase());
+            ticketId.toLowerCase().includes(filters.ticketId.toLowerCase());
 
         const matchStatus =
             !filters.status || t.status === filters.status;
@@ -85,6 +114,51 @@ const TicketManagementContent = () => {
 
         return matchTicket && matchStatus && matchDate;
     });
+
+    const mapEscalationsToTickets = (data) =>
+        data.map((e) => ({
+            escalationId: e.id,
+            ticketId: String(e.ticket_id && e.ticket_id !== 0
+                ? `TKT-${e.ticket_id}`
+                : `ESC-${e.id}`),
+
+            convoId: String(e.conversation_id),
+            reason: e.reason || "",
+            assignedToName: e.assigned_to_name || "Unassigned",
+            assignedTo: e.assigned_to || "Unassigned",
+            status: e.status === "PENDING" ? "Open" : e.status,
+            date: new Date(e.created_at).toISOString().split("T")[0],
+        }));
+
+
+    const fetchEscalations = async () => {
+        try {
+            const res = await APICall.getT("/conversation/escalation");
+            setTickets(mapEscalationsToTickets(res || []));
+        } catch (err) {
+            alert(err.message);
+        }
+    };
+
+    const fetchAgents = async () => {
+        try {
+            const res = await APICall.getT("/hrms/users");
+            console.log(res);
+
+            setAgents(res || []);
+        } catch (err) {
+            console.error("Failed to fetch agents", err);
+            alert("Unable to load agents");
+        }
+    };
+
+
+
+    useEffect(() => {
+        fetchAgents()
+        fetchEscalations()
+    }, [])
+
 
 
     return (
@@ -159,7 +233,7 @@ const TicketManagementContent = () => {
                                 <td><strong>{t.ticketId}</strong></td>
                                 <td>{t.convoId}</td>
                                 <td>{t.reason}</td>
-                                <td>{t.assignedTo}</td>
+                                <td>{t.assignedToName}</td>
                                 <td>{t.status}</td>
                                 <td>{t.date}</td>
                                 <td className="text-center">
@@ -172,7 +246,7 @@ const TicketManagementContent = () => {
                                         <Trash2
                                             size={16}
                                             className="cursorPointer text-danger"
-                                            onClick={() => deleteTicket(t.ticketId)}
+                                            onClick={() => deleteTicket(t.escalationId)}
                                         />
                                     </div>
                                 </td>
@@ -200,12 +274,12 @@ const TicketManagementContent = () => {
                                         ...editingTicket,
                                         assignedTo: e.target.value,
                                     })
-                                }
-                            >
+                                }>
                                 <option value="">Select agent</option>
-                                {AGENTS.map((agent) => (
-                                    <option key={agent} value={agent}>
-                                        {agent}
+
+                                {agents.map((agent) => (
+                                    <option key={agent.id} value={agent.id}>
+                                        {agent.fullname}
                                     </option>
                                 ))}
                             </Form.Select>
