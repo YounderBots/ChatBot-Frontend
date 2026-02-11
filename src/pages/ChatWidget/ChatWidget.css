@@ -51,6 +51,7 @@
     /* width: 380px; */
     height: 100%;
     max-height: 69vh;
+    min-height: 20vh;
     /* bottom: 10px; */
     /* right: -50px; */
     position: absolute;
