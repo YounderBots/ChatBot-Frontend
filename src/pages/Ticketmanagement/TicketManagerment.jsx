@@ -1,55 +1,29 @@
-import { Edit2, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Edit2, LucideBotMessageSquare, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { Button, Card, Col, Form, Modal, Row, Table } from "react-bootstrap";
 import APICall from "../../APICalls/APICall";
 import NormalLayout from "../../components/NormalLayout";
-
-const INITIAL_TICKETS = [
-    {
-        ticketId: "TCK-1001",
-        convoId: "CONV-9001",
-        reason: "User requested human agent",
-        assignedTo: "John Doe",
-        status: "Open",
-        date: "2024-01-10",
-    },
-    {
-        ticketId: "TCK-1002",
-        convoId: "CONV-9005",
-        reason: "Payment issue",
-        assignedTo: "Sarah Smith",
-        status: "In Progress",
-        date: "2024-01-11",
-    },
-    {
-        ticketId: "TCK-1003",
-        convoId: "CONV-9010",
-        reason: "Bot not responding",
-        assignedTo: "Alex Brown",
-        status: "Closed",
-        date: "2024-01-12",
-    },
-];
-
-const AGENTS = [
-    "John Doe",
-    "Sarah Smith",
-    "Alex Brown",
-    "Emily Johnson",
-    "Michael Lee",
-];
+import ChatWidget from "../ChatWidget/ChatWidget";
 
 const TicketManagementContent = () => {
     const [tickets, setTickets] = useState([]);
     const [agents, setAgents] = useState([]);
     const [editingTicket, setEditingTicket] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [activeSessionId, setActiveSessionId] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
     const [filters, setFilters] = useState({
         ticketId: "",
         status: "",
         fromDate: "",
         toDate: "",
     });
+
+    const PAGE_WINDOW = 3;
+    const itemsPerPage = 10;
+
+
+    const user = JSON.parse(localStorage.getItem("user"));
 
     const openEdit = (ticket) => {
         setEditingTicket({ ...ticket });
@@ -123,6 +97,7 @@ const TicketManagementContent = () => {
                 : `ESC-${e.id}`),
 
             convoId: String(e.conversation_id),
+            sessionId: String(e.session_id),
             reason: e.reason || "",
             assignedToName: e.assigned_to_name || "Unassigned",
             assignedTo: e.assigned_to || "Unassigned",
@@ -135,6 +110,7 @@ const TicketManagementContent = () => {
         try {
             const res = await APICall.getT("/conversation/escalation");
             setTickets(mapEscalationsToTickets(res || []));
+            console.log("res", res);
         } catch (err) {
             alert(err.message);
         }
@@ -151,6 +127,42 @@ const TicketManagementContent = () => {
             alert("Unable to load agents");
         }
     };
+    const totalPages = Math.max(
+        1,
+        Math.ceil(filteredTickets.length / itemsPerPage)
+    );
+
+    const paginatedTickets = useMemo(() => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        return filteredTickets.slice(
+            startIndex,
+            startIndex + itemsPerPage
+        );
+    }, [filteredTickets, currentPage]);
+
+    const handlePageChange = (page) => {
+        if (page >= 1 && page <= totalPages) {
+            setCurrentPage(page);
+        }
+    };
+
+
+    const getPageNumbers = () => {
+        const half = Math.floor(PAGE_WINDOW / 2);
+
+        let start = Math.max(1, currentPage - half);
+        let end = start + PAGE_WINDOW - 1;
+
+        if (end > totalPages) {
+            end = totalPages;
+            start = Math.max(1, end - PAGE_WINDOW + 1);
+        }
+
+        return Array.from(
+            { length: end - start + 1 },
+            (_, i) => start + i
+        );
+    };
 
 
 
@@ -158,6 +170,11 @@ const TicketManagementContent = () => {
         fetchAgents()
         fetchEscalations()
     }, [])
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filters, tickets.length]);
+
 
 
 
@@ -214,51 +231,115 @@ const TicketManagementContent = () => {
             </Card>
 
             <Card className="shadow-sm border-0 mt-2">
-                <Table hover responsive className="mb-0 align-middle">
-                    <thead className="table-light">
-                        <tr>
-                            <th>Ticket ID</th>
-                            <th>Conversation ID</th>
-                            <th>Reason</th>
-                            <th>Assigned To</th>
-                            <th>Status</th>
-                            <th>Date</th>
-                            <th className="text-center">Actions</th>
-                        </tr>
-                    </thead>
+                <Row className="g-3">
+                    <Col xs={12} md={6} lg={9} >
+                        <Table hover responsive className="mb-0 align-middle">
+                            <thead className="table-light">
+                                <tr>
+                                    <th>Ticket ID</th>
+                                    <th>Conversation ID</th>
+                                    <th>Reason</th>
+                                    <th>Assigned To</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th className="text-center">Actions</th>
+                                </tr>
+                            </thead>
 
-                    <tbody>
-                        {filteredTickets.map((t) => (
-                            <tr key={t.ticketId}>
-                                <td><strong>{t.ticketId}</strong></td>
-                                <td>{t.convoId}</td>
-                                <td>{t.reason}</td>
-                                <td>{t.assignedToName}</td>
-                                <td>{t.status}</td>
-                                <td>{t.date}</td>
-                                <td className="text-center">
-                                    <div className="d-flex justify-content-center gap-3">
-                                        <Edit2
-                                            size={16}
-                                            className="cursorPointer"
-                                            onClick={() => openEdit(t)}
-                                        />
-                                        <Trash2
-                                            size={16}
-                                            className="cursorPointer text-danger"
-                                            onClick={() => deleteTicket(t.escalationId)}
-                                        />
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
+                            <tbody>
+                                {paginatedTickets.map((t) => (
+                                    <tr key={t.escalationId}>
+                                        <td><strong>{t.ticketId}</strong></td>
+                                        <td>{t.convoId}</td>
+                                        <td>{t.reason}</td>
+                                        <td>{t.assignedToName}</td>
+                                        <td>{t.status}</td>
+                                        <td>{t.date}</td>
+                                        <td className="text-center">
+                                            <div className="d-flex justify-content-center gap-3">
+                                                <LucideBotMessageSquare
+                                                    size={16}
+                                                    className="cursorPointer"
+                                                    onClick={() => setActiveSessionId(t.sessionId)}
+                                                />
 
-                </Table>
-            </Card>
+                                                <Edit2
+                                                    size={16}
+                                                    className="cursorPointer"
+                                                    onClick={() => openEdit(t)}
+                                                />
+                                                <Trash2
+                                                    size={16}
+                                                    className="cursorPointer text-danger"
+                                                    onClick={() => deleteTicket(t.escalationId)}
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+
+                        </Table>
+                        {totalPages > 1 && (
+                            <div className="d-flex justify-content-between align-items-center px-3 py-2 border-top">
+                                <small className="text-muted">
+                                    Page {currentPage} of {totalPages}
+                                </small>
+
+                                <nav className="custom-pagination">
+                                    <ul className="pagination pagination-sm mb-0 align-items-center">
+                                        <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                            <button
+                                                className="page-link pill prev"
+                                                onClick={() => handlePageChange(currentPage - 1)}
+                                            >
+                                                Prev
+                                            </button>
+                                        </li>
+
+                                        {getPageNumbers().map(page => (
+                                            <li
+                                                key={page}
+                                                className={`page-item ${currentPage === page ? 'active' : ''}`}
+                                            >
+                                                <button
+                                                    className="page-link pill"
+                                                    onClick={() => handlePageChange(page)}
+                                                >
+                                                    {page}
+                                                </button>
+                                            </li>
+                                        ))}
+
+                                        <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                                            <button
+                                                className="page-link pill next"
+                                                onClick={() => handlePageChange(currentPage + 1)}
+                                            >
+                                                Next
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        )}
+                    </Col>
+                    <Col xs={12} md={6} lg={3} className="chat-col">
+                        {/* SINGLE AGENT CHAT WIDGET */}
+                        {/* {activeSessionId && ( */}
+                        <ChatWidget
+                            agentId={user.id}
+                            sessionId={activeSessionId}
+                            title={`Session ${activeSessionId}`}
+                            setActiveSessionId={setActiveSessionId}
+                        />
+                        {/* )} */}
+                    </Col>
+                </Row>
+            </Card >
 
             {/* EDIT MODAL */}
-            <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+            < Modal show={showModal} onHide={() => setShowModal(false)} centered >
                 <Modal.Header closeButton>
                     <Modal.Title>Edit Ticket</Modal.Title>
                 </Modal.Header>
@@ -327,7 +408,9 @@ const TicketManagementContent = () => {
                         Save Changes
                     </Button>
                 </Modal.Footer>
-            </Modal>
+            </Modal >
+
+
         </>
     );
 };
