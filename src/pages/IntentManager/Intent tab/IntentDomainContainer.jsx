@@ -1,96 +1,107 @@
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Edit2, Trash2 } from "lucide-react";
+import { Brain, Edit2, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { Form, ProgressBar } from "react-bootstrap";
 import APICall from "../../../APICalls/APICall";
 
 
 /* ================= COMPONENT ================= */
 
-const IntentTypeContainer = () => {
-  const [intentTypes, setIntentTypes] = useState([])
-  const [activeIntentTypes, setActiveIntentTypes] = useState(null)
+const IntentDomainContainer = () => {
+  const [intentDomain, setIntentDomain] = useState([])
+  const [activeIntentDomain, setActiveIntentDomain] = useState(null)
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [intentTypesToDelete, setIntentTypesToDelete] = useState(null)
+  const [intentDomainToDelete, setIntentDomainToDelete] = useState(null)
 
   const [loading, setLoading] = useState(true)
 
   /* ================= API LAYER ================= */
 
-  const IntentTypesAPI = {
+  const IntentDomainAPI = {
     fetchAll: async () => {
-      const res = await APICall.getT("/intents/intent_types")
+      const res = await APICall.getT("/intents/intent_domain")
       return res || []
     },
 
     create: async payload => {
-      const res = await APICall.postT("/intents/intent_type", payload)
+      const res = await APICall.postT("/intents/intent_domain", payload)
       return res
     },
 
     update: async payload => {
       const res = await APICall.postT(
-        `/intents/update_intent_types/${payload.id}`,
+        `/intents/update_intent_domain/${payload.id}`,
         payload
       )
       return res
     },
 
     remove: async id => {
-      await APICall.postT(`/intents/delete_intent_types/${id}`)
+      await APICall.postT(`/intents/delete_intent_domain/${id}`)
       return true
+    },
+    train: async id => {
+      return await APICall.postT(`/nlp/train/${id}`)
     }
   }
 
   /* ================= FETCH ================= */
 
-  const loadIntentTypes = useCallback(async () => {
+  const loadIntentDomain = useCallback(async () => {
     try {
       setLoading(true)
-      const data = await IntentTypesAPI.fetchAll()
-      // console.log("API DATA:", data)
-      setIntentTypes(Array.isArray(data) ? data : [])
+      const data = await IntentDomainAPI.fetchAll()
+      setIntentDomain(Array.isArray(data) ? data : [])
     } catch (err) {
-      console.error("Failed to load intent Types", err)
-      setIntentTypes([])
+      console.error("Failed to load intent Domains", err)
+      setIntentDomain([])
     } finally {
       setLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    loadIntentTypes()
-  }, [loadIntentTypes])
+    loadIntentDomain()
+  }, [loadIntentDomain])
 
   /* ================= ADD / EDIT ================= */
 
   const handleAdd = () => {
-    setActiveIntentTypes({ name: "", description: "" })
+    setActiveIntentDomain({
+      name: "",
+      description: "",
+      rasa_endpoint: "",
+      rasa_port: "",
+      auto_reload_enabled: true,
+      confidence_threshold: 60
+    })
     setIsModalOpen(true)
   }
 
-  const handleEdit = intent_types => {
-    setActiveIntentTypes(intent_types)
+  const handleEdit = intent_domains => {
+
+    setActiveIntentDomain(intent_domains)
     setIsModalOpen(true)
   }
 
   const handleSave = async () => {
-    if (!activeIntentTypes?.name?.trim()) return
+    if (!activeIntentDomain?.name?.trim()) return
 
     try {
       setLoading(true)
 
-      if (activeIntentTypes.id) {
-        await IntentTypesAPI.update(activeIntentTypes)
+      if (activeIntentDomain.id) {
+        await IntentDomainAPI.update(activeIntentDomain)
       } else {
-        await IntentTypesAPI.create(activeIntentTypes)
+        await IntentDomainAPI.create(activeIntentDomain)
       }
 
-      await loadIntentTypes()
+      await loadIntentDomain()
       setIsModalOpen(false)
-      setActiveIntentTypes(null)
+      setActiveIntentDomain(null)
     } catch (err) {
       console.error("Save failed", err)
     } finally {
@@ -101,28 +112,42 @@ const IntentTypeContainer = () => {
 
   /* ================= DELETE ================= */
 
-  const handleDelete = intent_types => {
-    setIntentTypesToDelete(intent_types)
+  const handleDelete = intent_domains => {
+    setIntentDomainToDelete(intent_domains)
     setShowDeleteModal(true)
   }
 
   const confirmDelete = async () => {
-    if (!intentTypesToDelete) return
+    if (!intentDomainToDelete) return
 
     try {
       setLoading(true)
-      await IntentTypesAPI.remove(intentTypesToDelete.id)
-      setIntentTypes(prev =>
-        prev.filter(c => c.id !== intentTypesToDelete.id)
+      await IntentDomainAPI.remove(intentDomainToDelete.id)
+      setIntentDomain(prev =>
+        prev.filter(c => c.id !== intentDomainToDelete.id)
       )
     } catch (err) {
       console.error("Delete failed", err)
     } finally {
       setShowDeleteModal(false)
-      setIntentTypesToDelete(null)
+      setIntentDomainToDelete(null)
       setLoading(false)
     }
   }
+
+  const handleTrain = async domain => {
+    try {
+      setLoading(true)
+      await IntentDomainAPI.train(domain.id)
+      alert(`Training started for ${domain.name}`)
+    } catch (err) {
+      console.error("Training failed", err)
+      alert("Training failed")
+    } finally {
+      setLoading(false)
+    }
+  }
+
 
   /* ================= UI ================= */
 
@@ -130,7 +155,7 @@ const IntentTypeContainer = () => {
     <div className="p-4 h-100 d-flex flex-column gap-4">
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center">
-        <h1 className="fw-bold mb-0">Intent Types</h1>
+        <h1 className="fw-bold mb-0">Domains</h1>
 
         <button
           className="btn btn-primary"
@@ -138,7 +163,7 @@ const IntentTypeContainer = () => {
           disabled={loading}
         >
           <i className="bi bi-plus-lg me-1" />
-          Add Intent Types
+          Add Domains
         </button>
       </div>
 
@@ -162,14 +187,14 @@ const IntentTypeContainer = () => {
                   Loading...
                 </td>
               </tr>
-            ) : intentTypes.length === 0 ? (
+            ) : intentDomain.length === 0 ? (
               <tr>
                 <td colSpan="5" className="text-center py-4 text-muted">
-                  No intent Types found
+                  No intent Domains found
                 </td>
               </tr>
             ) : (
-              intentTypes.map((cat, index) => (
+              intentDomain.map((cat, index) => (
                 <tr key={cat.id}>
                   <td className="fw-semibold text-muted">
                     {index + 1}
@@ -191,6 +216,12 @@ const IntentTypeContainer = () => {
 
                   <td className="text-end">
                     <div className="d-flex gap-4 justify-content-end">
+                      <Brain
+                        size={18}
+                        className="text-primary cursor-pointer"
+                        title="Train Model"
+                        onClick={() => handleTrain(cat)}
+                      />
                       <Edit2
                         size={16}
                         className="cursor-pointer"
@@ -219,9 +250,9 @@ const IntentTypeContainer = () => {
               <div className="modal-content rounded-4 shadow-lg">
                 <div className="modal-header border-0">
                   <h5 className="fw-semibold">
-                    {activeIntentTypes?.id
-                      ? "Edit Intent Types"
-                      : "Add Intent Types"}
+                    {activeIntentDomain?.id
+                      ? "Edit Intent Domains"
+                      : "Add Intent Domains"}
                   </h5>
                   <button
                     className="btn-close"
@@ -233,9 +264,9 @@ const IntentTypeContainer = () => {
                   <input
                     className="form-control mb-3"
                     placeholder="Name"
-                    value={activeIntentTypes?.name || ""}
+                    value={activeIntentDomain?.name || ""}
                     onChange={e =>
-                      setActiveIntentTypes(prev => ({
+                      setActiveIntentDomain(prev => ({
                         ...prev,
                         name: e.target.value
                       }))
@@ -243,17 +274,88 @@ const IntentTypeContainer = () => {
                   />
 
                   <textarea
-                    className="form-control"
+                    className="form-control mb-3"
                     rows={3}
                     placeholder="Description"
-                    value={activeIntentTypes?.description || ""}
+                    value={activeIntentDomain?.description || ""}
                     onChange={e =>
-                      setActiveIntentTypes(prev => ({
+                      setActiveIntentDomain(prev => ({
                         ...prev,
                         description: e.target.value
                       }))
                     }
                   />
+                  <input
+                    className="form-control mb-3"
+                    placeholder="Rasa Endpoint (http://localhost:5005)"
+                    value={activeIntentDomain?.rasa_endpoint || ""}
+                    onChange={e =>
+                      setActiveIntentDomain(prev => ({
+                        ...prev,
+                        rasa_endpoint: e.target.value
+                      }))
+                    }
+                  />
+                  <input
+                    type="number"
+                    className="form-control mb-3"
+                    placeholder="Rasa Port"
+                    value={activeIntentDomain?.rasa_port || ""}
+                    onChange={e =>
+                      setActiveIntentDomain(prev => ({
+                        ...prev,
+                        rasa_port: e.target.value
+                      }))
+                    }
+                  />
+                  <div className="form-check mb-3">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      checked={activeIntentDomain?.auto_reload_enabled || false}
+                      onChange={e =>
+                        setActiveIntentDomain(prev => ({
+                          ...prev,
+                          auto_reload_enabled: e.target.checked
+                        }))
+                      }
+                    />
+                    <label className="form-check-label">
+                      Auto Reload Model
+                    </label>
+                  </div>
+
+
+                  {/* Confidence Threshold */}
+                  <Form.Group className="mb-4">
+                    <Form.Label className="fw-semibold small text-secondary">
+                      Confidence Threshold ({activeIntentDomain?.confidence_threshold ?? 60}%)
+                    </Form.Label>
+
+                    <Form.Range
+                      min={0}
+                      max={100}
+                      value={activeIntentDomain?.confidence_threshold ?? 60}
+                      onChange={e =>
+                        setActiveIntentDomain(prev => ({
+                          ...prev,
+                          confidence_threshold: Number(e.target.value)
+                        }))
+                      }
+                    />
+
+                    <ProgressBar
+                      now={activeIntentDomain?.confidence_threshold ?? 60}
+                      variant={
+                        (activeIntentDomain?.confidence_threshold ?? 60) < 60
+                          ? "danger"
+                          : "success"
+                      }
+                    />
+                  </Form.Group>
+
+
+
                 </div>
 
                 <div className="modal-footer border-0">
@@ -286,7 +388,7 @@ const IntentTypeContainer = () => {
               <div className="modal-content rounded-4">
                 <div className="modal-body text-center">
                   <p>
-                    <strong>{intentTypesToDelete?.name}</strong>{" "}
+                    <strong>{intentDomainToDelete?.name}</strong>{" "}
                     will be deleted.
                   </p>
 
@@ -315,4 +417,4 @@ const IntentTypeContainer = () => {
   );
 };
 
-export default IntentTypeContainer;
+export default IntentDomainContainer;

@@ -3,7 +3,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import TabComponent from "../../components/TabComponent";
 import CategoryContainer from './Intent tab/CategoryContainer';
 import IntentContainer from './Intent tab/IntentContainer';
-import IntentTypeContainer from './Intent tab/IntentTypeContainer';
+import IntentDomainContainer from './Intent tab/IntentDomainContainer';
 
 
 const IntentDashboard = () => {
@@ -23,9 +23,9 @@ const IntentDashboard = () => {
         tabContent: <CategoryContainer />,
       },
       {
-        tabTitle: "Intent Types",
-        tabKey: "IntentTypes",
-        tabContent: <IntentTypeContainer />,
+        tabTitle: "Domains",
+        tabKey: "Domains",
+        tabContent: <IntentDomainContainer />,
       },
     ],
   };
