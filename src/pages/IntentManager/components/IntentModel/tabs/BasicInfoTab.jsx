@@ -5,6 +5,7 @@ const BasicInfoTab = ({ intent, onChange }) => {
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
   const [newCategory, setNewCategory] = useState("");
   const [categories, setCategories] = useState([]);
+  const [intentTypes, setIntentTypes] = useState([]);
   const [nameError, setNameError] = useState("");
 
   const isActive = intent.status !== "Inactive";
@@ -40,21 +41,38 @@ const BasicInfoTab = ({ intent, onChange }) => {
         console.error(err);
       }
     };
+    const fetchIntentTypes = async () => {
+      try {
+        const types = await APICall.getT("/intents/intent_types");
+        setIntentTypes(types || []);
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
     fetchCategories();
+    fetchIntentTypes();
   }, []);
 
   /* ---------- Category logic ---------- */
 
   const handleCategoryChange = (e) => {
     const value = e.target.value;
-    console.log("value:", value);
-    
 
     if (value === "add-new") {
       setShowAddCategoryModal(true);
     } else {
       update("category", value);
+    }
+  };
+
+  const handleIntentTypesChange = (e) => {
+    const value = e.target.value;
+
+    if (value === "add-new") {
+      setShowAddCategoryModal(true);
+    } else {
+      update("intent_type", value);
     }
   };
 
@@ -116,6 +134,23 @@ const BasicInfoTab = ({ intent, onChange }) => {
       </div>
 
       <div className="mb-3">
+        <label className="form-label fw-bold small">Intent Types</label>
+        <select
+          className="form-select"
+          value={intent.intent_type || ""}
+          onChange={handleIntentTypesChange}
+        >
+          <option value="">Select</option>
+
+          {intentTypes.map(cat => (
+            <option key={cat.id} value={cat.id}>
+              {cat.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="mb-3">
         <label className="form-label fw-bold small">Category</label>
         <select
           className="form-select"
@@ -123,7 +158,7 @@ const BasicInfoTab = ({ intent, onChange }) => {
           onChange={handleCategoryChange}
         >
           <option value="">Select</option>
-          
+
           {categories.map(cat => (
             <option key={cat.id} value={cat.id}>
               {cat.name}

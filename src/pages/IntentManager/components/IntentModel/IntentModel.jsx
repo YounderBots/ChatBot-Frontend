@@ -20,22 +20,23 @@ const IntentModal = ({ isOpen, onClose, fetchIntents, intent, onSaveAndTest, mod
   );
 
 
-const DEFAULT_INTENT = {
-  intent_name: "",
-  displayName: "",
-  description: "",
-  category: "",
-  priority: "Medium",
-  status: "ACTIVE",
-};
+  const DEFAULT_INTENT = {
+    intent_name: "",
+    displayName: "",
+    description: "",
+    intent_type: "",
+    category: "",
+    priority: "Medium",
+    status: "ACTIVE",
+  };
 
-const DEFAULT_ADVANCED = {
-  contextsRequired: [],
-  contextsSet: [],
-  fallback: "clarify",
-  threshold: 60,
-  enabled: true,
-};
+  const DEFAULT_ADVANCED = {
+    contextsRequired: [],
+    contextsSet: [],
+    fallback: "clarify",
+    threshold: 60,
+    enabled: true,
+  };
 
   const [advancedConfig, setAdvancedConfig] = useState(DEFAULT_ADVANCED);
 
@@ -44,101 +45,101 @@ const DEFAULT_ADVANCED = {
 
 
 
-const normalizeAdvanced = (intent) => {
-  return {
-    contextsRequired: intent.context_requirement || [],
-    contextsSet: intent.context_output || [],
+  const normalizeAdvanced = (intent) => {
+    return {
+      contextsRequired: intent.context_requirement || [],
+      contextsSet: intent.context_output || [],
 
-    fallback:
-      intent.fallback === "YES"
-        ? "clarify"
-        : intent.fallback === "ESCALATE"
-        ? "escalate"
-        : "generic",
+      fallback:
+        intent.fallback === "YES"
+          ? "clarify"
+          : intent.fallback === "ESCALATE"
+            ? "escalate"
+            : "generic",
 
-    threshold: Number(intent.confidence ?? 60),
+      threshold: Number(intent.confidence ?? 60),
 
-    enabled: intent.response_status === "ACTIVE",
+      enabled: intent.response_status === "ACTIVE",
+    };
   };
-};
 
-const normalizeResponses = (responses = []) => {
-  if (!Array.isArray(responses)) return [];
-  return responses.map((r, index) => ({
-    id: r.id || `${Date.now()}-${index}`,
-    content: r.response_text || "",          // ✅ editor
-    type: r.response_type || "text",          // ✅ dropdown
-    preview: false,
-    priority: r.priority || index + 1,
-    quickReplies: (r.quick_reply || []).map(qr => ({
-      id: qr.id || `${Math.random()}`,
-      text: qr.button_text || "",
-      value: qr.message_value || "",
-      actionType: qr.action_type || "POSTBACK",
-    })),
-  }));
-};
-
+  const normalizeResponses = (responses = []) => {
+    if (!Array.isArray(responses)) return [];
+    return responses.map((r, index) => ({
+      id: r.id || `${Date.now()}-${index}`,
+      content: r.response_text || "",          // ✅ editor
+      type: r.response_type || "text",          // ✅ dropdown
+      preview: false,
+      priority: r.priority || index + 1,
+      quickReplies: (r.quick_reply || []).map(qr => ({
+        id: qr.id || `${Math.random()}`,
+        text: qr.button_text || "",
+        value: qr.message_value || "",
+        actionType: qr.action_type || "POSTBACK",
+      })),
+    }));
+  };
 
 
-useEffect(() => {
-  if (intent) {
-    console.log("RAW ADVANCED FROM BACKEND 👉", {
-      context_requirement: intent.context_requirement,
-      context_output: intent.context_output,
-      confidence: intent.confidence,
-      response_status: intent.response_status,
-      responses: intent.responses
 
+  useEffect(() => {
+    if (intent) {
+      console.log("RAW ADVANCED FROM BACKEND 👉", {
+        context_requirement: intent.context_requirement,
+        context_output: intent.context_output,
+        confidence: intent.confidence,
+        response_status: intent.response_status,
+        responses: intent.responses
+
+      });
+    }
+  }, [intent]);
+
+
+  useEffect(() => {
+    if (!intent) {
+      // ADD MODE → reset everything
+      setIntentDraft(DEFAULT_INTENT);
+      setTrainingPhrases([]);
+      setResponses([]);
+      setAdvancedConfig(DEFAULT_ADVANCED);
+      return;
+    }
+
+    // EDIT MODE → populate fields
+    setIntentDraft({
+      intent_name: intent.intent_name || "",
+      displayName: intent.name || intent.displayName || "",
+      description: intent.description || "",
+      category: intent.category?.id || intent.category || "",
+      priority: intent.priority || "Medium",
+      status: intent.status || intent.response_status || "ACTIVE",
     });
-  }
-}, [intent]);
+
+    const normalizeArray = (val) => {
+      if (Array.isArray(val)) return val;
+      if (val && typeof val === "object") return Object.values(val);
+      return [];
+    };
+
+    const rawPhrases = normalizeArray(
+      intent.phrases ?? intent.trainingPhrases
+    );
+
+    setTrainingPhrases(
+      rawPhrases.map(p => ({
+        text: typeof p === "string" ? p : p.phrase || p.text || "",
+        language: p.language || "en",
+      }))
+    );
 
 
-useEffect(() => {
-  if (!intent) {
-    // ADD MODE → reset everything
-    setIntentDraft(DEFAULT_INTENT);
-    setTrainingPhrases([]);
-    setResponses([]);
-    setAdvancedConfig(DEFAULT_ADVANCED);
-    return;
-  }
-
-  // EDIT MODE → populate fields
-  setIntentDraft({
-    intent_name: intent.intent_name || "",
-    displayName: intent.name || intent.displayName || "",
-    description: intent.description || "",
-    category: intent.category?.id || intent.category || "",
-    priority: intent.priority || "Medium",
-    status: intent.status || intent.response_status || "ACTIVE",
-  });
-
-const normalizeArray = (val) => {
-  if (Array.isArray(val)) return val;
-  if (val && typeof val === "object") return Object.values(val);
-  return [];
-};
-
-const rawPhrases = normalizeArray(
-  intent.phrases ?? intent.trainingPhrases
-);
-
-setTrainingPhrases(
-  rawPhrases.map(p => ({
-    text: typeof p === "string" ? p : p.phrase || p.text || "",
-    language: p.language || "en",
-  }))
-);
-
-
-setResponses(normalizeResponses(intent.responses));
+    setResponses(normalizeResponses(intent.responses));
 
 
 
-  setAdvancedConfig(normalizeAdvanced(intent));
-}, [intent, mode]);
+    setAdvancedConfig(normalizeAdvanced(intent));
+  }, [intent, mode]);
 
 
 
@@ -192,41 +193,41 @@ setResponses(normalizeResponses(intent.responses));
 
 
 
-const handleSave = async () => {
-  const payload = buildBackendPayload();
-  console.log("SAVE PAYLOAD 👉", payload);
+  const handleSave = async () => {
+    const payload = buildBackendPayload();
+    console.log("SAVE PAYLOAD 👉", payload);
 
-  try {
-    let response;
-    
+    try {
+      let response;
 
-    if (intent?.id) {
-      // 🔄 UPDATE
-      response = await APICall.postT(
-        `/intents/intents/${intent.id}`,
-        payload
+
+      if (intent?.id) {
+        // 🔄 UPDATE
+        response = await APICall.postT(
+          `/intents/intents/${intent.id}`,
+          payload
+        );
+        console.log("API intent UPDATED ✅", response);
+      } else {
+        // ➕ CREATE
+        response = await APICall.postT(
+          "/intents/intents",
+          payload
+        );
+        console.log("API intent CREATED ✅", response);
+      }
+
+      onClose();
+      fetchIntents();
+
+    } catch (error) {
+      console.error("Save Intent Failed ", error);
+      alert(
+        error?.response?.data?.message ||
+        "Failed to save intent. Please try again."
       );
-      console.log("API intent UPDATED ✅", response);
-    } else {
-      // ➕ CREATE
-      response = await APICall.postT(
-        "/intents/intents",
-        payload
-      );
-      console.log("API intent CREATED ✅", response);
     }
-
-    onClose();
-    fetchIntents();
-
-  } catch (error) {
-    console.error("Save Intent Failed ", error);
-    alert(
-      error?.response?.data?.message ||
-      "Failed to save intent. Please try again."
-    );
-  }
-};
+  };
 
 
 
