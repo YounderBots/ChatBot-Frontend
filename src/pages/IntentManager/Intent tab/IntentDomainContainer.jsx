@@ -74,7 +74,6 @@ const IntentDomainContainer = () => {
       name: "",
       description: "",
       rasa_endpoint: "",
-      rasa_port: "",
       auto_reload_enabled: true,
       confidence_threshold: 60
     })
@@ -293,18 +292,6 @@ const IntentDomainContainer = () => {
                       setActiveIntentDomain(prev => ({
                         ...prev,
                         rasa_endpoint: e.target.value
-                      }))
-                    }
-                  />
-                  <input
-                    type="number"
-                    className="form-control mb-3"
-                    placeholder="Rasa Port"
-                    value={activeIntentDomain?.rasa_port || ""}
-                    onChange={e =>
-                      setActiveIntentDomain(prev => ({
-                        ...prev,
-                        rasa_port: e.target.value
                       }))
                     }
                   />
