@@ -201,9 +201,9 @@ const TicketManagementContent = () => {
                                 }
                             >
                                 <option value="">All</option>
-                                <option>Open</option>
-                                <option>In Progress</option>
-                                <option>Closed</option>
+                                <option>OPEN</option>
+                                <option>ASSIGNED</option>
+                                <option>CLOSED</option>
                             </Form.Select>
                         </Col>
 
