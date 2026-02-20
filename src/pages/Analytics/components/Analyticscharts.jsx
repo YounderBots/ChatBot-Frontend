@@ -147,7 +147,7 @@ const AnalyticsCharts = () => {
 
     const getColor = (value, max) => {
         const intensity = value / max;
-        return `rgba(13, 110, 253, ${0.15 + intensity * 0.85})`;
+        return `rgba(249, 115, 22, ${0.15 + intensity * 0.85})`;
     };
 
     const sortedIntentData = [...intentData]
@@ -242,7 +242,7 @@ const AnalyticsCharts = () => {
                                             iconSize={8}
                                         />
 
-                                        <Line dataKey="total" stroke="#0d6efd" strokeWidth={2} dot={false} />
+                                        <Line dataKey="total" stroke="#f97316" strokeWidth={2} dot={false} />
                                         <Line dataKey="resolved" stroke="#198754" strokeWidth={2} dot={false} />
                                         <Line dataKey="escalated" stroke="#fd7e14" strokeWidth={2} dot={false} />
                                         <Line dataKey="failed" stroke="#dc3545" strokeWidth={2} dot={false} />
@@ -329,7 +329,7 @@ const AnalyticsCharts = () => {
                                                             entry.range.startsWith("20") ||
                                                             entry.range.startsWith("40")
                                                             ? "#dc3545"
-                                                            : "#0d6efd"
+                                                            : "#f97316"
                                                     }
                                                 />
                                             ))}

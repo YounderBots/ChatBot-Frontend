@@ -48,7 +48,9 @@
 }
 
 .permissionTree .card {
-  background-color: #f8f9fa; /* light gray for distinction */
+  background-color: var(--cvq-gray-50);
+  border: 1px solid var(--cvq-gray-200);
+  border-radius: 12px;
 }
 
 .permissionTree .card strong {

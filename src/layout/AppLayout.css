@@ -15,10 +15,10 @@
 
 .offcanvas {
   z-index: 1050 !important;
-  color: rgb(2, 0, 97);
-  background-color: rgb(235, 240, 243);
-  border: none;
-
+  color: var(--cvq-black);
+  background: var(--cvq-glass-bg);
+  backdrop-filter: var(--cvq-blur);
+  border-right: 1px solid var(--cvq-glass-border);
 }
 
 .offcanvas {
@@ -121,21 +121,18 @@
   display: flex;
   flex-direction: column;
   width: 280px;
-  padding: 16px 12px;
+  padding: 24px 16px;
 
-  background: rgb(255, 255, 255);
-  background: linear-gradient(169deg, rgb(253, 255, 255) 0%, rgb(230, 238, 248) 51%, rgb(255, 255, 255) 100%);
-  color: var(--cvq-blue-800);
-  box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.15),
-    0 2px 6px rgba(0, 0, 0, 0.1);
-  border-radius: 0 60px 60px 0;
-  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--cvq-white);
+  background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
+  color: var(--cvq-black);
+  box-shadow: var(--cvq-shadow);
+  border-radius: 0 40px 40px 0;
+  transition: width var(--cvq-transition-slow);
   will-change: width;
   position: relative;
   z-index: 100;
-  transform: translateZ(5px);
-
+  border-right: 1px solid var(--cvq-gray-200);
 }
 
 
@@ -258,49 +255,32 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 12px 16px;
-  border-radius: 12px;
-  color: var(--cvq-blue-800);
+  padding: 14px 20px;
+  border-radius: 16px;
+  color: var(--cvq-gray-600);
   font-weight: 500;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--cvq-transition-normal);
   position: relative;
   overflow: hidden;
+  margin-bottom: 4px;
 }
 
 .offcanvas .sidebar-item {
-  color: rgb(2, 0, 97);
-}
-
-.sidebar-item::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  background: white;
-  transform: scaleY(0);
-  transition: transform 0.25s ease;
-  border-radius: 0 4px 4px 0;
+  color: var(--cvq-gray-700);
 }
 
 .sidebar-item:hover {
-  background: linear-gradient(135deg,
-      var(--cvq-blue-500) 0%,
-      var(--cvq-blue-400) 100%);
-  color: var(--cvq-white);
-  transform: translateX(4px);
+  background: var(--cvq-blue-100);
+  color: var(--cvq-blue-600);
+  padding-left: 24px;
 }
 
 .sidebar-item.active {
-  background: linear-gradient(135deg,
-      var(--cvq-blue-500) 0%,
-      var(--cvq-blue-400) 100%);
-  color: white;
-  box-shadow: 0 4px 12px rgba(30, 123, 217, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  background: var(--cvq-blue-500);
+  color: var(--cvq-white);
+  box-shadow: 0 8px 20px -6px rgba(249, 115, 22, 0.5);
   font-weight: 600;
 }
 
@@ -332,26 +312,15 @@
 
 /* ========== TOPBAR / NAVIGATION ========== */
 nav {
-  height: 64px;
-
-  padding-right: 24px;
+  height: 72px;
+  padding-right: 32px;
   display: flex;
   align-items: center;
   position: relative;
   z-index: 50;
-}
-
-nav::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 24px;
-  right: 24px;
-  height: 1px;
-  background: linear-gradient(90deg,
-      transparent 0%,
-      var(--cvq-gray-200) 50%,
-      transparent 100%);
+  background: var(--cvq-glass-bg);
+  backdrop-filter: var(--cvq-blur);
+  border-bottom: 1px solid var(--cvq-gray-100);
 }
 
 .topbar-title {
@@ -517,7 +486,7 @@ footer {
   top: 110%;
   background: white;
   border-radius: 10px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   min-width: 150px;
   overflow: hidden;
   z-index: 999;

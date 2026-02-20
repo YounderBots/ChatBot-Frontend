@@ -73,7 +73,7 @@ const apiGetRecentConversations = async () => ([
 
 // ================= Colors =================
 const INTENT_COLORS = [
-  "#0d6efd", "#198754", "#fd7e14", "#dc3545", "#6f42c1", "#20c997", "#ffc107", "#0dcaf0", "#adb5bd", "#343a40",
+  "#f97316", "#198754", "#fd7e14", "#dc3545", "#6f42c1", "#20c997", "#ffc107", "#0dcaf0", "#adb5bd", "#343a40",
 ];
 
 const intentVariant = (intent) => {
@@ -316,7 +316,7 @@ const DashboardContent = () => {
                       <XAxis dataKey="date" />
                       <YAxis />
                       <Tooltip />
-                      <Area type="monotone" dataKey="total" fill="#1e7bd933" stroke="#1e7bd9" />
+                      <Area type="monotone" dataKey="total" fill="#f9731633" stroke="#f97316" />
                       <Line type="monotone" dataKey="resolved" stroke="#198754" strokeWidth={3} />
                       <Line type="monotone" dataKey="escalated" stroke="#fd7e14" strokeWidth={3} />
                     </LineChart>
@@ -486,7 +486,7 @@ const DashboardContent = () => {
 
       </div >
     </div>
-  
+
   );
 };
 

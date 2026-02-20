@@ -258,7 +258,7 @@ export default function UsersTab() {
         <Card.Body>
           <Row className="align-items-center g-2">
             <Col md={4}>
-              <h5 className="mb-0 text-primary">Users</h5>
+              <h5 className="mb-0 " style={{ color: 'var(--cvq-blue-500)' }}>Users</h5>
             </Col>
             <Col
               xs={12}

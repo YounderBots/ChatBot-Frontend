@@ -54,9 +54,9 @@
 }
 
 .btn-danger {
-    background-color: #fee2e2;
-    border-color: #fee2e2;
-    color: #ef4444;
+    background-color: #fff1f2;
+    border-color: #ffe4e6;
+    color: #e11d48;
     font-weight: 600;
 }
 
@@ -182,13 +182,13 @@
 }
 
 .custom-pagination .page-link.pill {
-    border-radius: 10px;
+    border-radius: 12px;
     border: none;
-    padding: 6px 12px;
-    font-weight: 500;
+    padding: 8px 16px;
+    font-weight: 600;
     color: #fff;
-    background-color: #0f3d6e;
-    transition: all 0.2s ease;
+    background: linear-gradient(135deg, var(--cvq-blue-600), var(--cvq-blue-400));
+    transition: var(--cvq-transition-normal);
 }
 
 
@@ -403,5 +403,5 @@
 }
 
 .dropdown-menu {
-  z-index: 1055;
+    z-index: 1055;
 }

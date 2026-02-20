@@ -92,11 +92,12 @@
 
 
 .message-user {
-    background-color: #2a6789;
+    background: linear-gradient(135deg, var(--cvq-blue-600) 0%, var(--cvq-blue-400) 100%);
     color: white;
     align-self: flex-end;
     border-bottom-right-radius: 4px;
     max-width: 80% !important;
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2);
 }
 
 .message-user.voiceMessage {
@@ -119,18 +120,22 @@
 
 .bot-btn {
     font-size: 0.7rem;
-    border: 1px solid #2a6789;
-    color: #2a6789;
+    border: 1px solid var(--cvq-blue-500);
+    color: var(--cvq-blue-600);
+    border-radius: 8px;
+    padding: 6px 12px;
+    transition: var(--cvq-transition-fast);
 }
 
 .bot-btn:hover {
-    background-color: #2a6789;
-    border: 1px solid #2a6789;
+    background-color: var(--cvq-blue-500);
+    border-color: var(--cvq-blue-500);
+    color: white;
 }
 
 .bot-btn:active {
-    background-color: #2a6789 !important;
-    border: 1px solid #2a6789 !important;
+    background-color: var(--cvq-blue-700) !important;
+    border-color: var(--cvq-blue-700) !important;
 }
 
 
@@ -452,8 +457,10 @@
 }
 
 .startConvoButton.btn.btn-primary {
-    background-color: #2a6789;
-    border-color: #2a6789;
+    background: linear-gradient(135deg, var(--cvq-blue-600) 0%, var(--cvq-blue-400) 100%);
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
 }
 
 

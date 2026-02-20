@@ -4,24 +4,33 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
-  /* mobile safety */
-  background: linear-gradient(95deg,
-      #ffffff 0%,
-      #a1cef5 45%,
-      #4d81ab 100%);
+  padding: 1.5rem;
+  background: radial-gradient(circle at top right, #1a1a1a, #000000);
+  position: relative;
+  overflow: hidden;
+}
+
+.login-wrapper::before {
+  content: '';
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: var(--cvq-blue-500);
+  filter: blur(150px);
+  opacity: 0.15;
+  top: -100px;
+  right: -100px;
 }
 
 .login-layout {
-  width: 50%;
-  min-height: 520px;
+  width: 100%;
+  max-width: 1100px;
+  min-height: 620px;
   display: flex;
-  border-radius: 22px;
+  border-radius: 32px;
   overflow: hidden;
   background: white;
-  box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.25),
-    0 0 0 1px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
 /* LEFT */
@@ -34,13 +43,22 @@
 
 /* RIGHT */
 .login-right {
-  flex: 1;
-  padding: 2rem;
-  background: linear-gradient(135deg, #5dade2, #85c1e9);
+  flex: 1.2;
+  padding: 4rem;
+  background: linear-gradient(135deg, var(--cvq-blue-600), var(--cvq-blue-400));
   color: white;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  position: relative;
+}
+
+.login-right::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 86c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm66 3c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-46-45c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm54 24c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM57 6c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM32 30c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM8 46c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm63 31c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM44 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm56 45c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-60 2c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm40-2c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-70-2c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm40-28c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-68 45c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm117-68c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-12 63c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-63-69c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-28 114c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm76-28c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-48-38c3.314 0 6-2.686 6-6s-2.686-6-6-6-6 2.686-6 6 2.686 6 6 6zm10-68c3.314 0 6-2.686 6-6s-2.686-6-6-6-6 2.686-6 6 2.686 6 6 6zm-74 78c3.314 0 6-2.686 6-6s-2.686-6-6-6-6 2.686-6 6 2.686 6 6 6zm108-10c3.314 0 6-2.686 6-6s-2.686-6-6-6-6 2.686-6 6 2.686 6 6 6zm-22 92c3.314 0 6-2.686 6-6s-2.686-6-6-6-6 2.686-6 6 2.686 6 6 6zm-38-110c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8zm67 70c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8zM12 25c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8zm85 75c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8zM56 50c6.627 0 12-5.373 12-12s-5.373-12-12-12-12 5.373-12 12 5.373 12 12 12zm19 24c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8zM24 75c3.314 0 6-2.686 6-6s-2.686-6-6-6-6 2.686-6 6 2.686 6 6 6z' fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+  opacity: 0.8;
 }
 
 .login-right h1 {
@@ -203,16 +221,23 @@ input[type="password"]::-ms-reveal {
 }
 
 .btn-signin {
-  background-color: #194d84;
+  background: var(--cvq-blue-500);
+  background: linear-gradient(135deg, var(--cvq-blue-600) 0%, var(--cvq-blue-400) 100%);
   color: white;
-  border-radius: 4px;
-  font-size: 20px;
-  margin-top: 20px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 24px;
   width: 100%;
-  border: 10px;
+  border: none;
+  padding: 14px;
+  transition: var(--cvq-transition-normal);
+  box-shadow: 0 8px 20px -6px rgba(249, 115, 22, 0.4);
 }
 
 .btn-signin:hover {
-  background-color: #194d84;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px -8px rgba(249, 115, 22, 0.5);
+  background: linear-gradient(135deg, var(--cvq-blue-500) 0%, var(--cvq-blue-300) 100%);
   color: white;
 }

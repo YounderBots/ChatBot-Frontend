@@ -6,7 +6,7 @@ import {
 } from "recharts";
 import AnalyticsFilter from "./AnalyticsFilter";
 
-const INTENT_COLORS = ["#0d6efd", "#198754", "#fd7e14", "#dc3545", "#6f42c1"];
+const INTENT_COLORS = ["#f97316", "#198754", "#fd7e14", "#dc3545", "#6f42c1"];
 
 const KeymetricsGird = () => {
     // ============================================================
@@ -426,7 +426,7 @@ const KeymetricsGird = () => {
                                 <XAxis dataKey="date" tickFormatter={v => new Date(v).toLocaleDateString()} />
                                 <YAxis />
                                 <Tooltip />
-                                <Line dataKey="count" stroke="#0d6efd" strokeWidth={2} dot={false} />
+                                <Line dataKey="count" stroke="#f97316" strokeWidth={2} dot={false} />
                             </LineChart>
                         </ResponsiveContainer>
                     ) : (
