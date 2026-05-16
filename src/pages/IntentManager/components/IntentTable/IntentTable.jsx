@@ -11,7 +11,9 @@ const IntentTable = ({
   onToggleOne,
   onEdit,
   onDelete,
-  onDuplicate
+  onDuplicate,
+  canEdit = true,
+  canDelete = true,
 }) => {
   const [currentPage, setCurrentPage] = useState(1)
 
@@ -130,21 +132,27 @@ const IntentTable = ({
 
                 <td className="text-end">
                   <div className="d-flex gap-3 justify-content-end">
-                    <Edit2
-                      size={16}
-                      className="cursorPointer"
-                      onClick={() => onEdit(intent)}
-                    />
-                    <Copy
-                      size={16}
-                      className="cursorPointer"
-                      onClick={() => onDuplicate?.(intent)}
-                    />
-                    <Trash2
-                      size={16}
-                      className="cursorPointer text-danger"
-                      onClick={() => onDelete(intent)}
-                    />
+                    {canEdit && (
+                      <Edit2
+                        size={16}
+                        className="cursorPointer"
+                        onClick={() => onEdit(intent)}
+                      />
+                    )}
+                    {canEdit && (
+                      <Copy
+                        size={16}
+                        className="cursorPointer"
+                        onClick={() => onDuplicate?.(intent)}
+                      />
+                    )}
+                    {canDelete && (
+                      <Trash2
+                        size={16}
+                        className="cursorPointer text-danger"
+                        onClick={() => onDelete(intent)}
+                      />
+                    )}
                   </div>
                 </td>
               </tr>

@@ -3,11 +3,13 @@ import { Edit2, Trash2 } from "lucide-react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import APICall from "../../../APICalls/APICall";
+import { usePermission } from "../../../Context/AuthContext";
 
 
 /* ================= COMPONENT ================= */
 
 const CategoryContainer = () => {
+  const { canAdd, canEdit, canDelete } = usePermission('/Intents');
   const [categories, setCategories] = useState([])
   const [activeCategory, setActiveCategory] = useState(null)
 
@@ -132,14 +134,16 @@ const CategoryContainer = () => {
       <div className="d-flex justify-content-between align-items-center">
         <h1 className="fw-bold mb-0">Categories</h1>
 
-        <button
-          className="btn btn-primary"
-          onClick={handleAdd}
-          disabled={loading}
-        >
-          <i className="bi bi-plus-lg me-1" />
-          Add Category
-        </button>
+        {canAdd && (
+          <button
+            className="btn btn-primary"
+            onClick={handleAdd}
+            disabled={loading}
+          >
+            <i className="bi bi-plus-lg me-1" />
+            Add Category
+          </button>
+        )}
       </div>
 
       {/* Table */}
@@ -191,16 +195,20 @@ const CategoryContainer = () => {
 
                   <td className="text-end">
                     <div className="d-flex gap-4 justify-content-end">
-                      <Edit2
-                        size={16}
-                        className="cursor-pointer"
-                        onClick={() => handleEdit(cat)}
-                      />
-                      <Trash2
-                        size={16}
-                        className="text-danger cursor-pointer"
-                        onClick={() => handleDelete(cat)}
-                      />
+                      {canEdit && (
+                        <Edit2
+                          size={16}
+                          className="cursor-pointer"
+                          onClick={() => handleEdit(cat)}
+                        />
+                      )}
+                      {canDelete && (
+                        <Trash2
+                          size={16}
+                          className="text-danger cursor-pointer"
+                          onClick={() => handleDelete(cat)}
+                        />
+                      )}
                     </div>
                   </td>
                 </tr>

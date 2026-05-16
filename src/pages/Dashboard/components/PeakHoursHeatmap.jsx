@@ -86,18 +86,18 @@ const FunnelData = [
 const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const hours = Array.from({ length: 24 }, (_, i) => i);
 
-/* Heatmap volume data */
-const heatmapData = {
-    Mon: Array.from({ length: 24 }, () => Math.floor(Math.random() * 100)),
-    Tue: Array.from({ length: 24 }, () => Math.floor(Math.random() * 100)),
-    Wed: Array.from({ length: 24 }, () => Math.floor(Math.random() * 100)),
-    Thu: Array.from({ length: 24 }, () => Math.floor(Math.random() * 100)),
-    Fri: Array.from({ length: 24 }, () => Math.floor(Math.random() * 100)),
-    Sat: Array.from({ length: 24 }, () => Math.floor(Math.random() * 100)),
-    Sun: Array.from({ length: 24 }, () => Math.floor(Math.random() * 100)),
-};
-
-const PeakHoursHeatmap = () => {
+const PeakHoursHeatmap = ({ data = [] }) => {
+    // Build lookup: { Mon: [0..23 counts], ... } from API data or empty grid
+    const heatmapData = React.useMemo(() => {
+        const grid = {};
+        days.forEach(d => { grid[d] = new Array(24).fill(0); });
+        data.forEach(({ day, hours: counts }) => {
+            if (grid[day] && Array.isArray(counts)) {
+                grid[day] = counts.slice(0, 24);
+            }
+        });
+        return grid;
+    }, [data]);
     const [sortBy, setSortBy] = useState("usage");
     const [confidenceFilter, setConfidenceFilter] = useState(null);
     const [exporting, setExporting] = useState(false);

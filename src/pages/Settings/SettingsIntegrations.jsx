@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Card, Row, Col, Form, Button, Table, Modal } from "react-bootstrap";
 import Select from "react-select";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import { useToast } from "../../components/useToast";
 const defaultSettings = {
   apiKey: "abcd-1234-xyz-9876",
   apiEndpoint: "https://api.yourbot.com/v1",
@@ -41,6 +42,7 @@ const defaultSettings = {
 
 
 const SettingsIntegrations = () => {
+  const { showToast, ToastContainer } = useToast();
   const [showApiKey, setShowApiKey] = useState(false);
   const getCurrentTimestamp = () => {
     const now = new Date();
@@ -74,7 +76,7 @@ const SettingsIntegrations = () => {
   const regenerateApiKey = () => {
     const newKey = Math.random().toString(36).substring(2, 15);
     setSettings({ ...settings, apiKey: newKey });
-    alert("API Key regenerated");
+    showToast("API Key regenerated.", "success");
   };
 
   const [showModal, setShowModal] = useState(false);
@@ -199,11 +201,8 @@ const SettingsIntegrations = () => {
   const isModalOpen = showModal || showEditModal;
 
   return (
-    <Card className="border-0 overflow-hidden">
-      <Card.Body className="p-0 d-flex flex-column">
-        <div
-          className="flex-grow-1 overflow-auto p-4"
-          style={{ maxHeight: "calc(100vh - 440px)" }}>
+    <>
+      <ToastContainer />
 
           {/* API CONFIGURATION */}
           <h6 className="text-primary mb-3">API Configuration</h6>
@@ -238,7 +237,7 @@ const SettingsIntegrations = () => {
                 variant="primary"
                 onClick={() => {
                   navigator.clipboard.writeText(settings.apiKey);
-                  alert("API Key copied");
+                  showToast("API Key copied to clipboard.", "success");
                 }}
               >
                 Copy
@@ -268,7 +267,7 @@ const SettingsIntegrations = () => {
                   variant="primary"
                   onClick={() => {
                     navigator.clipboard.writeText(settings.apiEndpoint);
-                    alert("API Endpoint copied!");
+                    showToast("API Endpoint copied.", "success");
                   }}
                 >
                   Copy
@@ -326,7 +325,7 @@ const SettingsIntegrations = () => {
             </thead>
             <tbody>
               {settings.webhooks.map((wh, index) => (
-                <tr key={index}>
+                <tr key={wh.name ?? wh.url ?? index}>
                   <td>{wh.name}</td>
                   <td>{wh.url}</td>
                   <td>{wh.events}</td>
@@ -554,7 +553,7 @@ const SettingsIntegrations = () => {
             className="mb-3"
             size="sm"
             variant="primary"
-            onClick={() => alert("SMTP connection successful")}
+            onClick={() => showToast("SMTP test successful.", "success")}
           >
             Test Connection
           </Button>
@@ -817,10 +816,7 @@ const SettingsIntegrations = () => {
             </Modal.Footer>
           </Modal>
 
-        </div>
-        <hr />
-
-        <Row className="align-items-center mt-3">
+        <Row className="align-items-center mt-3" style={{ display: "none" }}>
           <Col md={6} className="text-muted">
             {lastSavedAt
               ? <>Last saved: <strong>{lastSavedAt.toLocaleString()}</strong></>
@@ -851,8 +847,7 @@ const SettingsIntegrations = () => {
 
 
 
-      </Card.Body>
-    </Card>
+    </>
   );
 };
 

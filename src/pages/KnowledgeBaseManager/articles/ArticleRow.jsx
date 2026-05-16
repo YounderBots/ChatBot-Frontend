@@ -1,3 +1,5 @@
+import { ThumbsUp } from "lucide-react";
+
 const ArticleRow = ({ article }) => {
   return (
     <tr>
@@ -8,7 +10,7 @@ const ArticleRow = ({ article }) => {
       <td>{article.category}</td>
       <td>{article.status}</td>
       <td>{article.views}</td>
-      <td>👍 {article.helpful}</td>
+      <td><ThumbsUp size={13} className="me-1 text-success" />{article.helpful}</td>
       <td>{article.updatedAt}</td>
       <td>{article.author}</td>
       <td>

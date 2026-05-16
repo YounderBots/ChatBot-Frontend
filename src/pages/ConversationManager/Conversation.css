@@ -1,29 +1,37 @@
+/* ═══════════════════════════════════════
+   CHAT TEXT FORMATTING
+═══════════════════════════════════════ */
 .chat-text {
-    line-height: 1.5;
-    word-break: break-word;
+  line-height: 1.6;
+  word-break: break-word;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 14px;
 }
 
-/* Section headings */
-.chat-heading {
-    font-weight: 600;
-    margin-top: 10px;
-    margin-bottom: 6px;
-}
-
-/* Bullet alignment */
-.chat-bullet {
-    display: flex;
-    padding-left: 14px;
-    text-indent: -10px;
-}
-
-/* Space between sections */
-.chat-gap {
-    height: 12px;
-}
-
-/* Avoid excessive <br> spacing */
 .chat-text br {
-    display: block;
-    margin-bottom: 4px;
+  display: block;
+  margin-bottom: 4px;
 }
+
+.chat-heading {
+  font-weight: 700;
+  margin-top: 12px;
+  margin-bottom: 6px;
+  color: #ffffff;
+  font-size: 15px;
+}
+
+.chat-bullet {
+  display: flex;
+  padding-left: 14px;
+  text-indent: -10px;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.5;
+}
+
+.chat-gap { height: 12px; }
+
+/* ══ LIGHT THEME OVERRIDES ══ */
+[data-theme="light"] .chat-text    { color: #334155; }
+[data-theme="light"] .chat-heading { color: #0f172a; }
+[data-theme="light"] .chat-bullet  { color: #475569; }

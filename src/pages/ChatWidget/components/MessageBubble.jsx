@@ -1,5 +1,6 @@
-import { UserCircle2 } from "lucide-react";
-import { useState } from "react";
+import DOMPurify from "dompurify";
+import { Pause, Play, UserCircle2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import BotAvatar from "./BotAvatar";
 import './Conversation.css';
 
@@ -92,31 +93,15 @@ const MessageBubble = ({ message, onAction }) => {
     const formatChatText = (text) => {
         if (!text) return "";
 
-        return text
-            // Escape HTML for safety
+        const html = text
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
-
-            // Bold **text**
             .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-
-            // Headings (**Title:**)
-            .replace(
-                /^<strong>(.+?):<\/strong>$/gm,
-                "<div class='chat-heading'>$1:</div>"
-            )
-
-            // Normalize bullets: ? or • → bullet row
-            .replace(
-                /^[?•]\s*(.+)$/gm,
-                "<div class='chat-bullet'>• $1</div>"
-            )
-
-            // Paragraph spacing (double newline)
+            .replace(/^<strong>(.+?):<\/strong>$/gm, "<div class='chat-heading'>$1:</div>")
+            .replace(/^[?•]\s*(.+)$/gm, "<div class='chat-bullet'>• $1</div>")
             .replace(/\n{2,}/g, "<div class='chat-gap'></div>")
-
-            // Single newline
             .replace(/\n/g, "<br />");
+        return DOMPurify.sanitize(html);
     };
 
 

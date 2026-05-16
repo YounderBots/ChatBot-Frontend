@@ -14,7 +14,7 @@ const IntentDashboard = () => {
     tabs: [
       {
         tabTitle: "Intent",
-        tabKey: "users",
+        tabKey: "intent",
         tabContent: <IntentContainer />,
       },
       {

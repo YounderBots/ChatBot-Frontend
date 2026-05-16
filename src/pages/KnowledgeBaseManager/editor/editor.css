@@ -1,10 +1,11 @@
-/* ===============================
-   MODAL BASE
-================================ */
+/* ═══════════════════════════════════════
+   ARTICLE EDITOR DIALOG OVERLAY
+═══════════════════════════════════════ */
 .article-dialog-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.45);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -15,77 +16,87 @@
   width: 90%;
   max-width: 1100px;
   max-height: 90vh;
-  background: #ffffff;
-  border-radius: 12px;
+  background: #0e1d38;
+  border: 1px solid rgba(232, 113, 10, 0.2);
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(232,113,10,0.08);
   overflow: hidden;
 }
 
-/* ===============================
-   HEADER
-================================ */
+/* ── Header ── */
 .article-dialog-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 18px 24px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(232, 113, 10, 0.05);
 }
 
 .article-dialog-header h3 {
   font-size: 18px;
-  font-weight: 600;
-  color: #0f172a;
+  font-weight: 700;
+  color: #ffffff;
 }
 
 .article-dialog-header button {
-  background: none;
-  border: none;
-  font-size: 22px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+  font-size: 18px;
   cursor: pointer;
-  color: #64748b;
+  color: rgba(255,255,255,0.6);
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
 }
 
 .article-dialog-header button:hover {
-  color: #0f172a;
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
 }
 
-/* ===============================
-   TABS
-================================ */
+/* ── Tabs ── */
 .article-dialog-tabs {
   display: flex;
   gap: 6px;
-  padding: 12px 24px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #f8fafc;
+  padding: 10px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .article-dialog-tabs button {
-  padding: 8px 14px;
+  padding: 7px 14px;
   font-size: 14px;
   border-radius: 8px;
   border: 1px solid transparent;
   background: transparent;
-  color: #475569;
+  color: rgba(255, 255, 255, 0.45);
   cursor: pointer;
-}
-
-.article-dialog-tabs button.active {
-  background: #2563eb;
-  color: #ffffff;
+  transition: all 0.2s;
   font-weight: 500;
 }
 
-.article-dialog-tabs button:hover:not(.active) {
-  background: #e5e7eb;
+.article-dialog-tabs button.active {
+  background: linear-gradient(135deg, #e8710a, #fb923c);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(232,113,10,0.35);
 }
 
-/* ===============================
-   BODY
-================================ */
+.article-dialog-tabs button:hover:not(.active) {
+  background: rgba(232, 113, 10, 0.1);
+  color: #fb923c;
+  border-color: rgba(232,113,10,0.2);
+}
+
+/* ── Body ── */
 .article-dialog-body {
   padding: 24px;
   overflow-y: auto;
@@ -94,14 +105,12 @@
 
 .article-dialog-body h4 {
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   margin-bottom: 16px;
-  color: #0f172a;
+  color: #ffffff;
 }
 
-/* ===============================
-   FORM GRID (ARTICLE INFO)
-================================ */
+/* ── Form grid ── */
 .article-info-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -120,8 +129,9 @@
   padding: 8px 12px;
   font-size: 14px;
   border-radius: 8px;
-  border: 1px solid #d1d5db;
-  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
 }
 
 .field textarea {
@@ -129,12 +139,18 @@
   resize: vertical;
 }
 
+.field input::placeholder,
+.field textarea::placeholder { color: rgba(255,255,255,0.25); }
+
+.field select option { background: #0e1d38; color: #ffffff; }
+
 .field input:focus,
 .field select:focus,
 .field textarea:focus {
   outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+  border-color: rgba(232, 113, 10, 0.5);
+  box-shadow: 0 0 0 3px rgba(232, 113, 10, 0.12);
+  background: rgba(232, 113, 10, 0.05);
 }
 
 .field-meta {
@@ -142,29 +158,26 @@
   justify-content: space-between;
   margin-top: 4px;
   font-size: 12px;
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.35);
 }
 
 .slug-preview {
   font-size: 12px;
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.35);
   margin-top: 4px;
 }
 
-/* ===============================
-   TAGS
-================================ */
-.tag-field {
-  grid-column: span 2;
-}
+/* ── Tags ── */
+.tag-field { grid-column: span 2; }
 
 .tag-input-wrapper {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   padding: 6px;
-  border: 1px solid #d1d5db;
+  border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .tag-input-wrapper input {
@@ -172,11 +185,14 @@
   outline: none;
   flex: 1;
   min-width: 120px;
+  background: transparent;
+  color: #ffffff;
 }
 
 .tag-chip {
-  background: #e0e7ff;
-  color: #3730a3;
+  background: rgba(232, 113, 10, 0.15);
+  color: #fb923c;
+  border: 1px solid rgba(232, 113, 10, 0.3);
   padding: 4px 8px;
   border-radius: 999px;
   font-size: 12px;
@@ -190,11 +206,10 @@
   border: none;
   cursor: pointer;
   font-size: 14px;
+  color: #fb923c;
 }
 
-/* ===============================
-   CONTENT SECTION
-================================ */
+/* ── Content section ── */
 .content-section {
   display: flex;
   flex-direction: column;
@@ -211,15 +226,17 @@
   padding: 6px 12px;
   font-size: 13px;
   border-radius: 6px;
-  border: 1px solid #d1d5db;
-  background: #ffffff;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.6);
   cursor: pointer;
+  transition: all 0.2s;
 }
 
 .content-toggle button.active {
-  background: #2563eb;
+  background: linear-gradient(135deg, #e8710a, #fb923c);
   color: #ffffff;
-  border-color: #2563eb;
+  border-color: transparent;
 }
 
 .editor-toolbar {
@@ -227,47 +244,52 @@
   flex-wrap: wrap;
   gap: 6px;
   padding: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 8px;
-  background: #f8fafc;
+  background: rgba(255,255,255,0.03);
 }
 
 .editor-toolbar button {
   padding: 6px 10px;
   font-size: 13px;
   border-radius: 6px;
-  border: 1px solid #d1d5db;
-  background: #ffffff;
+  border: 1px solid rgba(255,255,255,0.09);
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.7);
   cursor: pointer;
+  transition: all 0.2s;
 }
 
 .editor-toolbar button:hover {
-  background: #e5e7eb;
+  background: rgba(232,113,10,0.1);
+  border-color: rgba(232,113,10,0.25);
+  color: #fb923c;
 }
 
 .tiptap-editor {
   min-height: 260px;
-  border: 1px solid #d1d5db;
+  border: 1px solid rgba(255,255,255,0.09);
   border-radius: 8px;
   padding: 12px;
+  background: rgba(255,255,255,0.03);
+  color: rgba(255,255,255,0.85);
 }
 
 .content-preview {
-  border: 1px solid #d1d5db;
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 8px;
   padding: 16px;
-  background: #f8fafc;
+  background: rgba(255,255,255,0.03);
+  color: rgba(255,255,255,0.8);
 }
 
 .content-footer {
   text-align: right;
   font-size: 12px;
-  color: #64748b;
+  color: rgba(255,255,255,0.3);
 }
 
-/* ===============================
-   SEO & SETTINGS
-================================ */
+/* ── SEO section ── */
 .seo-section {
   display: flex;
   flex-direction: column;
@@ -276,35 +298,41 @@
 
 .seo-block label {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   margin-bottom: 6px;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.6px;
 }
 
 .seo-meta {
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: #64748b;
+  color: rgba(255,255,255,0.3);
 }
 
-.image-upload {
-  cursor: pointer;
-}
-
-.image-upload input {
-  display: none;
-}
+.image-upload { cursor: pointer; }
+.image-upload input { display: none; }
 
 .image-upload-box {
   height: 160px;
-  border: 2px dashed #cbd5f5;
+  border: 2px dashed rgba(232,113,10,0.25);
   border-radius: 10px;
-  background: #f8fafc;
+  background: rgba(232,113,10,0.04);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  color: #64748b;
+  color: rgba(255,255,255,0.4);
+  transition: all 0.2s;
+}
+
+.image-upload-box:hover {
+  border-color: rgba(232,113,10,0.5);
+  background: rgba(232,113,10,0.07);
+  color: #fb923c;
 }
 
 .image-upload-box img {
@@ -323,26 +351,28 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  color: rgba(255,255,255,0.75);
 }
 
-.align-bottom {
-  margin-top: 24px;
+.checkbox input[type="checkbox"] {
+  accent-color: #e8710a;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
 }
 
-.seo-actions {
-  display: flex;
-  gap: 12px;
-}
+.align-bottom { margin-top: 24px; }
 
-/* ===============================
-   FOOTER ACTIONS
-================================ */
+.seo-actions { display: flex; gap: 12px; }
+
+/* ── Footer actions ── */
 .article-dialog-footer {
   padding: 16px 24px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid rgba(255,255,255,0.07);
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+  background: rgba(255,255,255,0.02);
 }
 
 .btn {
@@ -351,32 +381,91 @@
   border-radius: 8px;
   cursor: pointer;
   border: none;
+  font-weight: 500;
+  transition: all 0.2s;
 }
 
 .btn.primary {
-  background: #2563eb;
+  background: linear-gradient(135deg, #e8710a, #fb923c);
   color: #ffffff;
+  box-shadow: 0 4px 14px rgba(232,113,10,0.4);
 }
+
+.btn.primary:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(232,113,10,0.5); }
 
 .btn.secondary {
-  background: #e5e7eb;
-  color: #0f172a;
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.1);
 }
+
+.btn.secondary:hover { background: rgba(255,255,255,0.12); color: #ffffff; }
 
 .btn.ghost {
-  background: transparent;
-  color: #475569;
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.55);
+  border: 1px solid rgba(255,255,255,0.08);
 }
+
+.btn.ghost:hover { background: rgba(255,255,255,0.09); color: rgba(255,255,255,0.8); }
 
 .btn.danger {
-  background: #ef4444;
-  color: #ffffff;
+  background: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+  border: 1px solid rgba(239,68,68,0.25);
 }
 
-/* ===============================
-   ERRORS
-================================ */
+.btn.danger:hover { background: rgba(239,68,68,0.2); }
+
+/* ── Errors ── */
 .error {
   font-size: 12px;
-  color: #dc2626;
+  color: #fca5a5;
 }
+
+/* ══ LIGHT THEME OVERRIDES ══ */
+[data-theme="light"] .article-dialog-overlay { background: rgba(15, 23, 42, 0.5); }
+[data-theme="light"] .article-dialog {
+  background: #ffffff;
+  border-color: rgba(232, 113, 10, 0.15);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
+}
+[data-theme="light"] .article-dialog-header  { background: rgba(232, 113, 10, 0.04); border-bottom-color: #e2e8f0; }
+[data-theme="light"] .article-dialog-header h3 { color: #0f172a; }
+[data-theme="light"] .article-dialog-header button { background: #f1f5f9; border-color: #e2e8f0; color: #475569; }
+[data-theme="light"] .article-dialog-header button:hover { background: #fee2e2; border-color: #fecaca; color: #dc2626; }
+[data-theme="light"] .article-dialog-tabs { background: #f8fafc; border-bottom-color: #e2e8f0; }
+[data-theme="light"] .article-dialog-tabs button { color: #64748b; }
+[data-theme="light"] .article-dialog-tabs button:hover:not(.active) { background: #fff7ed; color: #e8710a; border-color: rgba(232,113,10,0.2); }
+[data-theme="light"] .article-dialog-body h4 { color: #0f172a; }
+[data-theme="light"] .field input,
+[data-theme="light"] .field select,
+[data-theme="light"] .field textarea { background: #ffffff; border-color: #e2e8f0; color: #0f172a; }
+[data-theme="light"] .field input::placeholder,
+[data-theme="light"] .field textarea::placeholder { color: #94a3b8; }
+[data-theme="light"] .field-meta  { color: #94a3b8; }
+[data-theme="light"] .slug-preview { color: #94a3b8; }
+[data-theme="light"] .tag-input-wrapper { background: #f8fafc; border-color: #e2e8f0; }
+[data-theme="light"] .tag-input-wrapper input { color: #0f172a; }
+[data-theme="light"] .tag-chip { background: #fff7ed; color: #c2410c; border-color: #fed7aa; }
+[data-theme="light"] .tag-chip button { color: #c2410c; }
+[data-theme="light"] .content-toggle button { background: #f8fafc; border-color: #e2e8f0; color: #475569; }
+[data-theme="light"] .editor-toolbar { background: #f8fafc; border-color: #e2e8f0; }
+[data-theme="light"] .editor-toolbar button { background: #ffffff; border-color: #e2e8f0; color: #475569; }
+[data-theme="light"] .editor-toolbar button:hover { background: #fff7ed; border-color: rgba(232,113,10,0.2); color: #e8710a; }
+[data-theme="light"] .tiptap-editor { background: #ffffff; border-color: #e2e8f0; color: #0f172a; }
+[data-theme="light"] .content-preview { background: #f8fafc; border-color: #e2e8f0; color: #334155; }
+[data-theme="light"] .content-footer { color: #94a3b8; }
+[data-theme="light"] .image-upload-box { background: #f8fafc; border-color: #cbd5e1; color: #64748b; }
+[data-theme="light"] .image-upload-box:hover { background: #fff7ed; border-color: rgba(232,113,10,0.4); color: #e8710a; }
+[data-theme="light"] .seo-meta { color: #94a3b8; }
+[data-theme="light"] .checkbox span { color: #334155; }
+[data-theme="light"] .article-dialog-footer { background: #f8fafc; border-top-color: #e2e8f0; }
+[data-theme="light"] .btn.secondary { background: #f1f5f9; color: #334155; border-color: #e2e8f0; }
+[data-theme="light"] .btn.ghost     { background: #f1f5f9; color: #475569; border-color: #e2e8f0; }
+[data-theme="light"] .btn.danger    { background: #fff1f2; color: #e11d48; border-color: #ffe4e6; }
+[data-theme="light"] .error { color: #dc2626; }
+[data-theme="light"] .editor-actions { border-top-color: #e2e8f0; }
+[data-theme="light"] .editor-actions .btn.ghost { background: #f1f5f9; color: #334155; border-color: #e2e8f0; }
+[data-theme="light"] .btn-link   { color: #e8710a; }
+[data-theme="light"] .btn-delete { background: #fff1f2; border-color: #ffe4e6; color: #dc2626; }

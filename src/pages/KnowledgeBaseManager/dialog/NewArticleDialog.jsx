@@ -1,37 +1,36 @@
+import { Modal } from "react-bootstrap";
 import ArticleEditor from "../editor/ArticleEditor";
-import "./new-article-dialog.css";
-
+import "../dialog/new-article-dialog.css";
 
 const NewArticleDialog = ({ onClose, article, onSave, onDelete }) => {
-  const handleSave = (data) => {
-    onSave?.(data);
-    onClose();
-  };
-  const handleDelete = (data) => {
-    onDelete?.(data);
-    onClose();
-  };
+  const handleSave   = (data) => { onSave?.(data);   onClose(); };
+  const handleDelete = (id)   => { onDelete?.(id);   onClose(); };
 
   return (
-    <div className="kb-dialog-overlay">
-      <div className="kb-dialog">
-        {/* HEADER */}
-        <div className="kb-dialog-header">
-          <h3>{article ? "Edit Article" : "Add Article"}</h3>
-          <button className="close-btn" onClick={onClose}>✕</button>
-        </div>
+    <Modal
+      show
+      onHide={onClose}
+      size="xl"
+      scrollable
+      centered
+      className="kb-article-modal"
+    >
+      <Modal.Header closeButton>
+        <Modal.Title className="fw-bold" style={{ fontSize: "1rem" }}>
+          {article ? "Edit Article" : "New Article"}
+        </Modal.Title>
+      </Modal.Header>
 
-        {/* BODY */}
-        <div className="kb-dialog-body">
-          <ArticleEditor
-            article={article}
-            onCancel={onClose}
-            onSave={handleSave}
-            onDelete={handleDelete}
-          />
-        </div>
-      </div>
-    </div>
+      <Modal.Body className="p-0">
+        <ArticleEditor
+          article={article}
+          onCancel={onClose}
+          onSave={handleSave}
+          onDelete={handleDelete}
+          inDialog
+        />
+      </Modal.Body>
+    </Modal>
   );
 };
 

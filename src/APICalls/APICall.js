@@ -1,8 +1,18 @@
-export const baseURL = "http://127.0.0.1:8002";
+export const baseURL = import.meta.env.VITE_API_BASE_URL;
+
+const TIMEOUT_MS = 15000; // 15-second request timeout
 
 const getAuthHeader = () => ({
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
+    Authorization: `Bearer ${sessionStorage.getItem("token")}`,
 });
+
+/** Wraps fetch with an AbortController timeout. */
+const fetchWithTimeout = (url, options = {}) => {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), TIMEOUT_MS);
+    return fetch(url, { ...options, signal: controller.signal })
+        .finally(() => clearTimeout(id));
+};
 
 const handleResponse = async (response) => {
     const result = await response.json();
@@ -27,7 +37,7 @@ const APICall = {
     // -------------------------
     postWT: async (endpoint, payload = {}) => {
         try {
-            const response = await fetch(`${baseURL}${endpoint}`, {
+            const response = await fetchWithTimeout(`${baseURL}${endpoint}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -37,6 +47,7 @@ const APICall = {
 
             return await handleResponse(response);
         } catch (err) {
+            if (err.name === "AbortError") throw new Error("Request timed out");
             throw new Error(err.message || "POST request failed");
         }
     },
@@ -46,7 +57,7 @@ const APICall = {
     // -------------------------
     postT: async (endpoint, payload = {}) => {
         try {
-            const response = await fetch(`${baseURL}${endpoint}`, {
+            const response = await fetchWithTimeout(`${baseURL}${endpoint}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -57,6 +68,7 @@ const APICall = {
 
             return await handleResponse(response);
         } catch (err) {
+            if (err.name === "AbortError") throw new Error("Request timed out");
             throw new Error(err.message || "POST request failed");
         }
     },
@@ -66,7 +78,7 @@ const APICall = {
     // -------------------------
     getWT: async (endpoint) => {
         try {
-            const response = await fetch(`${baseURL}${endpoint}`, {
+            const response = await fetchWithTimeout(`${baseURL}${endpoint}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -75,6 +87,7 @@ const APICall = {
 
             return await handleResponse(response);
         } catch (err) {
+            if (err.name === "AbortError") throw new Error("Request timed out");
             throw new Error(err.message || "GET request failed");
         }
     },
@@ -84,7 +97,7 @@ const APICall = {
     // -------------------------
     getT: async (endpoint) => {
         try {
-            const response = await fetch(`${baseURL}${endpoint}`, {
+            const response = await fetchWithTimeout(`${baseURL}${endpoint}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -94,6 +107,7 @@ const APICall = {
 
             return await handleResponse(response);
         } catch (err) {
+            if (err.name === "AbortError") throw new Error("Request timed out");
             throw new Error(err.message || "GET request failed");
         }
     },
@@ -103,7 +117,7 @@ const APICall = {
     // -------------------------
     postfileT: async (endpoint, formData) => {
         try {
-            const response = await fetch(`${baseURL}${endpoint}`, {
+            const response = await fetchWithTimeout(`${baseURL}${endpoint}`, {
                 method: "POST",
                 headers: {
                     ...getAuthHeader(),
@@ -113,7 +127,48 @@ const APICall = {
 
             return await handleResponse(response);
         } catch (err) {
+            if (err.name === "AbortError") throw new Error("Request timed out");
+            throw new Error(err.message || "POST request failed");
+        }
+    },
+
+    // -------------------------
+    // PUT (With Token)
+    // -------------------------
+    putT: async (endpoint, payload = {}) => {
+        try {
+            const response = await fetchWithTimeout(`${baseURL}${endpoint}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...getAuthHeader(),
+                },
+                body: JSON.stringify(payload),
+            });
+            return await handleResponse(response);
+        } catch (err) {
+            if (err.name === "AbortError") throw new Error("Request timed out");
             throw new Error(err.message || "PUT request failed");
+        }
+    },
+
+    // -------------------------
+    // PATCH (With Token)
+    // -------------------------
+    patchT: async (endpoint, payload = {}) => {
+        try {
+            const response = await fetchWithTimeout(`${baseURL}${endpoint}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...getAuthHeader(),
+                },
+                body: JSON.stringify(payload),
+            });
+            return await handleResponse(response);
+        } catch (err) {
+            if (err.name === "AbortError") throw new Error("Request timed out");
+            throw new Error(err.message || "PATCH request failed");
         }
     },
 
@@ -122,7 +177,7 @@ const APICall = {
     // -------------------------
     deleteT: async (endpoint) => {
         try {
-            const response = await fetch(`${baseURL}${endpoint}`, {
+            const response = await fetchWithTimeout(`${baseURL}${endpoint}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
@@ -132,6 +187,7 @@ const APICall = {
 
             return await handleResponse(response);
         } catch (err) {
+            if (err.name === "AbortError") throw new Error("Request timed out");
             throw new Error(err.message || "DELETE request failed");
         }
     },

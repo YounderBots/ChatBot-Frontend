@@ -1,221 +1,316 @@
-import { ChevronLeft, ChevronRight, ChevronRightIcon, ChevronsLeft, Ticket, User } from "lucide-react";
+import {
+  BarChart3, Bell, Building2, ChevronLeft, ChevronRightIcon, ChevronsLeft,
+  CreditCard, Cpu, Database, GitBranch, Globe, LayoutDashboard, MessagesSquare,
+  Moon, Search, Settings, Shield, Sun, Ticket, User, Users, Zap
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Outlet, useNavigate, } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 
+import APICall from "../APICalls/APICall";
 import { useAuth } from "../Context/AuthContext";
-import ChatViq from "./assets/chatviq.png";
+import { useTheme } from "../Context/ThemeContext";
 import dpPlaceholder from "./assets/dpPlaceholder.png";
-import favIconChatViq from "./assets/favIconChatViq.png";
 
 import "./AppLayout.css";
 
-
-import {
-  BarChart3,
-  Cpu,
-  Database,
-  LayoutDashboard,
-  MessagesSquare,
-  Settings,
-  Users
-} from "lucide-react";
+const ChatViq = "/assets/images/chatviq.png";
+const favIconChatViq = "/assets/images/favIconChatViq.svg";
 
 export const ICON_MAP = {
-  "dashboard": LayoutDashboard,
-  "conversation": MessagesSquare,
-  "intent": Cpu,
-  "knowledgebase": Database,
-  "analytics": BarChart3,
-  "settings": Settings,
-  "users": Users,
-  "ticket": Ticket
+  dashboard:     LayoutDashboard,
+  conversation:  MessagesSquare,
+  intent:        Cpu,
+  knowledgebase: Database,
+  analytics:     BarChart3,
+  settings:      Settings,
+  users:         Users,
+  ticket:        Ticket,
+  // ── Market-launch additions ──────────────────────────────────────────
+  organization:  Building2,
+  billing:       CreditCard,
+  channels:      Globe,
+  // ── Operations & security additions ─────────────────────────────────
+  liveagent:     Zap,
+  security:      Shield,
+  // ── AI / NLP additions ───────────────────────────────────────────────
+  flowbuilder:   GitBranch,
 };
 
+const SECTION_MAP = {
+  dashboard:     "OVERVIEW",
+  conversation:  "OVERVIEW",
+  intent:        "INTELLIGENCE",
+  knowledgebase: "INTELLIGENCE",
+  analytics:     "INTELLIGENCE",
+  users:         "MANAGEMENT",
+  ticket:        "MANAGEMENT",
+  settings:      "MANAGEMENT",
+  // ── Market-launch additions ──────────────────────────────────────────
+  organization:  "WORKSPACE",
+  billing:       "WORKSPACE",
+  channels:      "WORKSPACE",
+  // ── Operations & security additions ─────────────────────────────────
+  liveagent:     "OPERATIONS",
+  security:      "OPERATIONS",
+  // ── AI / NLP additions ───────────────────────────────────────────────
+  flowbuilder:   "INTELLIGENCE",
+};
 
-/* -------------------- Render Menu -------------------- */
+const SECTION_ORDER = ["OVERVIEW", "INTELLIGENCE", "MANAGEMENT", "WORKSPACE", "OPERATIONS"];
+
+/* ─────────────────────────────────────────
+   SIDEBAR MENU
+───────────────────────────────────────── */
 const RenderMenu = ({ isExpanded, isMobile, activeMenu, setActiveMenu }) => {
   const { menus } = useAuth();
-  const navigate = useNavigate();
+  const navigate  = useNavigate();
+
+  const sections = {};
+  menus.forEach(m => {
+    const s = SECTION_MAP[m.icon] || "OVERVIEW";
+    (sections[s] = sections[s] || []).push(m);
+  });
+  const orderedSections = SECTION_ORDER.filter(s => sections[s]);
 
   return (
-    <div
-      className={`d-flex w-100 flex-column ${isMobile ? "" : "h-75"
-        } justify-content-around gap-2 py-2 ${!isMobile && !isExpanded ? "align-items-center" : ""
-        }`}
-    >
-      {menus.map((menu) => {
-        const Icon = ICON_MAP[menu.icon];
-        return (
-          <div
-            key={menu.name}
-            className={`d-flex align-items-center cursorPointer sidebar-item ${activeMenu === menu.name ? "active" : ""
-              }`}
-            onClick={() => {
-              navigate(menu.path);
-              setActiveMenu(menu.name);
-            }}
-          >
-            <Icon size={24} />
-            {(isMobile || isExpanded) && (
-              <>
-                <div className="px-1">{menu.name}</div>
-                <div className="ms-auto">
-                  <ChevronRight />
+    <div className={`sidebar-menu ${!isMobile && !isExpanded ? "menu-collapsed" : ""}`}>
+      {orderedSections.map(section => (
+        <div key={section} className="menu-section">
+          {(isMobile || isExpanded) && (
+            <div className="menu-section-label">{section}</div>
+          )}
+          {sections[section].map(menu => {
+            const Icon = ICON_MAP[menu.icon] || LayoutDashboard;
+            const isActive = activeMenu === menu.name;
+            return (
+              <div
+                key={menu.name}
+                className={`sidebar-item ${isActive ? "active" : ""}`}
+                onClick={() => { navigate(menu.path); setActiveMenu(menu.name); }}
+                title={!isExpanded && !isMobile ? menu.name : ""}
+                role="button"
+                tabIndex={0}
+                aria-label={menu.name}
+                aria-current={isActive ? "page" : undefined}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { navigate(menu.path); setActiveMenu(menu.name); } }}
+              >
+                <div className="sidebar-icon-box">
+                  <Icon size={17} />
                 </div>
-              </>
-            )}
-          </div>
-        );
-      })}
+                {(isMobile || isExpanded) && (
+                  <span className="sidebar-label">{menu.name}</span>
+                )}
+                {(isMobile || isExpanded) && isActive && (
+                  <span className="sidebar-active-pip" />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 };
 
-/* -------------------- Top Bar -------------------- */
+/* ─────────────────────────────────────────
+   TOP BAR
+───────────────────────────────────────── */
 const TopBar = ({ isMobile, toggleSidebar, activeMenu, setActiveMenu }) => {
-  const [dpImage, setDpImage] = useState(null);
-  const [showMenu, setShowMenu] = useState(false);
-  const navigate = useNavigate();
-  const { logout } = useAuth();
+  const [dpImage,      setDpImage]      = useState(null);
+  const [showMenu,     setShowMenu]     = useState(false);
+  const [searchFocus,  setSearchFocus]  = useState(false);
+  const [notifications, setNotifications] = useState(0);
+  const navigate    = useNavigate();
+  const { logout }  = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const searchRef   = useRef(null);
+
+  useEffect(() => { setDpImage(dpPlaceholder); }, []);
 
   useEffect(() => {
-    setDpImage(dpPlaceholder);
+    const fetchCount = async () => {
+      try {
+        const data = await APICall.getT("/conversation/notifications/count");
+        setNotifications(data?.count ?? 0);
+      } catch {
+        // Badge must never crash the shell — leave count unchanged on error.
+      }
+    };
+    fetchCount();
+    const id = setInterval(fetchCount, 60_000);
+    return () => clearInterval(id);
   }, []);
 
-
   useEffect(() => {
-    const close = () => setShowMenu(false);
+    const close = e => {
+      if (!e.target?.closest?.(".user-section"))  setShowMenu(false);
+      if (!e.target?.closest?.(".topbar-search")) setSearchFocus(false);
+    };
     window.addEventListener("click", close);
     return () => window.removeEventListener("click", close);
   }, []);
 
+  useEffect(() => {
+    const onKey = e => {
+      if (e.key === "Escape") { setSearchFocus(false); setShowMenu(false); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   return (
-    <nav className={`d-flex justify-content-between ${isMobile ? "bgLogoLightColor" : ""}`}>
-      {isMobile && (
-        <div className="d-flex" onClick={toggleSidebar}>
-          <ChevronsLeft />
+    <nav className={`topbar ${isMobile ? "mobile-topbar" : ""}`}>
+
+      {/* LEFT */}
+      {isMobile ? (
+        <button className="topbar-icon-btn" onClick={toggleSidebar} aria-label="Menu">
+          <ChevronsLeft size={20} />
+        </button>
+      ) : (
+        <div className="topbar-left">
+          <h4 className="topbar-page-title">{activeMenu}</h4>
+          <span className="topbar-breadcrumb">ChatViq Admin</span>
         </div>
       )}
 
-      <div>
-        {isMobile ? (
-          <img
-            src={ChatViq}
-            alt="ChatViq"
-            className="topBarLogo"
-            onClick={() => {
-              navigate("/");
-              setActiveMenu("Dashboard");
-            }}
+      {isMobile && (
+        <img
+          src={ChatViq}
+          alt="ChatViq"
+          className="topBarLogo"
+          onClick={() => { navigate("/"); setActiveMenu("Dashboard"); }}
+        />
+      )}
+
+      {/* CENTER – search (desktop only) */}
+      {!isMobile && (
+        <div
+          className={`topbar-search ${searchFocus ? "focused" : ""}`}
+          onClick={e => { e.stopPropagation(); setSearchFocus(true); searchRef.current?.focus(); }}
+        >
+          <Search size={15} className="search-icon" />
+          <input
+            ref={searchRef}
+            type="search"
+            placeholder="Search pages, data, settings…"
+            aria-label="Search"
+            onFocus={() => setSearchFocus(true)}
           />
-        ) : (
-          <h3 className="activeMenuHeading">{activeMenu}</h3>
-        )}
-      </div>
+          {searchFocus && <kbd className="search-kbd">ESC</kbd>}
+        </div>
+      )}
 
-      {/* DP SECTION */}
-      <div
-        className="userIcon"
-        style={{ position: "relative" }}
-        onClick={(e) => {
-          e.stopPropagation();
-          setShowMenu(!showMenu);
-        }}
-      >
-        {dpImage ? <img src={dpImage} alt="User" /> : <User />}
+      {/* RIGHT */}
+      <div className="topbar-right">
+        <button className="topbar-icon-btn notif-btn"
+          aria-label={notifications > 0 ? `${notifications} notifications` : "Notifications"}>
+          <Bell size={18} aria-hidden="true" />
+          {notifications > 0 && (
+            <span className="notif-badge" aria-hidden="true">{notifications}</span>
+          )}
+        </button>
 
-        {showMenu && (
-          <div className="dp-menu">
-            <div
-              onClick={() => {
-                navigate("/Profile");
-                setShowMenu(true);
-              }}
-            >
-              View Profile
-            </div>
+        <button
+          className="topbar-icon-btn theme-toggle"
+          onClick={toggleTheme}
+          title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+        >
+          {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
+        </button>
 
-            <div
-              onClick={() => {
-                navigate("/login");
-                setShowMenu(false);
-                logout();
-              }}
-            >
-              Logout
-            </div>
+        <div
+          className="user-section"
+          onClick={e => { e.stopPropagation(); setShowMenu(s => !s); }}
+        >
+          <div className="user-avatar-wrap">
+            {dpImage
+              ? <img src={dpImage} alt="User" className="user-avatar" />
+              : <User size={20} />
+            }
+            <span className="online-dot" />
           </div>
-        )}
+          {!isMobile && <span className="user-display-name">Admin</span>}
+
+          {showMenu && (
+            <div className="dp-menu">
+              <div className="dp-menu-header">
+                {dpImage && <img src={dpImage} alt="User" className="dp-menu-avatar" />}
+                <div>
+                  <div className="dp-menu-name">Administrator</div>
+                  <div className="dp-menu-role">Super Admin</div>
+                </div>
+              </div>
+              <div className="dp-menu-divider" />
+              <button
+                className="dp-menu-item"
+                onClick={() => { navigate("/Profile"); setShowMenu(false); }}
+              >
+                <User size={13} /> View Profile
+              </button>
+              <button
+                className="dp-menu-item danger"
+                onClick={() => { navigate("/login"); setShowMenu(false); logout(); }}
+              >
+                Sign out
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </nav>
   );
 };
 
-/* -------------------- Small Screen Sidebar -------------------- */
+/* ─────────────────────────────────────────
+   MOBILE SIDEBAR
+───────────────────────────────────────── */
 const SmallScreenSideBar = ({ isMobile, setSideBarOpen, activeMenu, setActiveMenu }) => {
   const navigate = useNavigate();
-
   return (
     <div className="offcanvas show offcanvas-start">
       <div className="offcanvas-header">
         <img
           src={ChatViq}
           alt="ChatViq"
-          onClick={() => {
-            navigate("/");
-            setActiveMenu("Dashboard");
-          }}
+          onClick={() => { navigate("/"); setActiveMenu("Dashboard"); }}
         />
-        <button
-          type="button"
-          className="btn-close"
-          onClick={() => setSideBarOpen(false)}
-        />
+        <button type="button" className="btn-close" onClick={() => setSideBarOpen(false)} />
       </div>
-
       <div className="offcanvas-body">
         <RenderMenu isMobile={isMobile} activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
       </div>
-
-      <div className="offcanvas-footer">Sidebar Footer</div>
     </div>
   );
 };
 
-/* -------------------- Big Screen Sidebar -------------------- */
+/* ─────────────────────────────────────────
+   DESKTOP SIDEBAR
+───────────────────────────────────────── */
 const BigScreenSideBar = ({ isExpanded, setIsExpanded, activeMenu, setActiveMenu }) => {
   const sideBarRef = useRef(null);
-  const navigate = useNavigate();
+  const navigate   = useNavigate();
 
   useEffect(() => {
-    const sidebar = sideBarRef.current;
-    if (!sidebar) return;
-
+    const el = sideBarRef.current;
+    if (!el) return;
     const expand = () => setIsExpanded(true);
-    sidebar.addEventListener("mouseenter", expand);
-
-    return () => sidebar.removeEventListener("mouseenter", expand);
+    el.addEventListener("mouseenter", expand);
+    return () => el.removeEventListener("mouseenter", expand);
   }, [setIsExpanded]);
 
   return (
-    <div className="sidebar-containerActual d-flex h-100 justify-content-between flex-column">
-      <div className={`sidebarHeader ${!isExpanded ? "sidebar-collapsed" : ""}`}>
-        <div
-          className="logo-wrapper"
-          onClick={() => {
-            navigate("/");
-            setActiveMenu("Dashboard");
-          }}
-        >
-          <img src={ChatViq} className="logo logo-big" />
-          <img src={favIconChatViq} className="logo logo-small" />
+    <div className="sidebar-inner">
+      <div
+        className={`sidebarHeader ${!isExpanded ? "sidebar-collapsed" : ""}`}
+        onClick={() => { navigate("/"); setActiveMenu("Dashboard"); }}
+      >
+        <div className="logo-wrapper">
+          <img src={ChatViq}        className="logo logo-big"   alt="ChatViq" />
+          <img src={favIconChatViq} className="logo logo-small" alt="CV"     />
         </div>
       </div>
 
-      <div
-        className="my-3 d-flex flex-column flex-grow-1 gap-1"
-        ref={sideBarRef}
-      >
+      <div className="sidebar-nav-area" ref={sideBarRef}>
         <RenderMenu
           isExpanded={isExpanded}
           activeMenu={activeMenu}
@@ -223,31 +318,30 @@ const BigScreenSideBar = ({ isExpanded, setIsExpanded, activeMenu, setActiveMenu
         />
       </div>
 
-      {isExpanded && <div></div>}
+      {isExpanded && (
+        <div className="sidebar-footer">
+          <span className="status-dot pulse" />
+          <span className="status-text">All systems online</span>
+        </div>
+      )}
     </div>
   );
 };
 
-/* -------------------- Content Area -------------------- */
-const ContentArea = () => <Outlet />;
-
-/* -------------------- Footer -------------------- */
-const FooterNote = () => <></>;
-
-/* -------------------- App Layout -------------------- */
+/* ─────────────────────────────────────────
+   APP LAYOUT ROOT
+───────────────────────────────────────── */
 const AppLayout = () => {
-  const [isMobile, setIsMobile] = useState(true);
+  const [isMobile,    setIsMobile]    = useState(true);
   const [sideBarOpen, setSideBarOpen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState("Dashboard");
-  const [isExpanded, setIsExpanded] = useState(true);
-
-  const toggleSidebar = () => setSideBarOpen((prev) => !prev);
+  const [activeMenu,  setActiveMenu]  = useState("Dashboard");
+  const [isExpanded,  setIsExpanded]  = useState(true);
 
   useEffect(() => {
-    const checkScreen = () => setIsMobile(window.innerWidth < 768);
-    checkScreen();
-    window.addEventListener("resize", checkScreen);
-    return () => window.removeEventListener("resize", checkScreen);
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
   }, []);
 
   return (
@@ -264,28 +358,23 @@ const AppLayout = () => {
               />
             </aside>
           )}
-
-          {sideBarOpen && <div className="mobile-backdrop" onClick={() => setSideBarOpen(false)} />}
-
+          {sideBarOpen && (
+            <div className="mobile-backdrop" onClick={() => setSideBarOpen(false)} />
+          )}
           <header>
             <TopBar
-              toggleSidebar={toggleSidebar}
               isMobile={isMobile}
+              toggleSidebar={() => setSideBarOpen(p => !p)}
               activeMenu={activeMenu}
               setActiveMenu={setActiveMenu}
             />
           </header>
-
-          <section className="flex-grow-1">
-            <ContentArea />
+          <section className="mobile-content">
+            <Outlet />
           </section>
-
-          <footer>
-            <FooterNote />
-          </footer>
         </div>
       ) : (
-        <div className="app-shell gap-5">
+        <div className="app-shell">
           <div className="sidebar-wrapper">
             <aside className={`sidebar-container ${!isExpanded ? "minimized" : ""}`}>
               <BigScreenSideBar
@@ -295,28 +384,25 @@ const AppLayout = () => {
                 setActiveMenu={setActiveMenu}
               />
             </aside>
-
-            <div className={`sidebar-expansionButton rounded ${isExpanded ? "sidebar-expansionButtonExpanded" : ""}`}>
-              {isExpanded ? (
-                <ChevronLeft onClick={() => setIsExpanded(false)} />
-              ) : (
-                <ChevronRightIcon onClick={() => setIsExpanded(true)} />
-              )}
+            <div className={`sidebar-toggle-btn ${isExpanded ? "expanded" : ""}`}>
+              {isExpanded
+                ? <ChevronLeft     size={13} onClick={() => setIsExpanded(false)} />
+                : <ChevronRightIcon size={13} onClick={() => setIsExpanded(true)} />
+              }
             </div>
           </div>
 
           <div className="main-area">
             <header>
-              <TopBar toggleSidebar={toggleSidebar} activeMenu={activeMenu} />
+              <TopBar
+                toggleSidebar={() => setSideBarOpen(p => !p)}
+                activeMenu={activeMenu}
+                setActiveMenu={setActiveMenu}
+              />
             </header>
-
             <section className="content">
-              <ContentArea />
+              <Outlet />
             </section>
-
-            <footer>
-              <FooterNote />
-            </footer>
           </div>
         </div>
       )}

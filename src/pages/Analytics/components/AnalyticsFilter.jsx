@@ -1,139 +1,90 @@
-import { Card, Row, Col, Form, Button } from "react-bootstrap";
+import { Calendar, RefreshCw } from "lucide-react";
 import React, { useState } from "react";
+import { Button, Form } from "react-bootstrap";
+
+const PRESETS = ["Today", "Yesterday", "Last 7 days", "Last 30 days", "This month"];
 
 const AnalyticsFilter = ({ onApply }) => {
-    const formatDate = (date) => date.toISOString().split("T")[0];
-    const todayStr = formatDate(new Date());
-    const [preset, setPreset] = useState("Today");
-    const [startDate, setStartDate] = useState(todayStr);
-    const [endDate, setEndDate] = useState(todayStr);
+  const fmt = (d) => d.toISOString().split("T")[0];
+  const today = fmt(new Date());
 
-    React.useEffect(() => {
-        handleApply();
-    }, []);
+  const [preset,    setPreset]    = useState("Today");
+  const [startDate, setStartDate] = useState(today);
+  const [endDate,   setEndDate]   = useState(today);
 
-    const applyPreset = (value) => {
-        const today = new Date();
-        let start, end;
+  React.useEffect(() => { fire("Today", today, today); }, []);
 
-        switch (value) {
-            case "Today":
-                start = new Date();
-                end = new Date();
-                break;
-            case "Yesterday":
-                start = new Date();
-                start.setDate(start.getDate() - 1);
-                end = new Date(start);
-                break;
-            case "Last 7 days":
-                end = new Date();
-                start = new Date();
-                start.setDate(end.getDate() - 6);
-                break;
-            case "Last 30 days":
-                end = new Date();
-                start = new Date();
-                start.setDate(end.getDate() - 29);
-                break;
-            case "This month":
-                start = new Date(today.getFullYear(), today.getMonth(), 1);
-                end = new Date();
-                break;
-            default:
-                return;
-        }
+  const fire = (p, s, e) => {
+    const start = new Date(s);
+    const end   = new Date(e);
+    const diff  = Math.ceil((end - start) / 86400000) + 1;
+    const prevEnd   = new Date(start); prevEnd.setDate(start.getDate() - 1);
+    const prevStart = new Date(prevEnd); prevStart.setDate(prevEnd.getDate() - diff + 1);
+    onApply?.({ preset: p, startDate: s, endDate: e,
+      compareRange: { startDate: fmt(prevStart), endDate: fmt(prevEnd) } });
+  };
 
-        setStartDate(formatDate(start));
-        setEndDate(formatDate(end));
-        setPreset(value);
-    };
+  const applyPreset = (value) => {
+    const today = new Date();
+    let s, e;
+    switch (value) {
+      case "Today":        s = e = new Date(); break;
+      case "Yesterday":    s = e = new Date(); s.setDate(s.getDate() - 1); e = new Date(s); break;
+      case "Last 7 days":  e = new Date(); s = new Date(); s.setDate(e.getDate() - 6); break;
+      case "Last 30 days": e = new Date(); s = new Date(); s.setDate(e.getDate() - 29); break;
+      case "This month":   s = new Date(today.getFullYear(), today.getMonth(), 1); e = new Date(); break;
+      default: return;
+    }
+    const sf = fmt(s), ef = fmt(e);
+    setStartDate(sf); setEndDate(ef); setPreset(value);
+    fire(value, sf, ef);
+  };
 
-    const handleApply = () => {
-        const payload = {
-            preset,
-            startDate,
-            endDate,
-        };
+  const handleApply = () => fire(preset, startDate, endDate);
 
-        // ALWAYS calculate previous period
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        const diffDays = (end - start) / (1000 * 60 * 60 * 24) + 1;
-        const prevEnd = new Date(start);
-        prevEnd.setDate(start.getDate() - 1);
-        const prevStart = new Date(prevEnd);
-        prevStart.setDate(prevEnd.getDate() - diffDays + 1);
+  return (
+    <div className="an-filter">
+      {/* Preset chips */}
+      <div className="an-filter-presets">
+        {PRESETS.map(p => (
+          <button
+            key={p}
+            className={`an-preset-btn ${preset === p ? "active" : ""}`}
+            onClick={() => applyPreset(p)}
+          >
+            {p}
+          </button>
+        ))}
+      </div>
 
-        payload.compareRange = {
-            startDate: formatDate(prevStart),
-            endDate: formatDate(prevEnd),
-        };
+      {/* Divider */}
+      <div className="an-filter-divider" />
 
-        onApply?.(payload);
-    };
-
-    return (
-        <div className="g-2 h-100">
-            <Row className="g-2">
-                <Col md={12}>
-                    <Card className="rounded-4 shadow-sm analytics-card">
-                        <Card.Body>
-                            <Row className="g-3 align-items-end">
-
-                                {/* Preset */}
-                                <Col xs={12} sm={6} md={3}>
-                                    <Form.Label className="small text-muted">Preset</Form.Label>
-                                    <Form.Select
-                                        value={preset}
-                                        onChange={(e) => {
-                                            setPreset(e.target.value);
-                                            applyPreset(e.target.value);
-                                        }}
-                                    >
-                                        <option>Today</option>
-                                        <option>Yesterday</option>
-                                        <option>Last 7 days</option>
-                                        <option>Last 30 days</option>
-                                        <option>This month</option>
-                                        <option>Custom</option>
-                                    </Form.Select>
-                                </Col>
-                                <Col xs={12} sm={6} md={3}>
-                                    <Form.Label className="small text-muted">Start Date</Form.Label>
-                                    <Form.Control
-                                        type="date"
-                                        value={startDate}
-                                        onChange={(e) => {
-                                            setPreset("Custom");
-                                            setStartDate(e.target.value);
-                                        }}
-                                    />
-                                </Col>
-                                <Col xs={12} sm={6} md={3}>
-                                    <Form.Label className="small text-muted">End Date</Form.Label>
-                                    <Form.Control
-                                        type="date"
-                                        value={endDate}
-                                        onChange={(e) => {
-                                            setPreset("Custom");
-                                            setEndDate(e.target.value);
-                                        }}
-                                    />
-                                </Col>
-                                <Col xs={12} md={3} className="d-flex justify-content-end g-2">
-                                    <Button size="sm" variant="primary" className="px-4" onClick={handleApply}>
-                                        Apply Filter
-                                    </Button>
-                                </Col>
-                            </Row>
-                        </Card.Body>
-                    </Card>
-                </Col>
-            </Row>
-        </div>
-
-    );
+      {/* Date range */}
+      <div className="an-filter-dates">
+        <Calendar size={14} className="an-filter-icon" />
+        <Form.Control
+          type="date"
+          size="sm"
+          value={startDate}
+          onChange={(e) => { setStartDate(e.target.value); setPreset("Custom"); }}
+          className="an-date-input"
+        />
+        <span className="an-filter-sep">–</span>
+        <Form.Control
+          type="date"
+          size="sm"
+          value={endDate}
+          onChange={(e) => { setEndDate(e.target.value); setPreset("Custom"); }}
+          className="an-date-input"
+        />
+        <Button size="sm" variant="primary" onClick={handleApply} className="an-apply-btn">
+          <RefreshCw size={12} className="me-1" />
+          Apply
+        </Button>
+      </div>
+    </div>
+  );
 };
 
 export default AnalyticsFilter;

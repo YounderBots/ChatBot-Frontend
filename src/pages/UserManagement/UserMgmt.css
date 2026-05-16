@@ -1,68 +1,207 @@
-/* Make header controls compact */
-.searchForm {
-  width: 180px;
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+/* ─── tokens ──────────────────────────────────────────────── */
+:root {
+  --um-font:   'Outfit', system-ui, sans-serif;
+  --um-accent: #e8710a;
+  --um-card:   #ffffff;
+  --um-border: #e5e7eb;
+  --um-bg:     #fafafa;
+  --um-text1:  #111318;
+  --um-text2:  #6b7280;
+  --um-text3:  #9ca3af;
+  --um-radius: 10px;
+  --um-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.05);
 }
 
-.searchForm input {
-  height: 32px;
-  font-size: 13px;
+[data-theme="dark"] {
+  --um-card:   rgba(255,255,255,0.05);
+  --um-border: rgba(255,255,255,0.12);
+  --um-bg:     rgba(255,255,255,0.02);
+  --um-text1:  #ffffff;
+  --um-text2:  rgba(255,255,255,0.55);
+  --um-text3:  rgba(255,255,255,0.35);
+  --um-shadow: 0 1px 3px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.2);
 }
 
-/* Properly align search icon inside input */
-.searchIcon {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-  color: var(--cvq-gray-400);
+/* ─── legacy compat ───────────────────────────────────────── */
+.searchForm { width: 180px; }
+.searchIcon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--um-text3); }
+.primaryBtn { height: 32px; font-size: 13px; padding: 0 12px; display: flex; align-items: center; gap: 6px; }
+.roleSelection { display: flex; flex-direction: column; }
+.permissionTree .form-check-input { cursor: pointer; accent-color: var(--um-accent); }
+
+/* ─── toolbar ─────────────────────────────────────────────── */
+.um-toolbar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px;
+}
+.um-search-wrap { position: relative; flex: 1; min-width: 160px; max-width: 280px; }
+.um-search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--um-text3); pointer-events: none; }
+
+.um-input {
+  font-family: var(--um-font); font-size: 13px; color: var(--um-text1);
+  background: var(--um-card); border: 1.5px solid var(--um-border); border-radius: 7px;
+  padding: 7px 11px; outline: none; transition: border-color .14s, box-shadow .14s; width: 100%;
+}
+.um-input.with-icon { padding-left: 32px; }
+.um-input:focus { border-color: var(--um-accent); box-shadow: 0 0 0 3px rgba(232,113,10,.1); }
+.um-input::placeholder { color: var(--um-text3); }
+
+.um-select {
+  font-family: var(--um-font); font-size: 13px; color: var(--um-text1);
+  background: var(--um-card); border: 1.5px solid var(--um-border); border-radius: 7px;
+  padding: 7px 11px; outline: none; cursor: pointer; appearance: none; transition: border-color .14s;
+}
+.um-select:focus { border-color: var(--um-accent); box-shadow: 0 0 0 3px rgba(232,113,10,.1); }
+
+/* ─── buttons ─────────────────────────────────────────────── */
+.um-btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px;
+  font-size: 13px; font-weight: 500; font-family: var(--um-font);
+  border-radius: 7px; border: none; cursor: pointer; transition: all .14s; line-height: 1; white-space: nowrap;
+}
+.um-btn:disabled { opacity: .45; cursor: not-allowed; }
+.um-btn-primary { background: var(--um-accent); color: #fff; }
+.um-btn-primary:hover:not(:disabled) { background: #c45e08; }
+.um-btn-ghost { background: transparent; color: var(--um-text2); border: 1.5px solid var(--um-border); }
+.um-btn-ghost:hover:not(:disabled) { background: #f3f4f6; }
+.um-btn-sm { padding: 5px 12px; font-size: 12px; }
+
+/* ─── table card ──────────────────────────────────────────── */
+.um-table-card {
+  background: var(--um-card); border-radius: var(--um-radius);
+  border: 1px solid var(--um-border); box-shadow: var(--um-shadow); overflow: hidden;
+}
+.um-table { width: 100%; border-collapse: collapse; font-family: var(--um-font); font-size: 13px; }
+.um-table thead th {
+  padding: 10px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--um-text3); background: #fafafa;
+  border-bottom: 1px solid var(--um-border); white-space: nowrap;
+}
+.um-table tbody tr { border-bottom: 1px solid #f3f4f6; transition: background .1s; }
+.um-table tbody tr:last-child { border-bottom: none; }
+.um-table tbody tr:hover { background: #fdf8f4; }
+.um-table tbody td { padding: 11px 16px; color: var(--um-text1); vertical-align: middle; }
+
+/* ─── avatar ──────────────────────────────────────────────── */
+.um-avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 2px solid var(--um-border); }
+.um-avatar-placeholder {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, rgba(232,113,10,.15), rgba(251,146,60,.15));
+  border: 2px solid var(--um-border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--um-font); font-size: 13px; font-weight: 600; color: var(--um-accent);
+}
+.um-avatar-lg { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 2px solid var(--um-border); }
+.um-avatar-lg-placeholder {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: linear-gradient(135deg, rgba(232,113,10,.15), rgba(251,146,60,.15));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; font-weight: 600; color: var(--um-accent); font-family: var(--um-font);
 }
 
-/* Shrink filter dropdown */
-.form-select-sm {
-  height: 32px;
-  font-size: 13px;
-  padding-top: 2px;
-  padding-bottom: 2px;
+/* ─── badges ──────────────────────────────────────────────── */
+.um-badge {
+  display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 20px;
+  font-size: 11px; font-weight: 600; font-family: var(--um-font);
 }
+.um-badge-active   { background: #dcfce7; color: #15803d; }
+.um-badge-inactive { background: #f3f4f6; color: #6b7280; }
+.um-badge-role     { background: rgba(232,113,10,.12); color: var(--um-accent); }
 
-/* Shrink add user button */
-.primaryBtn {
-  height: 32px;
-  font-size: 13px;
-  padding: 0 12px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+/* ─── status toggle ───────────────────────────────────────── */
+.um-switch { position: relative; display: inline-block; width: 38px; height: 21px; flex-shrink: 0; }
+.um-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+.um-switch-track {
+  position: absolute; inset: 0; background: #d1d5db; border-radius: 11px;
+  cursor: pointer; transition: background .18s;
 }
+.um-switch-track::after {
+  content: ''; position: absolute; width: 15px; height: 15px; border-radius: 50%;
+  background: #fff; top: 3px; left: 3px; transition: transform .18s;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+}
+.um-switch input:checked + .um-switch-track { background: var(--um-accent); }
+.um-switch input:checked + .um-switch-track::after { transform: translateX(17px); }
+.um-switch input:disabled + .um-switch-track { opacity: .4; cursor: not-allowed; }
 
-/* Section 2: Role & Permissions styling */
-.roleSelection {
-  display: flex;
-  flex-direction: column;
+/* ─── action buttons ──────────────────────────────────────── */
+.um-actions { display: flex; align-items: center; gap: 8px; justify-content: center; }
+.um-action-btn {
+  width: 28px; height: 28px; border-radius: 6px; border: none;
+  background: transparent; color: var(--um-text2); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .13s, color .13s;
 }
+.um-action-btn:hover { background: #f3f4f6; color: var(--um-text1); }
+.um-action-btn.danger:hover { background: #fee2e2; color: #b91c1c; }
 
-.permissionTree {
-  max-height: 300px;
-  overflow-y: auto;
+/* ─── modal ───────────────────────────────────────────────── */
+.um-modal .modal-content {
+  border-radius: 14px; border: 1px solid var(--um-border);
+  font-family: var(--um-font); box-shadow: 0 20px 60px rgba(0,0,0,.15);
 }
+.um-modal .modal-header { border-bottom: 1px solid var(--um-border); padding: 16px 20px; }
+.um-modal .modal-title { font-size: 15px; font-weight: 600; font-family: var(--um-font); color: var(--um-text1); }
+.um-modal .modal-body { padding: 20px; }
+.um-modal .modal-footer { border-top: 1px solid var(--um-border); padding: 12px 20px; gap: 8px; }
 
-.permissionTree .card {
-  background-color: var(--cvq-gray-50);
-  border: 1px solid var(--cvq-gray-200);
-  border-radius: 12px;
+.um-form-label { font-size: 12.5px; font-weight: 500; color: var(--um-text1); font-family: var(--um-font); display: block; margin-bottom: 5px; }
+.um-form-control {
+  font-family: var(--um-font); font-size: 13.5px; color: var(--um-text1);
+  background: #fafafa; border: 1.5px solid var(--um-border); border-radius: 7px;
+  padding: 8px 11px; outline: none; width: 100%;
+  transition: border-color .14s, box-shadow .14s; appearance: none;
 }
+.um-form-control:focus { border-color: var(--um-accent); box-shadow: 0 0 0 3px rgba(232,113,10,.1); background: #fff; }
+.um-form-control.is-error { border-color: #ef4444; }
 
-.permissionTree .card strong {
-  font-size: 0.95rem;
-  color: var(--cvq-blue-900);
+/* ─── avatar upload ───────────────────────────────────────── */
+.um-avatar-upload {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 16px; border: 2px dashed var(--um-border); border-radius: 10px;
+  background: var(--um-bg); cursor: pointer; transition: border-color .14s;
 }
+.um-avatar-upload:hover { border-color: var(--um-accent); }
 
-.permissionTree .form-check-label {
-  font-size: 0.85rem;
-  color: var(--cvq-text);
-}
+/* ─── password strength ───────────────────────────────────── */
+.um-strength-bar { height: 4px; border-radius: 2px; background: #e5e7eb; margin-top: 6px; overflow: hidden; }
+.um-strength-fill { height: 100%; border-radius: 2px; transition: width .3s, background .3s; }
 
-.permissionTree .form-check-input {
-  cursor: pointer;
+/* ─── role radio cards ────────────────────────────────────── */
+.um-role-options { display: flex; flex-wrap: wrap; gap: 8px; }
+.um-role-option {
+  display: flex; align-items: center; gap: 8px; padding: 8px 14px;
+  border-radius: 8px; border: 1.5px solid var(--um-border); cursor: pointer;
+  font-family: var(--um-font); font-size: 13px; color: var(--um-text2);
+  background: var(--um-bg); transition: all .13s; user-select: none;
 }
+.um-role-option:hover { border-color: var(--um-accent); color: var(--um-text1); }
+.um-role-option.is-selected { border-color: var(--um-accent); background: rgba(232,113,10,.08); color: var(--um-accent); font-weight: 600; }
+.um-role-option input { accent-color: var(--um-accent); }
+
+/* ─── section title ───────────────────────────────────────── */
+.um-section-title {
+  font-size: 11.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--um-text3); font-family: var(--um-font);
+  margin: 18px 0 10px; display: flex; align-items: center; gap: 8px;
+}
+.um-section-title::after { content: ''; flex: 1; height: 1px; background: var(--um-border); }
+
+/* ─── perm table ──────────────────────────────────────────── */
+.um-perm-table { width: 100%; border-collapse: collapse; font-family: var(--um-font); font-size: 13px; }
+.um-perm-table thead th {
+  padding: 8px 14px; font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--um-text3); background: #fafafa;
+  border-bottom: 1px solid var(--um-border); text-align: center;
+}
+.um-perm-table thead th:first-child { text-align: left; }
+.um-perm-table tbody tr { border-bottom: 1px solid #f3f4f6; }
+.um-perm-table tbody tr:last-child { border-bottom: none; }
+.um-perm-table tbody tr:hover { background: #fdf8f4; }
+.um-perm-table tbody td { padding: 10px 14px; color: var(--um-text1); text-align: center; }
+.um-perm-table tbody td:first-child { text-align: left; font-weight: 500; }
+.um-perm-table .form-check-input { accent-color: var(--um-accent); width: 15px; height: 15px; cursor: pointer; }
+
+/* ─── empty ───────────────────────────────────────────────── */
+.um-empty { text-align: center; padding: 48px; color: var(--um-text3); font-family: var(--um-font); font-size: 13.5px; }

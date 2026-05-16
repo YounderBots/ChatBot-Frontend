@@ -53,11 +53,7 @@ const SettingsAppearance = () => {
 
 
   return (
-    <Card className="border-0 overflow-hidden">
-      <Card.Body className="p-0 d-flex flex-column">
-        <div
-          className="flex-grow-1 overflow-auto p-4"
-          style={{ maxHeight: "calc(100vh - 440px)" }}>
+    <>
           {/* CHAT WIDGET CUSTOMIZATION */}
           <h6 className="text-primary mb-3">Chat Widget Customization</h6>
 
@@ -408,10 +404,7 @@ const SettingsAppearance = () => {
             </div>
           </div>
         </div>
-</div>  
-        <hr />
-
-        <Row className="align-items-center mt-3">
+        <Row className="align-items-center mt-3" style={{ display: "none" }}>
           <Col md={6} className="text-muted">
             {lastSavedAt
               ? <>Last saved: <strong>{lastSavedAt.toLocaleString()}</strong></>
@@ -440,8 +433,18 @@ const SettingsAppearance = () => {
         </Row>
 
 
-      </Card.Body>
-    </Card>
+      {hasChanges && (
+        <div className="s-save-bar">
+          <span className="s-save-bar-left">
+            {lastSavedAt ? <>Last saved {lastSavedAt.toLocaleTimeString()}</> : "Unsaved changes"}
+          </span>
+          <div className="s-save-bar-right">
+            <button className="s-btn s-btn-ghost" onClick={handleDiscard} disabled={!hasChanges}>Discard</button>
+            <button className="s-btn s-btn-primary" onClick={handleSave} disabled={!hasChanges}>Save changes</button>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

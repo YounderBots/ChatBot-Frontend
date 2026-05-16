@@ -8,6 +8,8 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import '../Theme.css'
 
 import APICall from '../../../APICalls/APICall'
+import { usePermission } from '../../../Context/AuthContext'
+import { useToast } from '../../../components/useToast'
 
 const IntentContainer = () => {
   const [viewMode, setViewMode] = useState('table')
@@ -22,17 +24,21 @@ const IntentContainer = () => {
   const [showBulkMenu, setShowBulkMenu] = useState(false)
   const [bulkMenuPos, setBulkMenuPos] = useState({ top: 0, left: 0 })
   const [intentMode, setIntentMode] = useState("add");
+  const [search, setSearch] = useState("")
+  const [statusFilter, setStatusFilter] = useState("All")
+  const [sortBy, setSortBy] = useState("Name")
+  const { canAdd, canEdit, canDelete } = usePermission('/Intents');
+  const { showToast, ToastContainer } = useToast();
 
   /* ------------------ Fetch ------------------ */
 
   const fetchIntents = async () => {
     try {
       const res = await APICall.getT("/intents/intents")
-      console.log("Fetched intents:", res);
       setIntents(res || [])
 
     } catch (err) {
-      alert(err.message)
+      showToast(err.message || "Failed to load intents.", "danger")
     } finally {
       setLoading(false)
     }
@@ -58,7 +64,6 @@ const IntentContainer = () => {
   }
 
   const handleEdit = (intent) => {
-    console.log("Editing intent:", intent)
     setSelectedIntent(intent)
     setIsModalOpen(true)
     setIntentMode("edit");
@@ -67,7 +72,7 @@ const IntentContainer = () => {
   const handleDelete = (intent) => {
     setIntentToDelete(intent)
     setShowDeleteModal(true)
-    setIntentMode("duplicate");
+    setIntentMode("delete");
   }
 
   const confirmDelete = async () => {
@@ -78,7 +83,7 @@ const IntentContainer = () => {
       setShowDeleteModal(false)
       setIntentToDelete(null)
     } catch (err) {
-      alert(err.message)
+      showToast(err.message || "Failed to delete intent.", "danger")
     }
   }
 
@@ -136,7 +141,7 @@ const IntentContainer = () => {
       setSelectedIds([])
       setShowBulkMenu(false)
     } catch (err) {
-      alert(err.message)
+      showToast(err.message || "Bulk delete failed.", "danger")
     }
   }
 
@@ -152,6 +157,25 @@ const IntentContainer = () => {
     setShowBulkMenu(false)
   }
 
+  /* ------------------ Filtered / sorted list ------------------ */
+
+  const displayedIntents = intents
+    .filter(i => {
+      const matchSearch = !search ||
+        i.name?.toLowerCase().includes(search.toLowerCase()) ||
+        i.intent_name?.toLowerCase().includes(search.toLowerCase());
+      const matchStatus = statusFilter === "All" ||
+        (statusFilter === "Active"   && i.status === "ACTIVE") ||
+        (statusFilter === "Inactive" && i.status !== "ACTIVE");
+      return matchSearch && matchStatus;
+    })
+    .sort((a, b) => {
+      if (sortBy === "Name")  return (a.name || "").localeCompare(b.name || "");
+      if (sortBy === "Usage") return (b.uses || 0) - (a.uses || 0);
+      if (sortBy === "Date")  return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+      return 0;
+    });
+
   /* ------------------ UI ------------------ */
 
   if (loading) {
@@ -162,6 +186,7 @@ const IntentContainer = () => {
 
   return (
     <div className="h-100 d-flex flex-column gap-3">
+      <ToastContainer />
 
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -178,29 +203,44 @@ const IntentContainer = () => {
               type="text"
               className="form-control border-0 shadow-none text-cvq-text"
               placeholder="Search intents..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
+            {search && (
+              <button className="btn btn-sm border-0 bg-transparent" onClick={() => setSearch("")}>
+                <i className="bi bi-x text-muted"></i>
+              </button>
+            )}
           </div>
 
           {/* Status Filter */}
           <div className="input-group bg-white border rounded-3 shadow-sm px-2 py-1">
-            <select className="form-select form-select-sm border-0 bg-transparent">
-              <option>All</option>
-              <option>Active</option>
-              <option>Inactive</option>
+            <select
+              className="form-select form-select-sm border-0 bg-transparent"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="All">All</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
             </select>
           </div>
 
           {/* Sort */}
           <div className="input-group bg-white border rounded-3 shadow-sm px-2 py-1">
-            <select className="form-select form-select-sm border-0 bg-transparent">
-              <option>Sort by Name</option>
-              <option>Sort by Usage</option>
-              <option>Sort by Date</option>
+            <select
+              className="form-select form-select-sm border-0 bg-transparent"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="Name">Sort by Name</option>
+              <option value="Usage">Sort by Usage</option>
+              <option value="Date">Sort by Date</option>
             </select>
           </div>
 
           {/* Bulk Actions */}
-          {selectedIds.length > 0 && (
+          {selectedIds.length > 0 && canDelete && (
             <div className="input-group bg-white border rounded-3 shadow-sm px-2 py-1 position-relative">
               <button
                 className="form-select form-select-sm border-0 bg-transparent"
@@ -293,12 +333,14 @@ const IntentContainer = () => {
           </div>
 
           {/* Add Button */}
-          <button
-            className="btn btn-primary d-inline-flex align-items-center fw-semibold add-intent-btn"
-            onClick={handleAdd}
-          >
-            <i className="bi bi-plus-lg me-1"></i> Add Intent
-          </button>
+          {canAdd && (
+            <button
+              className="btn btn-primary d-inline-flex align-items-center fw-semibold add-intent-btn"
+              onClick={handleAdd}
+            >
+              <i className="bi bi-plus-lg me-1"></i> Add Intent
+            </button>
+          )}
         </div>
       </div>
 
@@ -306,22 +348,26 @@ const IntentContainer = () => {
       <div className="bg-white rounded-4 shadow flex-grow-1 overflow-auto">
         {viewMode === 'table' ? (
           <IntentTable
-            intents={intents}
+            intents={displayedIntents}
             selectedIds={selectedIds}
             onToggleAll={toggleSelectAll}
             onToggleOne={toggleSelectOne}
             onEdit={handleEdit}
             onDuplicate={handleDuplicate}
             onDelete={handleDelete}
+            canEdit={canEdit}
+            canDelete={canDelete}
           />
         ) : (
           <IntentGrid
-            intents={intents}
+            intents={displayedIntents}
             selectedIds={selectedIds}
             onToggleOne={toggleSelectOne}
             onEdit={handleEdit}
             onDuplicate={handleDuplicate}
             onDelete={handleDelete}
+            canEdit={canEdit}
+            canDelete={canDelete}
           />
         )}
       </div>

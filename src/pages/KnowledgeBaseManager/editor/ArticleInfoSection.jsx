@@ -121,6 +121,9 @@ const ArticleInfoSection = ({
               </option>
             ))}
           </select>
+          {errors.category && (
+            <small className="error">{errors.category}</small>
+          )}
         </div>
 
         {/* TAGS */}

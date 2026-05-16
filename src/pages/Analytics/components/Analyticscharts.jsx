@@ -13,13 +13,10 @@ import {
     YAxis,
     Legend,
     Cell,
-    FunnelChart,
-    Funnel,
-    LabelList,
-
 } from "recharts";
 import html2canvas from "html2canvas";
 import { Tooltip as BootstrapTooltip } from "bootstrap";
+import UserJourneyFunnel from "./UserJourneyFunnel";
 
 const conversationTrendData = [
     { time: "Mon", total: 420, resolved: 310, escalated: 70, failed: 40 },
@@ -284,9 +281,9 @@ const AnalyticsCharts = () => {
                                         dataKey="uses"
                                         radius={[0, 6, 6, 0]}
                                     >
-                                        {sortedIntentData.map((entry, index) => (
+                                        {sortedIntentData.map((entry) => (
                                             <Cell
-                                                key={index}
+                                                key={entry.intent}
                                                 fill={getConfidenceColor(entry.confidence)}
                                             />
                                         ))}
@@ -321,9 +318,9 @@ const AnalyticsCharts = () => {
                                                 handleConfidenceFilter(data.range)
                                             }
                                         >
-                                            {confidenceHistogram.map((entry, index) => (
+                                            {confidenceHistogram.map((entry) => (
                                                 <Cell
-                                                    key={index}
+                                                    key={entry.range}
                                                     fill={
                                                         entry.range.startsWith("0") ||
                                                             entry.range.startsWith("20") ||
@@ -485,35 +482,11 @@ const AnalyticsCharts = () => {
 
 
 
-                {/* ================== CHART 6 (6 COL) ================== */}
+                {/* ================== CHART 6 — User Journey Funnel ================== */}
                 <Col sm={12}>
                     <Card className="rounded-4 shadow-sm analytics-card mt-2">
-                        <Card.Body>
-                            <h6 className="fw-semibold mb-3"> User Journey Funnel </h6>
-                            <ResponsiveContainer width="100%" height={360}>
-                                <FunnelChart>
-                                    <Tooltip />
-                                    <
-                                        Funnel data={FunnelData} dataKey="value" isAnimationActive={false} >
-                                        <LabelList
-                                            dataKey="stage"
-                                            position="center"
-                                            fill="#ffffffff"
-                                        />
-                                    </Funnel>
-                                </FunnelChart>
-                            </ResponsiveContainer>
-                            <div className="mt-3">
-                                {FunnelData.slice(0, -1).map((step, index) => {
-                                    const next = FunnelData[index + 1];
-                                    const conversion = Math.round((next.value / step.value) * 100);
-                                    return (
-                                        <div key={step.stage} className="d-flex justify-content-between small text-muted mb-1" >
-                                            <span> {step.stage} → {next.stage} → {conversion}% conversion </span>
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                        <Card.Body className="p-0">
+                            <UserJourneyFunnel />
                         </Card.Body>
                     </Card>
                 </Col>

@@ -1,0 +1,259 @@
+/* ─── Shares Login base styles, adds register-specific overrides ─── */
+
+.register-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background-color: #ffffff;
+  background-image:
+    linear-gradient(rgba(99, 102, 241, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
+  background-size: 56px 56px;
+  position: relative;
+  overflow: hidden;
+}
+
+.register-wrapper::before {
+  content: '';
+  position: absolute;
+  width: 560px;
+  height: 560px;
+  top: -160px;
+  left: -160px;
+  border-radius: 50%;
+  animation: orbFloat 9s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+.register-wrapper::after {
+  content: '';
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+  bottom: -120px;
+  right: -120px;
+  border-radius: 50%;
+  animation: orbFloat 12s ease-in-out infinite alternate-reverse;
+  pointer-events: none;
+}
+
+@keyframes orbFloat {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(40px, 30px) scale(1.08); }
+}
+
+.register-layout {
+  width: 100%;
+  max-width: 1120px;
+  min-height: 640px;
+  display: flex;
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(99, 102, 241, 0.12),
+    0 30px 80px -20px rgba(0, 0, 0, 0.7),
+    0 0 60px -10px rgba(99, 102, 241, 0.08);
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── HERO ─────────────────────────────────────────────────────── */
+.register-hero {
+  flex: 1.15;
+  background: linear-gradient(145deg, #0b1528 0%, #0e1d38 60%, #0a1220 100%);
+  border-right: 1px solid rgba(99, 102, 241, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 3.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.register-hero .hero-ring {
+  border-color: rgba(99, 102, 241, 0.1);
+}
+
+.register-hero .hero-headline span {
+  background: linear-gradient(135deg, #6366f1 0%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.register-hero .feature-dot {
+  background: linear-gradient(135deg, #6366f1, #a78bfa);
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.6);
+}
+
+.register-hero .hero-logo {
+  filter: drop-shadow(0 0 18px rgba(99, 102, 241, 0.35));
+}
+
+/* ─── FORM PANEL ──────────────────────────────────────────────── */
+.register-form-panel {
+  flex: 1;
+  background: #080f1e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 2.5rem;
+  overflow-y: auto;
+}
+
+.register-card-glass {
+  width: 100%;
+  max-width: 440px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 20px;
+  padding: 2.25rem 2.5rem;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.register-badge {
+  display: inline-block;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  color: #a78bfa;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  padding: 0.3rem 0.85rem;
+  border-radius: 100px;
+  margin-bottom: 1.1rem;
+}
+
+.btn-register-modern {
+  width: 100%;
+  margin-top: 1.25rem;
+  padding: 0.9rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 50%, #818cf8 100%);
+  background-size: 200% 200%;
+  background-position: 0% 50%;
+  cursor: pointer;
+  transition: background-position 0.4s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  box-shadow:
+    0 6px 24px -4px rgba(99, 102, 241, 0.5),
+    0 0 0 1px rgba(99, 102, 241, 0.2) inset;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-register-modern::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.btn-register-modern:hover:not(:disabled) {
+  background-position: 100% 50%;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px -6px rgba(99, 102, 241, 0.55);
+}
+
+.btn-register-modern:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.two-col-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 1rem;
+}
+
+/* ─── Step progress bar (replaces inline divs) ────────────────── */
+.step-progress {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.step-bar {
+  flex: 1;
+  height: 3px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  transition: background 0.3s ease;
+}
+
+.step-bar--active {
+  background: #6366f1;
+}
+
+/* ─── Back button ─────────────────────────────────────────────── */
+.btn-back-modern {
+  flex: 0 0 auto;
+  padding: 0.9rem 1.25rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-back-modern:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* ─── Action row (back + submit) ──────────────────────────────── */
+.reg-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 1.25rem;
+}
+
+.reg-submit {
+  flex: 1;
+  margin-top: 0 !important;
+}
+
+/* ─── register-link as accessible button ─────────────────────── */
+.register-link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #a78bfa;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: inherit;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.register-link:hover {
+  color: #c4b5fd;
+  text-decoration: underline;
+}
+
+/* ─── RESPONSIVE ─────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .register-wrapper { padding: 1rem; align-items: flex-start; padding-top: 2rem; }
+  .register-layout  { flex-direction: column; min-height: auto; border-radius: 20px; }
+  .register-hero    { border-right: none; border-bottom: 1px solid rgba(99,102,241,.12); padding: 2.5rem 2rem; text-align: center; }
+  .register-hero .login-hero-content { display: flex; flex-direction: column; align-items: center; }
+  .register-form-panel { padding: 2.5rem 1.75rem; }
+  .register-card-glass { padding: 2rem 1.5rem; }
+  .two-col-grid { grid-template-columns: 1fr; }
+}

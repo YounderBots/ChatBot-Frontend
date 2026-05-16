@@ -1,321 +1,221 @@
-import "bootstrap/dist/css/bootstrap.min.css";
-import { Edit2, Trash2 } from "lucide-react";
+import { Edit2, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Button, Card, Col, Form, Modal, Row, Table } from "react-bootstrap";
+import { Modal, Spinner } from "react-bootstrap";
 import APICall from "../../APICalls/APICall";
-
-
-/* =======================
-   COMPONENT
-======================= */
+import { usePermission } from "../../Context/AuthContext";
+import { useConfirm } from "../../components/useConfirm";
+import { useToast } from "../../components/useToast";
+import "./UserMgmt.css";
 
 export default function RolesTab() {
-    const [roles, setRoles] = useState([]);
-    const [editingRole, setEditingRole] = useState(null);
-    const [tempPermissions, setTempPermissions] = useState({});
-    const [showModal, setShowModal] = useState(false);
-    const [menus, setMenus] = useState([]);
-
-
-
-    /* ---------- OPEN EDIT ---------- */
-    const openEdit = (role) => {
-        const permissions = role.permissions || {};
-
-
-        setEditingRole({
-            id: role.id,
-            key: role.key,
-            name: role.name,
-            status: role.status ?? true,
-        });
-
-        // IMPORTANT: clone permissions so switches work independently
-        setTempPermissions(JSON.parse(JSON.stringify(permissions)));
-
-        setShowModal(true);
-    };
+    const { canAdd, canEdit, canDelete } = usePermission('/User-Management');
+    const { showToast, ToastContainer } = useToast();
+    const { confirm, ConfirmDialog } = useConfirm();
+    const [roles,            setRoles]           = useState([]);
+    const [menus,            setMenus]           = useState([]);
+    const [editingRole,      setEditingRole]     = useState(null);
+    const [tempPermissions,  setTempPerms]       = useState({});
+    const [showModal,        setShowModal]       = useState(false);
+    const [saving,           setSaving]          = useState(false);
 
     const mapBackendPermissions = (permissions = []) => {
         const result = {};
-
-        permissions.forEach((perm) => {
-            // ✅ ALWAYS USE menu_id
-            const menuId = Number(perm.menu_id);
+        permissions.forEach((p) => {
+            const menuId = Number(p.menu_id);
             if (!menuId) return;
-
             result[menuId] = [];
-
-            if (perm.view) result[menuId].push("view");
-            if (perm.add) result[menuId].push("add");
-            if (perm.edit) result[menuId].push("edit");
-            if (perm.delete) result[menuId].push("delete");
+            if (p.view)   result[menuId].push("view");
+            if (p.add)    result[menuId].push("add");
+            if (p.edit)   result[menuId].push("edit");
+            if (p.delete) result[menuId].push("delete");
         });
-
         return result;
     };
 
-
-
-
-
-
     const fetchRoles = async () => {
         try {
-            const response = await APICall.getT("/hrms/roles");
-
-            const rolesArray = Array.isArray(response) ? response : [];
-
-            const formattedRoles = rolesArray.map((role) => ({
-                id: role.id,
-                key: role.id,
-                name: role.name,
-                status: role.status === "ACTIVE",
-                permissions: mapBackendPermissions(role.permission || []),
-            }));
-
-
-            setRoles(formattedRoles);
-        } catch (error) {
-            console.error("Failed to fetch roles:", error);
-        }
+            const res = await APICall.getT("/hrms/roles");
+            setRoles((Array.isArray(res) ? res : []).map(r => ({
+                id: r.id, key: r.id, name: r.name, status: r.status === "ACTIVE",
+                permissions: mapBackendPermissions(r.permissions || r.permission || []),
+            })));
+        } catch (e) { showToast(e.message || "Failed to load roles.", "danger"); }
     };
+
     const fetchMenus = async () => {
         try {
-            const response = await APICall.getT("/hrms/menus");
-            setMenus(Array.isArray(response) ? response : []);
-        } catch (err) {
-            console.error("Failed to fetch menus", err);
-        }
+            const res = await APICall.getT("/hrms/menus");
+            setMenus(Array.isArray(res) ? res : []);
+        } catch (e) { showToast(e.message || "Failed to load menus.", "danger"); }
     };
 
+    useEffect(() => { fetchRoles(); fetchMenus(); }, []);
 
-    useEffect(() => {
-        fetchRoles();
-        fetchMenus();
-    }, []);
-
-
-    /* ---------- TOGGLE PERMISSION ---------- */
-    const togglePermission = (menuId, type) => {
-        setTempPermissions((prev) => {
-            const current = prev[menuId] || [];
-
-            const updated = current.includes(type)
-                ? current.filter((p) => p !== type)
-                : [...current, type];
-
-            return { ...prev, [menuId]: updated };
-        });
-    };
-
-
-    /* ---------- SAVE ---------- */
-
-    const buildPermissionsPayload = () => {
-        return Object.entries(tempPermissions).map(([menuId, actions]) => ({
-            menu: Number(menuId),
-            view: actions.includes("view"),
-            add: actions.includes("add"),
-            edit: actions.includes("edit"),
-            delete: actions.includes("delete"),
-        }));
-    };
-
-
-
-    const savePermissions = async () => {
-        if (!editingRole?.name?.trim()) {
-            alert("Role name is required");
-            return;
-        }
-
-        const payload = {
-            name: editingRole.name,
-            permissions: buildPermissionsPayload(),
-        };
-
-        try {
-            if (editingRole.id) {
-                await APICall.postT(`/hrms/update_role/${editingRole.id}`, payload);
-            } else {
-                await APICall.postT("/hrms/role", payload);
-            }
-
-            await fetchRoles();
-            setShowModal(false);
-            setEditingRole(null);
-        } catch (error) {
-            console.error("Save role failed:", error);
-            alert("Failed to save role");
-        }
-    };
-
-
-
-
-
-
-
-
-    const deleteRole = async (roleKey) => {
-        if (!window.confirm("Are you sure you want to delete this role?")) return;
-
-        try {
-            const response = await APICall.postT(`/hrms/delete_role/${roleKey}`);
-
-            await fetchRoles();
-        } catch (error) {
-            console.error("Delete role failed:", error);
-            alert("Failed to delete role");
-        }
-    };
-
-
-    const openAddRole = () => {
-        setEditingRole({
-            id: null,
-            name: "",
-            permissions: {},
-            status: true,
-            emailNotifications: false,
-        });
-        setTempPermissions({});
+    const openEdit = (role) => {
+        setEditingRole({ id: role.id, key: role.key, name: role.name, status: role.status ?? true });
+        setTempPerms(JSON.parse(JSON.stringify(role.permissions || {})));
         setShowModal(true);
     };
 
+    const DEMO_ROLE_NAMES = [
+        "Content Editor", "Analytics Viewer", "Support Lead", "Bot Trainer",
+    ];
 
+    const openAdd = () => {
+        setEditingRole({ id: null, name: "", permissions: {}, status: true });
+        setTempPerms({});
+        setShowModal(true);
+    };
 
+    const fillDemoRole = () => {
+        const name = DEMO_ROLE_NAMES[Math.floor(Math.random() * DEMO_ROLE_NAMES.length)];
+        setEditingRole(prev => ({ ...prev, name }));
+        const viewOnlyMenus = menus.slice(0, 3).reduce((acc, m) => {
+            acc[m.id] = ["view"];
+            return acc;
+        }, {});
+        setTempPerms(viewOnlyMenus);
+    };
 
+    const togglePermission = (menuId, type) => {
+        setTempPerms(prev => {
+            const curr = prev[menuId] || [];
+            return { ...prev, [menuId]: curr.includes(type) ? curr.filter(p => p !== type) : [...curr, type] };
+        });
+    };
+
+    const savePermissions = async () => {
+        if (!editingRole?.name?.trim()) { showToast("Role name is required.", "warning"); return; }
+        setSaving(true);
+        const payload = {
+            name: editingRole.name,
+            menus: Object.entries(tempPermissions).map(([menuId, actions]) => ({
+                menu: Number(menuId),
+                view:   actions.includes("view"),
+                add:    actions.includes("add"),
+                edit:   actions.includes("edit"),
+                delete: actions.includes("delete"),
+            })),
+        };
+        try {
+            if (editingRole.id) await APICall.postT(`/hrms/update_role/${editingRole.id}`, payload);
+            else                await APICall.postT("/hrms/role", payload);
+            await fetchRoles(); setShowModal(false); setEditingRole(null);
+            showToast("Role saved.", "success");
+        } catch (err) { showToast(err.message || "Failed to save role.", "danger"); }
+        finally { setSaving(false); }
+    };
+
+    const deleteRole = async (key) => {
+        if (!await confirm("Delete this role? This cannot be undone.")) return;
+        try { await APICall.postT(`/hrms/delete_role/${key}`); await fetchRoles(); showToast("Role deleted.", "success"); }
+        catch (err) { showToast(err.message || "Failed to delete role.", "danger"); }
+    };
+
+    const PERMS = ["view", "add", "edit", "delete"];
 
     return (
         <>
+            <ToastContainer />
+            <ConfirmDialog />
+            {/* ── Toolbar ─────────────────────────────────────── */}
+            <div className="um-toolbar">
+                <span style={{ fontFamily: "var(--um-font)", fontSize: 13.5, fontWeight: 500, color: "var(--um-text1)" }}>
+                    {roles.length} role{roles.length !== 1 ? "s" : ""}
+                </span>
+                {canAdd && (
+                    <button className="um-btn um-btn-primary" style={{ marginLeft: "auto" }} onClick={openAdd}>
+                        <Plus size={14} /> Add Role
+                    </button>
+                )}
+            </div>
 
-            {/* ===== ROLES HEADER ===== */}
-            <Card className="mb-3 shadow-sm border-0">
-                <Card.Body>
-                    <Row className="align-items-center g-2">
-                        <Col md={6}>
-                            <h5 className="mb-0 text-primary">Roles</h5>
-                        </Col>
-
-                        <Col md={6} className="d-flex justify-content-end">
-                            <Button size="sm" className="primaryBtn" onClick={openAddRole}>
-                                Add Role
-                            </Button>
-                        </Col>
-                    </Row>
-                </Card.Body>
-            </Card>
-
-
-
-            {/* ===== ROLES TABLE ===== */}
-            {/* ===== ROLES TABLE ===== */}
-            <Card className="shadow-sm border-0">
-                <Table hover responsive className="mb-0 align-middle">
-                    <thead className="table-light">
+            {/* ── Table ───────────────────────────────────────── */}
+            <div className="um-table-card">
+                <table className="um-table">
+                    <thead>
                         <tr>
-                            <th>Role</th>
-                            <th className="text-center">Actions</th>
+                            <th>Role Name</th>
+                            <th style={{ textAlign: "center" }}>Actions</th>
                         </tr>
                     </thead>
-
                     <tbody>
-                        {roles.map((role) => (
+                        {roles.length === 0 && (
+                            <tr><td colSpan={2}><div className="um-empty">No roles defined yet.</div></td></tr>
+                        )}
+                        {roles.map(role => (
                             <tr key={role.key}>
+                                <td style={{ fontWeight: 500 }}>{role.name}</td>
                                 <td>
-                                    <strong>{role.name}</strong>
-                                </td>
-                                <td className="text-center">
-                                    <div className="d-flex justify-content-center gap-3">
-                                        <Edit2
-                                            size={16}
-                                            className="cursorPointer"
-                                            onClick={() => openEdit(role)}
-                                        />
-                                        <Trash2
-                                            size={16}
-                                            className="cursorPointer text-danger"
-                                            onClick={() => deleteRole(role.key)}
-                                        />
+                                    <div className="um-actions">
+                                        {canEdit   && <button className="um-action-btn" onClick={() => openEdit(role)} title="Edit"><Edit2 size={15} /></button>}
+                                        {canDelete && <button className="um-action-btn danger" onClick={() => deleteRole(role.key)} title="Delete"><Trash2 size={15} /></button>}
                                     </div>
                                 </td>
                             </tr>
                         ))}
                     </tbody>
-                </Table>
-            </Card>
+                </table>
+            </div>
 
-
-
-
-            {/* ===== EDIT MODAL ===== */}
-            <Modal show={showModal} onHide={() => setShowModal(false)} size="xl" centered>
+            {/* ── Modal ───────────────────────────────────────── */}
+            <Modal show={showModal} onHide={() => setShowModal(false)} size="xl" centered dialogClassName="um-modal">
                 <Modal.Header closeButton>
                     <Modal.Title>
-                        {roles.some(r => r.key === editingRole?.key)
-                            ? `Edit Role & Permissions – ${editingRole?.name}`
-                            : "Add Role & Permissions"}
+                        {roles.some(r => r.key === editingRole?.key) ? `Edit Role — ${editingRole?.name}` : "Add Role"}
                     </Modal.Title>
-
+                    {!editingRole?.id && (
+                        <button
+                            className="um-btn um-btn-ghost um-btn-sm"
+                            style={{ marginLeft: 12, fontSize: 12 }}
+                            onClick={fillDemoRole}
+                            title="Prefill with a demo role name and basic view permissions"
+                        >
+                            Fill Demo Data
+                        </button>
+                    )}
                 </Modal.Header>
-
                 <Modal.Body>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Role Name</Form.Label>
-                        <Form.Control
-                            type="text"
+                    <div style={{ marginBottom: 20 }}>
+                        <label className="um-form-label">Role Name *</label>
+                        <input className="um-form-control" style={{ maxWidth: 320 }}
                             value={editingRole?.name || ""}
-                            onChange={(e) =>
-                                setEditingRole({ ...editingRole, name: e.target.value })
-                            }
-                        />
-                    </Form.Group>
+                            onChange={e => setEditingRole({ ...editingRole, name: e.target.value })} />
+                    </div>
 
-                    <Table bordered>
-                        <thead className="table-light">
-                            <tr>
-                                <th>Menu</th>
-                                <th className="text-center">View</th>
-                                <th className="text-center">Add</th>
-                                <th className="text-center">Edit</th>
-                                <th className="text-center">Delete</th>
-                            </tr>
-                        </thead>
+                    <div className="um-section-title">Permissions</div>
 
-                        <tbody>
-                            {menus.map((menu) => (
-                                <tr key={menu.id}>
-                                    <td><strong>{menu.menu}</strong></td>
-
-                                    {["view", "add", "edit", "delete"].map((type) => (
-                                        <td key={type} className="text-center">
-                                            <Form.Check
-                                                type="switch"
-                                                checked={Array.isArray(tempPermissions[menu.id]) &&
-                                                    tempPermissions[menu.id].includes(type)}
-                                                onChange={() => togglePermission(menu.id, type)}
-                                            />
-                                        </td>
-                                    ))}
+                    <div className="um-table-card" style={{ overflow: "auto", maxHeight: 440 }}>
+                        <table className="um-perm-table">
+                            <thead>
+                                <tr>
+                                    <th>Module</th>
+                                    {PERMS.map(p => <th key={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</th>)}
                                 </tr>
-                            ))}
-                        </tbody>
-
-
-                    </Table>
-
-
+                            </thead>
+                            <tbody>
+                                {menus.map(menu => (
+                                    <tr key={menu.id}>
+                                        <td>{menu.menu}</td>
+                                        {PERMS.map(type => (
+                                            <td key={type}>
+                                                <input type="checkbox" className="form-check-input"
+                                                    style={{ accentColor: "var(--um-accent)", width: 15, height: 15, cursor: "pointer" }}
+                                                    checked={Array.isArray(tempPermissions[menu.id]) && tempPermissions[menu.id].includes(type)}
+                                                    onChange={() => togglePermission(menu.id, type)} />
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </Modal.Body>
-
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowModal(false)}>
-                        Cancel
-                    </Button>
-                    <Button className="primaryBtn" onClick={savePermissions}>
-                        Save Changes
-                    </Button>
+                    <button className="um-btn um-btn-ghost" onClick={() => setShowModal(false)}>Cancel</button>
+                    <button className="um-btn um-btn-primary" onClick={savePermissions} disabled={saving}>
+                        {saving ? <Spinner size="sm" /> : "Save changes"}
+                    </button>
                 </Modal.Footer>
             </Modal>
         </>

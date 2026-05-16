@@ -286,7 +286,7 @@ const IntentDomainContainer = () => {
                   />
                   <input
                     className="form-control mb-3"
-                    placeholder="Rasa Endpoint (http://localhost:5005)"
+                    placeholder="Rasa Endpoint (http://localhost:8503)"
                     value={activeIntentDomain?.rasa_endpoint || ""}
                     onChange={e =>
                       setActiveIntentDomain(prev => ({

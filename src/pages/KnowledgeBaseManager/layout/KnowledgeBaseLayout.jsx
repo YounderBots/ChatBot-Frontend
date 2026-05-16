@@ -1,97 +1,82 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Card, Container } from "react-bootstrap";
+import { BookOpen, FolderOpen, Settings2 } from "lucide-react";
+import APICall from "../../../APICalls/APICall";
 import ArticlesPanel from "../articles/ArticlesPanel";
 import ManageCategoriesDialog from "../dialog/ManageCategoriesDialog";
-
-import APICall from "../../../APICalls/APICall";
 import "./kb-layout.css";
 
 export default function KnowledgeBaseLayout() {
-  const navigate = useNavigate();
-
-  /* ================= CATEGORIES STATE ================= */
-  const [categories, setCategories] = useState([]);
-  //   { name: "Getting Started", count: 12 },
-  //   { name: "Account & Billing", count: 8 },
-  //   { name: "Technical Support", count: 15 },
-  //   { name: "Product Info", count: 6 },
-  //   { name: "Policies", count: 3 },
-  // ]);
-
+  const [categories, setCategories]       = useState([]);
   const [activeCategory, setActiveCategory] = useState("All");
-  const [manageOpen, setManageOpen] = useState(false);
+  const [manageOpen, setManageOpen]       = useState(false);
 
-  const totalCount = categories.reduce((sum, c) => sum + c.count, 0);
+  const totalCount = categories.reduce((sum, c) => sum + (c.count ?? 0), 0);
 
   const fetchCategory = async () => {
     try {
-
       const res = await APICall.getT("/knowledgebase/category");
-      const sortedCategories = [...res].sort(
-        (a, b) => a.order - b.order
-      );
-      setCategories(sortedCategories)
-
-
+      setCategories([...res].sort((a, b) => a.order - b.order));
     } catch (err) {
-      alert(err.message || "Failed to add category");
+      console.error("Failed to fetch categories:", err.message);
     }
   };
 
-  useEffect(() => {
-    fetchCategory();
-  }, [])
+  useEffect(() => { fetchCategory(); }, []);
 
-  /* ================= RENDER ================= */
   return (
-    <div className="kb-page-wrapper">
-      {/* ================= GRID LAYOUT ================= */}
-      <div className="kb-layout">
-        {/* ================= SIDEBAR ================= */}
-        <aside className="kb-sidebar">
-          {/* All Articles */}
-          <div
-            className={`all-articles ${activeCategory === "All" ? "active" : ""
-              }`}
-            onClick={() => setActiveCategory("All")}
-          >
-            All Articles <span className="count">({totalCount})</span>
+    <Container fluid className="h-100 d-flex flex-column" style={{ paddingLeft: 0, paddingRight: 0 }}>
+      <Card className="border-0 rounded-4 shadow h-100 kb-card">
+        <Card.Body className="p-0 d-flex kb-card-body">
+
+          {/* ── Sidebar ── */}
+          <aside className="kb-sidebar d-flex flex-column">
+            <div className="kb-sidebar-header">
+              <BookOpen size={16} className="me-2 opacity-75" />
+              Knowledge Base
+            </div>
+
+            <nav className="kb-nav flex-grow-1">
+              <div
+                className={`kb-cat-item ${activeCategory === "All" ? "active" : ""}`}
+                onClick={() => setActiveCategory("All")}
+              >
+                <span className="d-flex align-items-center gap-2">
+                  <FolderOpen size={13} />
+                  All Articles
+                </span>
+                <span className="kb-count">{totalCount}</span>
+              </div>
+
+              {categories.map((c) => (
+                <div
+                  key={c.id ?? c.name}
+                  className={`kb-cat-item ${activeCategory === c.name ? "active" : ""}`}
+                  onClick={() => setActiveCategory(c.name)}
+                >
+                  <span className="kb-cat-name">{c.name}</span>
+                  <span className="kb-count">{c.count ?? 0}</span>
+                </div>
+              ))}
+            </nav>
+
+            <button className="kb-manage-btn" onClick={() => setManageOpen(true)}>
+              <Settings2 size={13} className="me-2" />
+              Manage Categories
+            </button>
+          </aside>
+
+          {/* ── Main content ── */}
+          <div className="kb-main d-flex flex-column">
+            <ArticlesPanel
+              activeCategory={activeCategory}
+              onCategoryRefresh={fetchCategory}
+            />
           </div>
 
-          {/* Categories */}
-          {categories.map((c) => (
-            <div
-              key={c.name}
-              className={`category-row ${activeCategory === c.name ? "active" : ""
-                }`}
-              onClick={() => setActiveCategory(c.name)}
-            >
-              <span>{c.name}</span>
-              <span className="count">{c.count}</span>
-            </div>
-          ))}
+        </Card.Body>
+      </Card>
 
-          {/* Manage Categories */}
-          <button
-            className="manage-btn"
-            onClick={() => setManageOpen(true)}
-          >
-            Manage Categories
-          </button>
-        </aside>
-
-        {/* ================= MAIN CONTENT ================= */}
-        {/* 🔥 Wrapper ensures correct height sync with sidebar */}
-        <div className="kb-main">
-          <ArticlesPanel
-            activeCategory={activeCategory}
-            onNewArticle={() => navigate("/articles/new")}
-            onEdit={(a) => navigate(`/articles/${a.id}/edit`)}
-          />
-        </div>
-      </div>
-
-      {/* ================= MODAL ================= */}
       {manageOpen && (
         <ManageCategoriesDialog
           categories={categories}
@@ -100,6 +85,6 @@ export default function KnowledgeBaseLayout() {
           onClose={() => setManageOpen(false)}
         />
       )}
-    </div>
+    </Container>
   );
 }

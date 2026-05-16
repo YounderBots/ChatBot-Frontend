@@ -1,11 +1,49 @@
+import DOMPurify from "dompurify";
 import { RefreshCcwIcon, Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Button, Card, Col, Form, InputGroup, Modal, Row } from "react-bootstrap";
+import { Alert, Button, Card, Col, Form, InputGroup, Modal, Row, Spinner } from "react-bootstrap";
 import Select from "react-select";
 import APICall from "../../APICalls/APICall";
+import { useTheme } from "../../Context/ThemeContext";
 import "./Conversation.css";
 
 const ConversationManager = () => {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
+  const selectStyles = {
+    control: (base) => ({ ...base, border: "none", boxShadow: "none", backgroundColor: "transparent" }),
+    container: (base) => ({ ...base, border: "none" }),
+    menu: (base) => ({
+      ...base,
+      backgroundColor: isDark ? "#0e1d38" : "#ffffff",
+      border: isDark ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(0,0,0,0.1)",
+      boxShadow: isDark ? "0 8px 24px rgba(0,0,0,0.5)" : "0 8px 24px rgba(0,0,0,0.1)",
+      zIndex: 9999,
+    }),
+    menuList: (base) => ({ ...base, backgroundColor: "transparent", padding: "4px" }),
+    option: (base, state) => ({
+      ...base,
+      borderRadius: "6px",
+      backgroundColor: state.isSelected
+        ? (isDark ? "rgba(232,113,10,0.25)" : "rgba(232,113,10,0.12)")
+        : state.isFocused
+          ? (isDark ? "rgba(255,255,255,0.06)" : "rgba(232,113,10,0.06)")
+          : "transparent",
+      color: isDark ? "#ffffff" : "#0f172a",
+      cursor: "pointer",
+    }),
+    multiValue: (base) => ({ ...base, backgroundColor: isDark ? "rgba(232,113,10,0.2)" : "rgba(232,113,10,0.12)", borderRadius: "6px" }),
+    multiValueLabel: (base) => ({ ...base, color: isDark ? "#ffffff" : "#0f172a" }),
+    multiValueRemove: (base) => ({ ...base, color: isDark ? "rgba(255,255,255,0.6)" : "#475569", borderRadius: "0 6px 6px 0", ":hover": { backgroundColor: "rgba(232,113,10,0.3)", color: isDark ? "#ffffff" : "#0f172a" } }),
+    placeholder: (base) => ({ ...base, color: isDark ? "rgba(255,255,255,0.35)" : "#94a3b8" }),
+    singleValue: (base) => ({ ...base, color: isDark ? "#ffffff" : "#0f172a" }),
+    input: (base) => ({ ...base, color: isDark ? "#ffffff" : "#0f172a" }),
+    dropdownIndicator: (base) => ({ ...base, color: isDark ? "rgba(255,255,255,0.35)" : "#94a3b8" }),
+    indicatorSeparator: (base) => ({ ...base, backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0" }),
+    noOptionsMessage: (base) => ({ ...base, color: isDark ? "rgba(255,255,255,0.45)" : "#64748b" }),
+  };
+
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -22,6 +60,8 @@ const ConversationManager = () => {
   const [conversations, setConversations] = useState([]);
   const [filteredConversations, setFilteredConversations] = useState(conversations);
   const [Value, setValue] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState(null);
 
 
   useEffect(() => {
@@ -29,29 +69,24 @@ const ConversationManager = () => {
   }, []);
 
   const fetchConversations = async () => {
+    setLoading(true);
     try {
-
-      const data = await APICall.getT('/conversation/conversations')
-      // const data = await res.json();
-      console.log(data);
-
-
-
-      const normalized = data.map(mapSessionToConversation);
+      const data = await APICall.getT('/conversation/conversations');
+      const sessions = Array.isArray(data) ? data : (data.sessions || []);
+      const normalized = sessions.map(mapSessionToConversation);
       setConversations(normalized);
       setFilteredConversations(normalized);
     } catch (err) {
-      console.error("Failed to fetch conversations", err);
+      setToast({ variant: "danger", msg: "Failed to load conversations. Please try again." });
     } finally {
+      setLoading(false);
     }
   };
 
   const refreshConversations = async () => {
-    fetchConversations();
-    console.log(selectedConversation);
-
     setSelectedConversation(null);
-  }
+    fetchConversations();
+  };
 
   const mapSessionToConversation = (session) => {
     const msgs = session.conversations || [];
@@ -69,6 +104,8 @@ const ConversationManager = () => {
 
     return {
       id: session.session_key,
+      sessionId: session.session_id,             // numeric PK used by escalation API
+      convoId: lastMsg?.id || null,              // last message id for conversation_id
       user: session.user_name || "Anonymous",
       avatar: (session.user_name?.[0] || "U").toUpperCase(),
 
@@ -133,7 +170,7 @@ const ConversationManager = () => {
 
     if (endDate) {
       filtered = filtered.filter(
-        (c) => new Date(c.endDate) <= new Date(endDate)
+        (c) => c.endDate && new Date(c.endDate) <= new Date(endDate)
       );
     }
 
@@ -166,7 +203,6 @@ const ConversationManager = () => {
 
     setFilteredConversations(filtered);
     setCurrentPage(1);
-    console.log(filtered);
   };
 
 
@@ -206,7 +242,6 @@ const ConversationManager = () => {
 
 
   const exportJSON = () => {
-    alert("Exporting conversation as JSON");
     if (!selectedConversation) return;
 
     const json = JSON.stringify(selectedConversation, null, 2);
@@ -223,21 +258,21 @@ const ConversationManager = () => {
   };
 
   const exportPDF = () => {
-    alert("export PDF")
-  }
+    setToast({ variant: "info", msg: "PDF export is not yet implemented." });
+  };
 
   const flagConversation = () => {
-    alert("Conversation flagged");
+    setToast({ variant: "warning", msg: "Conversation flagged." });
   };
 
   const deleteConversation = () => {
     if (window.confirm("Are you sure you want to delete this conversation?")) {
-      console.log("Conversation deleted");
+      setToast({ variant: "success", msg: "Conversation deleted." });
     }
   };
 
   const escalateConversation = () => {
-    alert("Conversation escalated to agent");
+    setToast({ variant: "info", msg: "Conversation escalated to agent." });
   };
 
 
@@ -265,20 +300,18 @@ const ConversationManager = () => {
     if (!window.confirm("Escalate this conversation to a human agent?")) return;
 
     try {
-      await APICall.postWT("/conversation/escalation", {
-        session_id: row.sessionId,          // 🔴 required
-        conversation_id: row.convoId,       // 🔴 required
+      // FIX: postWT (no auth) → postT (Bearer token required by backend)
+      await APICall.postT("/conversation/escalation", {
+        session_id: row.sessionId,
+        conversation_id: row.convoId,
         priority: "HIGH",
         reason: "Manual escalation from dashboard",
       });
 
-      alert("Escalated successfully");
-
-      // Refresh table
-      fetchEscalations();
+      setToast({ variant: "success", msg: "Escalated successfully." });
+      fetchConversations();
     } catch (err) {
-      console.error(err);
-      alert("Failed to escalate");
+      setToast({ variant: "danger", msg: "Failed to escalate. Please try again." });
     }
   };
 
@@ -288,61 +321,29 @@ const ConversationManager = () => {
     currentPage * itemsPerPage
   );
 
-  // const formatChatText = (text) => {
-  //   if (!text) return "";
-
-  //   return text
-  //     // Bold **text**
-  //     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-  //     // New line AFTER colon :
-  //     .replace(/:\s*/g, ":")
-
-  //     // New line BEFORE emojis / icons
-  //     .replace(
-  //       /(\p{Extended_Pictographic})/gu,
-  //       "<br />$1"
-  //     )
-  //     .replace(
-  //       /\u2022/gu,
-  //       "<br /> &bull;"
-  //     );
-  // };
-
-
   const formatChatText = (text) => {
     if (!text) return "";
 
-    return text
-      // Escape HTML for safety
+    const html = text
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
-
-      // Bold **text**
       .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-
-      // Headings (**Title:**)
-      .replace(
-        /^<strong>(.+?):<\/strong>$/gm,
-        "<div class='chat-heading'>$1:</div>"
-      )
-
-      // Normalize bullets: ? or • → bullet row
-      .replace(
-        /^[?•]\s*(.+)$/gm,
-        "<div class='chat-bullet'>• $1</div>"
-      )
-
-      // Paragraph spacing (double newline)
+      .replace(/^<strong>(.+?):<\/strong>$/gm, "<div class='chat-heading'>$1:</div>")
+      .replace(/^[?•]\s*(.+)$/gm, "<div class='chat-bullet'>• $1</div>")
       .replace(/\n{2,}/g, "<div class='chat-gap'></div>")
-
-      // Single newline
       .replace(/\n/g, "<br />");
+    return DOMPurify.sanitize(html);
   };
 
   return (
 
     <Card className="shadow-sm border-0 rounded-4 ">
       <Card.Body>
+        {toast && (
+          <Alert variant={toast.variant} dismissible onClose={() => setToast(null)} className="mb-3">
+            {toast.msg}
+          </Alert>
+        )}
         <Row className="g-3 mb-3 ">
           <Col xs={4} md={6} lg={3}>
             <div className="input-group bg-white border rounded-3 shadow-sm ">
@@ -404,18 +405,7 @@ const ConversationManager = () => {
                 ]}
                 value={statusFilter}
                 onChange={(selected) => setStatusFilter(selected)}
-                styles={{
-                  control: (base) => ({
-                    ...base,
-                    border: "none",
-                    boxShadow: "none",
-                    backgroundColor: "transparent",
-                  }),
-                  container: (base) => ({
-                    ...base,
-                    border: "none",
-                  }),
-                }}
+                styles={selectStyles}
               />
             </div>
           </Col>
@@ -434,18 +424,7 @@ const ConversationManager = () => {
                 ]}
                 value={sentiment}
                 onChange={(selected) => setSentiment(selected)}
-                styles={{
-                  control: (base) => ({
-                    ...base,
-                    border: "none",
-                    boxShadow: "none",
-                    backgroundColor: "transparent",
-                  }),
-                  container: (base) => ({
-                    ...base,
-                    border: "none",
-                  }),
-                }}
+                styles={selectStyles}
               />
             </div>
           </Col>
@@ -464,18 +443,7 @@ const ConversationManager = () => {
                 ]}
                 value={selectedIntents}
                 onChange={(selected) => setSelectedIntents(selected)}
-                styles={{
-                  control: (base) => ({
-                    ...base,
-                    border: "none",
-                    boxShadow: "none",
-                    backgroundColor: "transparent",
-                  }),
-                  container: (base) => ({
-                    ...base,
-                    border: "none",
-                  }),
-                }}
+                styles={selectStyles}
               />
             </div>
           </Col>
@@ -495,7 +463,7 @@ const ConversationManager = () => {
           <Col xs={12} md={12} lg={3}>
             <div className="d-flex gap-2 align-content-end justify-content-end">
               <Button className="p-1"
-                style={{ backgroundColor: "#0d3357", width: "100px", height: "40px" }}
+                style={{ backgroundColor: "#e8710a", width: "100px", height: "40px" }}
                 onClick={handleApplyFilters}>
                 Apply
               </Button>
@@ -503,7 +471,7 @@ const ConversationManager = () => {
                 Reset
               </Button>
               <Button
-                className="p-1 gap-2"
+                className="flex items-center justify-center gap-2"
                 style={{ width: "150px", height: "40px" }}
                 onClick={refreshConversations}
               >
@@ -516,7 +484,13 @@ const ConversationManager = () => {
           <div className="d-flex flex-column flex-lg-row gap-2 w-100 mt-3">
             <Col xs={12} lg={4} className="bg-light border rounded mt-3 " style={{ overflowY: "auto" }}>
               <div className="">
-                {paginatedConversations
+                {loading ? (
+                  <div className="d-flex justify-content-center align-items-center py-5">
+                    <Spinner animation="border" variant="primary" />
+                  </div>
+                ) : paginatedConversations.length === 0 ? (
+                  <div className="text-center text-muted py-5">No conversations found.</div>
+                ) : paginatedConversations
                   .filter(conv =>
                     conv.user.toLowerCase().includes(search.toLowerCase()) ||
                     conv.id.toLowerCase().includes(search.toLowerCase()) ||
@@ -537,7 +511,7 @@ const ConversationManager = () => {
                         style={{
                           width: "44px",
                           height: "44px",
-                          backgroundColor: "#165d9c",
+                          backgroundColor: "#e8710a",
                           color: "white",
                           fontWeight: "bold",
                           fontSize: "0.85rem",
@@ -700,7 +674,7 @@ const ConversationManager = () => {
                     style={{ height: "65vh" }}>
                     {selectedConversation.messages.map((msg, idx) => (
                       <div
-                        key={idx}
+                        key={`${msg.timestamp}-${msg.type}-${idx}`}
                         className={`d-flex mb-2 ${msg.type === "user"
                           ? "justify-content-end"
                           : "justify-content-start"
@@ -711,9 +685,9 @@ const ConversationManager = () => {
                           style={{
                             backgroundColor:
                               msg.type === "user"
-                                ? "#165d9c"
+                                ? "#e8710a"
                                 : msg.type === "bot"
-                                  ? "#4fa3ff"
+                                  ? "#4A6FA5"
                                   : "#94a3b8",
                             color:
                               msg.type === "user" || msg.type === "agent"

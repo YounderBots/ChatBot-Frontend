@@ -1,3 +1,5 @@
+import DOMPurify from "dompurify";
+import { ChevronDown, ChevronUp, Link, Trash2 } from "lucide-react";
 
 const VARIABLES = [
   "{user_name}",
@@ -25,7 +27,6 @@ const ResponsesTab = ({
   // console.log("safeResponses", safeResponses);
 
 
-console.log("responses",responses);
 
 
   /* ---------- HELPERS ---------- */
@@ -111,19 +112,19 @@ console.log("responses",responses);
                   className="btn btn-light"
                   onClick={() => moveResponse(index, "up")}
                 >
-                  ↑
+                  <ChevronUp size={14} />
                 </button>
                 <button
                   className="btn btn-light"
                   onClick={() => moveResponse(index, "down")}
                 >
-                  ↓
+                  <ChevronDown size={14} />
                 </button>
                 <button
                   className="btn btn-light text-danger"
                   onClick={() => deleteResponse(res.id)}
                 >
-                  🗑
+                  <Trash2 size={14} />
                 </button>
               </div>
             </div>
@@ -154,7 +155,7 @@ console.log("responses",responses);
                     if (url) formatText("createLink", url);
                   }}
                 >
-                  🔗
+                  <Link size={14} />
                 </button>
               </div>
 
@@ -221,7 +222,7 @@ console.log("responses",responses);
               <div className="border rounded p-2 bg-light mb-2">
                 <div
                   dangerouslySetInnerHTML={{
-                    __html: res.content || "<em>No content</em>",
+                    __html: DOMPurify.sanitize(res.content || "<em>No content</em>"),
                   }}
                 />
               </div>

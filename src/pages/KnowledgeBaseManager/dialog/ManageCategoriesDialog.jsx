@@ -8,6 +8,7 @@ import {
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import APICall from "../../../APICalls/APICall";
+import { useToast } from "../../../components/useToast";
 
 export default function ManageCategoriesDialog({
   categories,
@@ -19,6 +20,8 @@ export default function ManageCategoriesDialog({
   const [editingIndex, setEditingIndex] = useState(null);
   const [editingValue, setEditingValue] = useState("");
   const [dragIndex, setDragIndex] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const { showToast, ToastContainer } = useToast();
 
   const updateCategoryOrder = async (updatedCategories) => {
     try {
@@ -33,27 +36,28 @@ export default function ManageCategoriesDialog({
       );
     } catch (err) {
       console.error("Failed to update order", err);
-      alert("Failed to save category order");
+      showToast("Failed to save category order.", "danger");
     }
   };
 
   /* ================= ADD ================= */
   const handleAdd = async () => {
     if (!newCategory.trim()) return;
-
+    setSaving(true);
     try {
-      const payload = {
+      const res = await APICall.postT("/knowledgebase/category", {
         name: newCategory.trim(),
         order: categories.length + 1,
-      };
-
-      const res = await APICall.postT("/knowledgebase/category", payload);
-      if (res.status == "Success") {
+      });
+      if (res.status === "Success" || res.id) {
+        setNewCategory("");
         fetchCategory();
+        showToast("Category added.", "success");
       }
-
     } catch (err) {
-      alert(err.message || "Failed to add category");
+      showToast(err.message || "Failed to add category.", "danger");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -70,7 +74,7 @@ export default function ManageCategoriesDialog({
       fetchCategory();
 
     } catch (err) {
-      alert(err.message || "Failed to delete category");
+      showToast(err.message || "Failed to delete category.", "danger");
     }
   };
 
@@ -97,7 +101,7 @@ export default function ManageCategoriesDialog({
       setEditingIndex(null);
       setEditingValue("");
     } catch (err) {
-      alert(err.message || "Failed to update category");
+      showToast(err.message || "Failed to update category.", "danger");
     }
   };
 
@@ -124,6 +128,7 @@ export default function ManageCategoriesDialog({
 
   return createPortal(
     <>
+      <ToastContainer />
       {/* ================= ICON CSS ================= */}
       <style>
         {`

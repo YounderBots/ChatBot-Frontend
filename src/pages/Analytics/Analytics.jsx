@@ -1,44 +1,70 @@
-import { Row, Col, } from "react-bootstrap";
-import KeymetricsGird from "./components/KeymetricsGrid";
-import NormalLayout from "../../components/NormalLayout";
-import AnalyticsCharts from "./components/Analyticscharts";
-import AnalyticsTables from "./components/AnalyticsTables";
-import AnalyticsReport from "./components/AnalyticsReporet";
+import { useState } from "react";
+import TabComponent from "../../components/TabComponent";
+import AnalyticsCSAT from "./components/AnalyticsCSAT";
+import AnalyticsExport from "./components/AnalyticsExport";
 import AnalyticsMetrics from "./components/AnalyticsMetrics";
-
-const AnalyticsContent = () => {
-  return (
-    <div className="p-2 P-100">
-      <Row>
-        <Col md={12} className="mb-3">
-          <KeymetricsGird />
-        </Col>
-        <Col md={12} className="mb-3">
-          <AnalyticsCharts />
-        </Col>
-
-        <Col md={12} className="mb-3">
-          <AnalyticsTables />
-        </Col>
-
-        <Col md={12} className="mb-3">
-          <AnalyticsReport />
-        </Col>
-
-        <Col md={12} className="mb-3">
-          <AnalyticsMetrics />
-        </Col>
-      </Row>
-    </div>
-  );
-};
+import AnalyticsReport from "./components/AnalyticsReporet";
+import AnalyticsTables from "./components/AnalyticsTables";
+import AnalyticsCharts from "./components/Analyticscharts";
+import KeymetricsGrid from "./components/KeymetricsGrid";
+import "./Analytics.css";
 
 const Analytics = () => {
-  return (
-    <NormalLayout>
-      <AnalyticsContent />
-    </NormalLayout>
-  );
+  const pageContent = {
+    title: "Analytics & Reports",
+    subTitle: "Performance insights and data exports",
+    tabs: [
+      {
+        tabTitle: "Overview",
+        tabKey: "overview",
+        tabContent: (
+          <div className="analytics-tab-pane">
+            <KeymetricsGrid />
+          </div>
+        ),
+      },
+      {
+        tabTitle: "Charts",
+        tabKey: "charts",
+        tabContent: (
+          <div className="analytics-tab-pane">
+            <AnalyticsCharts />
+          </div>
+        ),
+      },
+      {
+        tabTitle: "Real-time",
+        tabKey: "realtime",
+        tabContent: (
+          <div className="analytics-tab-pane">
+            <AnalyticsMetrics />
+          </div>
+        ),
+      },
+      {
+        tabTitle: "CSAT",
+        tabKey: "csat",
+        tabContent: (
+          <div className="analytics-tab-pane">
+            <AnalyticsCSAT />
+          </div>
+        ),
+      },
+      {
+        tabTitle: "Reports",
+        tabKey: "reports",
+        tabContent: (
+          <div className="analytics-tab-pane">
+            <AnalyticsTables />
+            <AnalyticsReport />
+            <AnalyticsExport />
+          </div>
+        ),
+      },
+    ],
+  };
+
+  return <TabComponent pageContent={pageContent} />;
 };
 
 export default Analytics;

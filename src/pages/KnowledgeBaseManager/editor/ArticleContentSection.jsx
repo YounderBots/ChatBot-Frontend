@@ -1,3 +1,4 @@
+import DOMPurify from "dompurify";
 import { useEffect, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -176,7 +177,7 @@ const ArticleContentSection = ({ form, setForm }) => {
         <div
           className="content-preview"
           dangerouslySetInnerHTML={{
-            __html: form.content || "<p>No content</p>",
+            __html: DOMPurify.sanitize(form.content || "<p>No content</p>"),
           }}
         />
       )}

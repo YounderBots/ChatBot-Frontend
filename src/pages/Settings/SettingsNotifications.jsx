@@ -1,380 +1,246 @@
 import React, { useState, useEffect } from "react";
-import { Card, Row, Col, Form, Button } from "react-bootstrap";
+import { Mail, Smartphone, Monitor } from "lucide-react";
+import APICall from "../../APICalls/APICall";
+
+const EVENT_LABELS = {
+  newConversation:       { label: "New Conversation",       desc: "When a visitor starts a new chat" },
+  escalatedConversation: { label: "Escalated Conversation", desc: "When a chat is escalated to an agent" },
+  lowConfidence:         { label: "Low Confidence Warning", desc: "When the bot is unsure about a response" },
+  failedConversation:    { label: "Failed Conversation",    desc: "When a conversation ends without resolution" },
+  negativeFeedback:      { label: "Negative Feedback",      desc: "When a visitor rates the chat poorly" },
+  dailySummary:          { label: "Daily Summary",          desc: "A recap of activity sent each morning" },
+  weeklyReport:          { label: "Weekly Report",          desc: "A comprehensive weekly digest" },
+};
+
 const defaultSettings = {
-    enableEmail: true,
-    adminEmail: "",
-    emailFrequency: "REALTIME",
-    emailEvents: {
-      newConversation: true,
-      escalatedConversation: true,
-      lowConfidence: false,
-      failedConversation: true,
-      negativeFeedback: true,
-      dailySummary: false,
-      weeklyReport: false,
-    },
+  enableEmail: true,  adminEmail: "", emailFrequency: "REALTIME",
+  emailEvents: { newConversation:true, escalatedConversation:true, lowConfidence:false, failedConversation:true, negativeFeedback:true, dailySummary:false, weeklyReport:false },
+  enablePush: false,
+  pushEvents:  { newConversation:false, escalatedConversation:false, lowConfidence:false, failedConversation:false, negativeFeedback:false, dailySummary:false, weeklyReport:false },
+  enableInApp: true, sound: "default",
+};
 
-    enablePush: false,
-    pushEvents: {
-      newConversation: false,
-      escalatedConversation: false,
-      lowConfidence: false,
-      failedConversation: false,
-      negativeFeedback: false,
-      dailySummary: false,
-      weeklyReport: false,
-    },
+const Toggle = ({ checked, onChange, disabled }) => (
+  <label className="s-switch">
+    <input type="checkbox" checked={checked} onChange={onChange} disabled={disabled} />
+    <span className="s-switch-track" />
+  </label>
+);
 
-    enableInApp: true,
-    sound: "default",
-  };
+const EventToggles = ({ events, onChange }) => (
+  <>
+    {Object.entries(EVENT_LABELS).map(([key, { label, desc }]) => (
+      <div key={key} className="s-toggle-row">
+        <div className="s-toggle-text">
+          <h4>{label}</h4>
+          <p>{desc}</p>
+        </div>
+        <Toggle checked={events[key]} onChange={() => onChange(key)} />
+      </div>
+    ))}
+  </>
+);
 
 const SettingsNotifications = () => {
-  // const [settings, setSettings] = useState({
-  //   enableEmail: true,
-  //   adminEmail: "",
-  //   emailFrequency: "REALTIME",
-  //   emailEvents: {
-  //     newConversation: true,
-  //     escalatedConversation: true,
-  //     lowConfidence: false,
-  //     failedConversation: true,
-  //     negativeFeedback: true,
-  //     dailySummary: false,
-  //     weeklyReport: false,
-  //   },
-
-  //   enablePush: false,
-  //   pushEvents: {
-  //     newConversation: false,
-  //     escalatedConversation: false,
-  //     lowConfidence: false,
-  //     failedConversation: false,
-  //     negativeFeedback: false,
-  //     dailySummary: false,
-  //     weeklyReport: false,
-  //   },
-
-  //   enableInApp: true,
-  //   sound: "default",
-  // });
-
-  const toggleEmailEvent = (key) => {
-    setSettings({
-      ...settings,
-      emailEvents: {
-        ...settings.emailEvents,
-        [key]: !settings.emailEvents[key],
-      },
-    });
-  };
-  
-
-  const togglePushEvent = (key) => {
-    setSettings({
-      ...settings,
-      pushEvents: {
-        ...settings.pushEvents,
-        [key]: !settings.pushEvents[key],
-      },
-    });
-  };
   const [settings, setSettings] = useState(defaultSettings);
-  const [savedSettings, setSavedSettings] = useState(defaultSettings);
-  const [hasChanges, setHasChanges] = useState(false);
-  const [lastSavedAt, setLastSavedAt] = useState(null);
-  const [emailError, setEmailError] = useState("");
+  const [saved, setSaved]       = useState(defaultSettings);
+  const [hasChanges, setChanges]= useState(false);
+  const [lastSaved, setLastSaved]= useState(null);
+  const [emailError, setEmailErr]= useState("");
+  const [loading, setLoading]   = useState(true);
+  const [saving, setSaving]     = useState(false);
+  const [apiError, setApiError] = useState(null);
+
+  useEffect(() => { setChanges(JSON.stringify(settings) !== JSON.stringify(saved)); }, [settings, saved]);
+
   useEffect(() => {
-    setHasChanges(
-      JSON.stringify(settings) !== JSON.stringify(savedSettings)
-    );
-  }, [settings, savedSettings]);
+    (async () => {
+      try {
+        const data = await APICall.getT("/settings/notification_settings");
+        const n = data.notification || {};
+        const emailKeys = Array.isArray(n.notification_events) ? n.notification_events : (n.notification_events || "").split(",").filter(Boolean);
+        const pushKeys  = Array.isArray(n.push_notification_events) ? n.push_notification_events : (n.push_notification_events || "").split(",").filter(Boolean);
+        const base = { newConversation:false, escalatedConversation:false, lowConfidence:false, failedConversation:false, negativeFeedback:false, dailySummary:false, weeklyReport:false };
+        const emailEvents = { ...base }; emailKeys.forEach(k => { if (k in emailEvents) emailEvents[k] = true; });
+        const pushEvents  = { ...base }; pushKeys.forEach(k  => { if (k in pushEvents)  pushEvents[k]  = true; });
+        const loaded = {
+          enableEmail: n.email_notifications_enabled ?? true,
+          adminEmail:  n.admin_email || "",
+          emailFrequency: n.frequency || "REALTIME",
+          emailEvents,
+          enablePush: n.push_notifications_admin ?? false,
+          pushEvents,
+          enableInApp: n.in_app_notifications ?? true,
+          sound: "default",
+        };
+        setSettings(loaded); setSaved(loaded);
+      } catch (err) {
+        if (!err.message?.includes("404")) setApiError(err.message);
+      } finally { setLoading(false); }
+    })();
+  }, []);
 
-  
-  const handleSave = () => {
+  const set = (patch) => setSettings((s) => ({ ...s, ...patch }));
+  const toggleEmail = (k) => set({ emailEvents: { ...settings.emailEvents, [k]: !settings.emailEvents[k] } });
+  const togglePush  = (k) => set({ pushEvents:  { ...settings.pushEvents,  [k]: !settings.pushEvents[k]  } });
+
+  const handleSave = async () => {
     if (emailError) return;
-
-    setSavedSettings(settings);
-    setLastSavedAt(new Date());
-    setHasChanges(false);
-
-    alert("Notification settings saved successfully ✅");
+    setSaving(true); setApiError(null);
+    try {
+      await APICall.postT("/settings/notification_settings", {
+        notification: {
+          email_notifications: {
+            email_notification: settings.enableEmail,
+            admin_email: settings.adminEmail,
+            notification_events: Object.entries(settings.emailEvents).filter(([,v])=>v).map(([k])=>k),
+            frequency: settings.emailFrequency,
+          },
+          push_notifications: {
+            push_notifications: settings.enablePush,
+            notification_events: Object.entries(settings.pushEvents).filter(([,v])=>v).map(([k])=>k),
+          },
+          in_app: settings.enableInApp,
+        },
+      });
+      setSaved(settings); setLastSaved(new Date()); setChanges(false);
+    } catch (err) { setApiError(err.message); }
+    finally { setSaving(false); }
   };
 
-  const handleDiscard = () => {
-    setSettings(savedSettings);
-    setEmailError("");
-    setHasChanges(false);
-  };
-
+  if (loading) return <div className="s-loading"><div className="s-spin" /></div>;
 
   return (
-    <Card className="border-0 overflow-hidden">
-      <Card.Body className="p-0 d-flex flex-column">
-        <div
-          className="flex-grow-1 overflow-auto p-4"
-          style={{ maxHeight: "calc(100vh - 440px)" }}>
+    <>
+      {apiError && <div className="s-alert s-alert-danger">{apiError}</div>}
 
-        <h6 className="text-primary mb-3">Email Notifications</h6>
+      {/* ── Email ──────────────────────────────────── */}
+      <div className="s-section">
+        <div className="s-section-head">
+          <div className="s-section-icon"><Mail size={14} /></div>
+          <div>
+            <p className="s-section-title">Email Notifications</p>
+            <p className="s-section-desc">Alerts delivered to your inbox</p>
+          </div>
+        </div>
 
-        <Form.Check
-          type="switch"
-          label="Enable Email Notifications"
-          checked={settings.enableEmail}
-          onChange={(e) =>
-            setSettings({ ...settings, enableEmail: e.target.checked })
-          }
-        />
+        <div className="s-card">
+          <div className="s-toggle-row" style={{ borderBottom: "1px solid #f3f4f6", marginBottom: 16 }}>
+            <div className="s-toggle-text">
+              <h4>Enable Email Notifications</h4>
+              <p>Send event alerts to the admin email address</p>
+            </div>
+            <Toggle checked={settings.enableEmail} onChange={(e) => set({ enableEmail: e.target.checked })} />
+          </div>
 
-        <Row className="mt-3">
-          <Col md={6}>
-            <Form.Label>Admin Email</Form.Label>
-            <Form.Control
-              type="email"
-              value={settings.adminEmail}
-              isInvalid={!!emailError}
-              onChange={(e) => {
-                const value = e.target.value;
-                setSettings({ ...settings, adminEmail: value });
+          <div className="s-grid-2" style={{ marginBottom: 20 }}>
+            <div className="s-field">
+              <label className="s-label">Admin Email</label>
+              <input type="email" className={`s-input ${emailError ? "is-error" : ""}`}
+                value={settings.adminEmail}
+                disabled={!settings.enableEmail}
+                placeholder="admin@yourcompany.com"
+                onChange={(e) => {
+                  const v = e.target.value;
+                  set({ adminEmail: v });
+                  setEmailErr(!v ? "Required" : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? "Invalid email" : "");
+                }} />
+              {emailError && <span className="s-field-error">{emailError}</span>}
+            </div>
 
-                if (!value) {
-                  setEmailError("Email is required");
-                } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-                  setEmailError("Enter a valid email address");
-                } else {
-                  setEmailError("");
-                }
-              }}
-            />
+            <div className="s-field">
+              <label className="s-label">Send Frequency</label>
+              <div className="s-pill-group" style={{ marginTop: 4 }}>
+                {[
+                  { v: "REALTIME", l: "Real-time" },
+                  { v: "HOURLY",   l: "Hourly" },
+                  { v: "DAILY",    l: "Daily digest" },
+                ].map(({ v, l }) => (
+                  <div key={v} className={`s-pill ${settings.emailFrequency === v ? "is-active" : ""}`}
+                    onClick={() => settings.enableEmail && set({ emailFrequency: v })}>
+                    {l}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
 
-            {emailError && (
-              <Form.Control.Feedback type="invalid">
-                {emailError}
-              </Form.Control.Feedback>
-            )}
+          <p className="s-label" style={{ marginBottom: 8 }}>Notify me when…</p>
+          <EventToggles events={settings.emailEvents} onChange={toggleEmail} />
+        </div>
+      </div>
 
-          </Col>
-        </Row>
+      {/* ── Push ───────────────────────────────────── */}
+      <div className="s-section">
+        <div className="s-section-head">
+          <div className="s-section-icon"><Smartphone size={14} /></div>
+          <div>
+            <p className="s-section-title">Push Notifications</p>
+            <p className="s-section-desc">Browser & device push alerts for admins</p>
+          </div>
+        </div>
 
-        <Row className="mt-3">
-          <Col md={12}>
-            <Form.Label>Notification Events</Form.Label>
+        <div className="s-card">
+          <div className="s-toggle-row" style={{ borderBottom: "1px solid #f3f4f6", marginBottom: 16 }}>
+            <div className="s-toggle-text">
+              <h4>Enable Push Notifications</h4>
+              <p>Requires browser permission to send notifications</p>
+            </div>
+            <Toggle checked={settings.enablePush} onChange={(e) => set({ enablePush: e.target.checked })} />
+          </div>
+          <EventToggles events={settings.pushEvents} onChange={togglePush} />
+        </div>
+      </div>
 
-            <Form.Check
-              className="mb-3"
-              label="New Conversation"
-              checked={settings.emailEvents.newConversation}
-              onChange={() => toggleEmailEvent("newConversation")}
-            />
-            <Form.Check
-              className="mb-3"
-              label="Escalated Conversation"
-              checked={settings.emailEvents.escalatedConversation}
-              onChange={() => toggleEmailEvent("escalatedConversation")}
-            />
-            <Form.Check
-              className="mb-3"
-              label="Low Confidence Warning"
-              checked={settings.emailEvents.lowConfidence}
-              onChange={() => toggleEmailEvent("lowConfidence")}
-            />
-            <Form.Check
-              className="mb-3"
-              label="Failed Conversation"
-              checked={settings.emailEvents.failedConversation}
-              onChange={() => toggleEmailEvent("failedConversation")}
-            />
-            <Form.Check
-              className="mb-3"
-              label="Negative Feedback"
-              checked={settings.emailEvents.negativeFeedback}
-              onChange={() => toggleEmailEvent("negativeFeedback")}
-            />
-            <Form.Check
-              className="mb-3"
-              label="Daily Summary"
-              checked={settings.emailEvents.dailySummary}
-              onChange={() => toggleEmailEvent("dailySummary")}
-            />
-            <Form.Check
-              className="mb-3"
-              label="Weekly Report"
-              checked={settings.emailEvents.weeklyReport}
-              onChange={() => toggleEmailEvent("weeklyReport")}
-            />
-          </Col>
-        </Row>
+      {/* ── In-app ─────────────────────────────────── */}
+      <div className="s-section">
+        <div className="s-section-head">
+          <div className="s-section-icon"><Monitor size={14} /></div>
+          <div>
+            <p className="s-section-title">In-App Notifications</p>
+            <p className="s-section-desc">Alerts displayed inside the admin dashboard</p>
+          </div>
+        </div>
 
-        <Row className="mt-3">
-          <Col md={6}>
-            <Form.Label>Frequency</Form.Label>
+        <div className="s-card">
+          <div className="s-toggle-row">
+            <div className="s-toggle-text">
+              <h4>Show In-App Alerts</h4>
+              <p>Toast notifications for key events while you're logged in</p>
+            </div>
+            <Toggle checked={settings.enableInApp} onChange={(e) => set({ enableInApp: e.target.checked })} />
+          </div>
 
-            <Form.Check
-              className="mb-2"
-              type="radio"
-              name="emailFrequency"
-              label="Real-time"
-              checked={settings.emailFrequency === "REALTIME"}
-              onChange={() =>
-                setSettings({ ...settings, emailFrequency: "REALTIME" })
-              }
-            />
-            <Form.Check
-              className="mb-2"
-              type="radio"
-              name="emailFrequency"
-              label="Hourly Digest"
-              checked={settings.emailFrequency === "HOURLY"}
-              onChange={() =>
-                setSettings({ ...settings, emailFrequency: "HOURLY" })
-              }
-            />
-            <Form.Check
-              type="radio"
-              name="emailFrequency"
-              label="Daily Digest"
-              checked={settings.emailFrequency === "DAILY"}
-              onChange={() =>
-                setSettings({ ...settings, emailFrequency: "DAILY" })
-              }
-            />
-          </Col>
-        </Row>
-
-        <hr />
-
-        <h6 className="text-primary mb-3">Push Notifications</h6>
-
-        <Form.Check
-          type="switch"
-          label="Enable for admins"
-          checked={settings.enablePush}
-          onChange={(e) =>
-            setSettings({ ...settings, enablePush: e.target.checked })
-          }
-        />
-
-        <Row className="mt-3">
-          <Col md={12}>
-            <Form.Label>Events</Form.Label>
-
-            <Form.Check
-              className="mb-3"
-              label="New Conversation"
-              checked={settings.pushEvents.newConversation}
-              onChange={() => togglePushEvent("newConversation")}
-            />
-
-            <Form.Check
-              className="mb-3"
-              label="Escalated Conversation"
-              checked={settings.pushEvents.escalatedConversation}
-              onChange={() => togglePushEvent("escalatedConversation")}
-            />
-
-            <Form.Check
-              className="mb-3"
-              label="Low Confidence Warning"
-              checked={settings.pushEvents.lowConfidence}
-              onChange={() => togglePushEvent("lowConfidence")}
-            />
-
-            <Form.Check
-              className="mb-3"
-              label="Failed Conversation"
-              checked={settings.pushEvents.failedConversation}
-              onChange={() => togglePushEvent("failedConversation")}
-            />
-
-            <Form.Check
-              className="mb-3"
-              label="Negative Feedback"
-              checked={settings.pushEvents.negativeFeedback}
-              onChange={() => togglePushEvent("negativeFeedback")}
-            />
-
-            <Form.Check
-              className="mb-3"
-              label="Daily Summary"
-              checked={settings.pushEvents.dailySummary}
-              onChange={() => togglePushEvent("dailySummary")}
-            />
-
-            <Form.Check
-              className="mb-3"
-              label="Weekly Report"
-              checked={settings.pushEvents.weeklyReport}
-              onChange={() => togglePushEvent("weeklyReport")}
-            />
-          </Col>
-        </Row>
-
-
-        <hr />
-
-        <h6 className="text-primary mb-3">In-App Notifications</h6>
-
-        <Form.Check
-          type="switch"
-          label="Enable In-App Notifications"
-          checked={settings.enableInApp}
-          onChange={(e) =>
-            setSettings({ ...settings, enableInApp: e.target.checked })
-          }
-        />
-
-        <Row className="mt-3">
-          <Col md={6}>
-            <Form.Label>Notification Sound</Form.Label>
-            <Form.Select
-              value={settings.sound}
-              onChange={(e) =>
-                setSettings({ ...settings, sound: e.target.value })
-              }
-            >
+          <div className="s-field" style={{ marginTop: 16, maxWidth: 240 }}>
+            <label className="s-label">Notification Sound</label>
+            <select className="s-select" value={settings.sound}
+              onChange={(e) => set({ sound: e.target.value })}>
               <option value="default">Default</option>
               <option value="chime">Chime</option>
               <option value="alert">Alert</option>
-            </Form.Select>
-
-          </Col>
-        </Row>
-
-        </div>
-        <hr />
-
-        <div className="d-flex align-items-center justify-content-between mt-3">
-          <div className="text-muted">
-            {lastSavedAt
-              ? <>Last saved: <strong>{lastSavedAt.toLocaleString()}</strong></>
-              : "Not saved yet"}
+              <option value="none">None</option>
+            </select>
           </div>
+        </div>
+      </div>
 
-          <div className="d-flex gap-2">
-            <Button
-              size="sm"
-              variant="danger"
-              onClick={handleDiscard}
-              disabled={!hasChanges}
-            >
+      {/* ── Save bar ───────────────────────────────── */}
+      {hasChanges && (
+        <div className="s-save-bar">
+          <span className="s-save-bar-left">
+            {lastSaved ? <>Last saved {lastSaved.toLocaleTimeString()}</> : "Unsaved changes"}
+          </span>
+          <div className="s-save-bar-right">
+            <button className="s-btn s-btn-ghost" onClick={() => { setSettings(saved); setChanges(false); }}>
               Discard
-            </Button>
-
-            <Button
-              size="sm"
-              variant="primary"
-              onClick={handleSave}
-              disabled={!hasChanges || !!emailError}
-            >
-              Save Changes
-            </Button>
+            </button>
+            <button className="s-btn s-btn-primary" onClick={handleSave} disabled={saving || !!emailError}>
+              {saving ? "Saving…" : "Save changes"}
+            </button>
           </div>
         </div>
-
-
-
-      </Card.Body>
-    </Card>
+      )}
+    </>
   );
 };
 

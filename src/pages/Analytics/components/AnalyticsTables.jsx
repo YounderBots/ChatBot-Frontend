@@ -204,8 +204,8 @@ const AnalyticsTables = () => {
                                     </thead>
 
                                     <tbody>
-                                        {sortedData.map((row, index) => (
-                                            <tr key={index}>
+                                        {sortedData.map((row) => (
+                                            <tr key={row.intent}>
                                                 <td>{row.intent}</td>
                                                 <td>{row.uses}</td>
                                                 <td>{row.confidence}%</td>
@@ -376,8 +376,8 @@ const AnalyticsTables = () => {
                                 </thead>
 
                                 <tbody>
-                                    {userEngagementData.map((row, index) => (
-                                        <tr key={index}>
+                                    {userEngagementData.map((row) => (
+                                        <tr key={row.session}>
                                             <td>{row.session}</td>
                                             <td>{row.platform}</td>
                                             <td>{row.messages}</td>

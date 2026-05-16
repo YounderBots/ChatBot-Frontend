@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import { useState } from "react";
 
 const MIN_PHRASES = 10;
@@ -148,7 +149,7 @@ const TrainingPhrasesTab = ({ phrases, setPhrases }) => {
               className="btn btn-link text-secondary p-0 px-2"
               onClick={() => handleDelete(phrase.id)}
             >
-              ✕
+              <X size={14} />
             </button>
           </div>
         ))}

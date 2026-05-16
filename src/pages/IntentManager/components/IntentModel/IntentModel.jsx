@@ -6,6 +6,67 @@ import QuickRepliesTab from "./tabs/QuickRepliesTab";
 import ResponsesTab from "./tabs/ResponsesTab";
 import TrainingPhrasesTab from "./tabs/TrainingPhrasesTab";
 
+const DEMO_INTENTS = [
+  {
+    intent_name: "product_inquiry",
+    displayName: "Product Inquiry",
+    description: "User asks about a specific product or feature",
+    priority: "Medium",
+    status: "ACTIVE",
+    phrases: [
+      { text: "Tell me about your product", language: "en" },
+      { text: "What features do you offer?", language: "en" },
+      { text: "How does this work?", language: "en" },
+      { text: "What plans are available?", language: "en" },
+      { text: "Can you explain the pricing?", language: "en" },
+    ],
+    responses: [
+      { id: "demo-r1", content: "Great question! We offer a range of plans starting from Free to Enterprise. Would you like me to walk you through the features?", type: "text", priority: 1, quickReplies: [
+        { id: "demo-qr1", text: "View pricing", value: "view_pricing", actionType: "POSTBACK" },
+        { id: "demo-qr2", text: "Book a demo",  value: "book_demo",   actionType: "POSTBACK" },
+      ]},
+      { id: "demo-r2", content: "I'd be happy to help! Our platform includes intent management, a knowledge base, live chat, and advanced analytics.", type: "text", priority: 2, quickReplies: [] },
+    ],
+  },
+  {
+    intent_name: "refund_request",
+    displayName: "Refund Request",
+    description: "User requests a refund or cancellation",
+    priority: "High",
+    status: "ACTIVE",
+    phrases: [
+      { text: "I want a refund",             language: "en" },
+      { text: "How do I get my money back?", language: "en" },
+      { text: "Cancel my subscription",      language: "en" },
+      { text: "I was charged incorrectly",   language: "en" },
+      { text: "I need to cancel my plan",    language: "en" },
+    ],
+    responses: [
+      { id: "demo-r3", content: "I'm sorry to hear that. Could you please share your account email so I can look into your billing?", type: "text", priority: 1, quickReplies: [
+        { id: "demo-qr3", text: "Provide email",   value: "provide_email",   actionType: "POSTBACK" },
+        { id: "demo-qr4", text: "Talk to billing", value: "talk_to_billing", actionType: "POSTBACK" },
+      ]},
+    ],
+  },
+  {
+    intent_name: "feature_request",
+    displayName: "Feature Request",
+    description: "User requests a new feature or improvement",
+    priority: "Low",
+    status: "ACTIVE",
+    phrases: [
+      { text: "Can you add this feature?",   language: "en" },
+      { text: "I'd like to suggest an idea", language: "en" },
+      { text: "Feature request",             language: "en" },
+      { text: "Would it be possible to...",  language: "en" },
+      { text: "I wish you had…",             language: "en" },
+    ],
+    responses: [
+      { id: "demo-r5", content: "Thanks for the suggestion! We love hearing from our users. I'll pass this on to the product team.", type: "text", priority: 1, quickReplies: [] },
+    ],
+  },
+];
+
 const IntentModal = ({ isOpen, onClose, fetchIntents, intent, onSaveAndTest, mode }) => {
 
 
@@ -14,6 +75,8 @@ const IntentModal = ({ isOpen, onClose, fetchIntents, intent, onSaveAndTest, mod
   const [activeTab, setActiveTab] = useState("basic");
   const [responses, setResponses] = useState([]);
   const [activeQuickResponseId, setActiveQuickResponseId] = useState(null);
+  const [validationErrors, setValidationErrors] = useState([]);
+  const [saving, setSaving] = useState(false);
   const advancedRef = useRef(null);
   const [trainingPhrases, setTrainingPhrases] = useState(
     intent?.trainingPhrases || []
@@ -80,20 +143,6 @@ const IntentModal = ({ isOpen, onClose, fetchIntents, intent, onSaveAndTest, mod
     }));
   };
 
-
-
-  useEffect(() => {
-    if (intent) {
-      console.log("RAW ADVANCED FROM BACKEND 👉", {
-        context_requirement: intent.context_requirement,
-        context_output: intent.context_output,
-        confidence: intent.confidence,
-        response_status: intent.response_status,
-        responses: intent.responses
-
-      });
-    }
-  }, [intent]);
 
 
   useEffect(() => {
@@ -194,38 +243,37 @@ const IntentModal = ({ isOpen, onClose, fetchIntents, intent, onSaveAndTest, mod
 
 
   const handleSave = async () => {
+    // ── Validation ──────────────────────────────────────────
+    const errs = [];
+    if (!intentDraft.intent_name?.trim())
+      errs.push("Intent name (snake_case) is required.");
+    if (!intentDraft.displayName?.trim())
+      errs.push("Display name is required.");
+    if (trainingPhrases.length === 0)
+      errs.push("Add at least one training phrase.");
+
+    if (errs.length > 0) {
+      setValidationErrors(errs);
+      setActiveTab("basic");
+      return;
+    }
+    setValidationErrors([]);
+    // ────────────────────────────────────────────────────────
+
     const payload = buildBackendPayload();
-    console.log("SAVE PAYLOAD 👉", payload);
-
+    setSaving(true);
     try {
-      let response;
-
-
       if (intent?.id) {
-        // 🔄 UPDATE
-        response = await APICall.postT(
-          `/intents/intents/${intent.id}`,
-          payload
-        );
-        console.log("API intent UPDATED ✅", response);
+        await APICall.postT(`/intents/intents/${intent.id}`, payload);
       } else {
-        // ➕ CREATE
-        response = await APICall.postT(
-          "/intents/intents",
-          payload
-        );
-        console.log("API intent CREATED ✅", response);
+        await APICall.postT("/intents/intents", payload);
       }
-
       onClose();
       fetchIntents();
-
     } catch (error) {
-      console.error("Save Intent Failed ", error);
-      alert(
-        error?.response?.data?.message ||
-        "Failed to save intent. Please try again."
-      );
+      setValidationErrors([error?.message || "Failed to save intent. Please try again."]);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -250,8 +298,27 @@ const IntentModal = ({ isOpen, onClose, fetchIntents, intent, onSaveAndTest, mod
   };
 
 
-  const handleDelete = () => {
-    console.log("Delete intent");
+  const handleDelete = () => {};
+
+  const fillDemo = () => {
+    const demo = DEMO_INTENTS[Math.floor(Math.random() * DEMO_INTENTS.length)];
+    setIntentDraft({
+      intent_name: demo.intent_name,
+      displayName: demo.displayName,
+      description: demo.description,
+      intent_type: "",
+      category:    "",
+      priority:    demo.priority,
+      status:      demo.status,
+    });
+    setTrainingPhrases(demo.phrases.map((p, i) => ({
+      id: `demo-${Date.now()}-${i}`,
+      text: p.text,
+      language: p.language,
+    })));
+    setResponses(demo.responses);
+    setActiveTab("basic");
+    setValidationErrors([]);
   };
 
 
@@ -272,6 +339,18 @@ const IntentModal = ({ isOpen, onClose, fetchIntents, intent, onSaveAndTest, mod
                 {mode === "edit" && "Edit Intent"}
                 {mode === "duplicate" && "Duplicate Intent"}
               </h5>
+              <div className="d-flex align-items-center gap-2 ms-auto me-2">
+                {mode === "add" && (
+                  <button
+                    className="btn btn-outline-secondary btn-sm"
+                    onClick={fillDemo}
+                    title="Prefill with demo data for quick testing"
+                    style={{ fontSize: 12 }}
+                  >
+                    Fill Demo Data
+                  </button>
+                )}
+              </div>
               <button className="btn-close" onClick={onClose} />
             </div>
 
@@ -339,28 +418,35 @@ const IntentModal = ({ isOpen, onClose, fetchIntents, intent, onSaveAndTest, mod
             </div>
 
             {/* Footer */}
-            <div className="modal-footer bg-light px-4">
-              <button
-                className="btn btn-danger me-auto"
-                onClick={handleDelete}
-              >
-                Delete Intent
-              </button>
-
-              <button className="btn btn-secondary" onClick={onClose}>
-                Cancel
-              </button>
-
-              <button
-                className="btn btn-secondary"
-                onClick={handleSaveAndTest}
-              >
-                Save & Test
-              </button>
-
-              <button className="btn btn-primary" onClick={handleSave}>
-                Save Intent
-              </button>
+            <div className="modal-footer bg-light px-4 flex-column align-items-stretch">
+              {validationErrors.length > 0 && (
+                <div className="alert alert-danger py-2 mb-2 w-100" style={{ fontSize: 13 }}>
+                  {validationErrors.map((e, i) => <div key={i}>• {e}</div>)}
+                </div>
+              )}
+              <div className="d-flex w-100">
+                <button
+                  className="btn btn-danger me-auto"
+                  onClick={handleDelete}
+                >
+                  Delete Intent
+                </button>
+                <button className="btn btn-secondary me-2" onClick={onClose}>
+                  Cancel
+                </button>
+                <button
+                  className="btn btn-secondary me-2"
+                  onClick={handleSaveAndTest}
+                  disabled={saving}
+                >
+                  Save & Test
+                </button>
+                <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+                  {saving
+                    ? <><span className="spinner-border spinner-border-sm me-1" />Saving…</>
+                    : "Save Intent"}
+                </button>
+              </div>
             </div>
 
           </div>

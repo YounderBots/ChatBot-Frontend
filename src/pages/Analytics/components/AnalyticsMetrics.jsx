@@ -1,95 +1,121 @@
-import React, { useState, useEffect } from "react";
-import '../Analytics.css'
-import { Card, Row, Col, } from "react-bootstrap";
+import { Activity, CheckCircle, MessageCircle, Radio, Users, XCircle, AlertTriangle } from "lucide-react";
+import { useEffect, useState } from "react";
+import "../Analytics.css";
 
-const AnalyticsMetrics = () => {
-    const [liveUsers, setLiveUsers] = useState(0);
-    const [activeConversations, setActiveConversations] = useState(0);
-    const [messagesPerMinute, setMessagesPerMinute] = useState(0);
-    const [systemHealth, setSystemHealth] = useState("Healthy");
+const pulse = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-    useEffect(() => {
-        const updateMetrics = () => {
-            setLiveUsers(Math.floor(Math.random() * 200) + 50);
-            setActiveConversations(Math.floor(Math.random() * 120) + 20);
-            setMessagesPerMinute(Math.floor(Math.random() * 500) + 100);
+const HEALTH_CONFIG = {
+  Healthy:  { color: "#22c55e", icon: CheckCircle,    label: "All systems operational" },
+  Degraded: { color: "#f59e0b", icon: AlertTriangle,   label: "Performance degraded" },
+  Down:     { color: "#ef4444", icon: XCircle,         label: "Service unavailable" },
+};
 
-            const healthStates = ["Healthy", "Degraded", "Down"];
-            setSystemHealth(healthStates[Math.floor(Math.random() * healthStates.length)]);
-        };
+const LiveCard = ({ icon: Icon, label, value, sub, color, accent }) => (
+  <div className="an-live-card" style={{ "--accent": accent || "#e8710a" }}>
+    <div className="an-live-card-icon" style={{ color }}>
+      <Icon size={20} />
+    </div>
+    <div className="an-live-card-body">
+      <div className="an-live-label">{label}</div>
+      <div className="an-live-value" style={{ color }}>{value}</div>
+      {sub && <div className="an-live-sub">{sub}</div>}
+    </div>
+    <div className="an-live-pulse" style={{ background: color }} />
+  </div>
+);
 
-        updateMetrics();
-        const interval = setInterval(updateMetrics, 5000);
+export default function AnalyticsMetrics() {
+  const [metrics, setMetrics] = useState({
+    liveUsers:    pulse(50, 250),
+    activeConvs:  pulse(20, 140),
+    msgPerMin:    pulse(100, 600),
+    health:       "Healthy",
+  });
+  const [tick, setTick] = useState(0);
 
-        return () => clearInterval(interval);
-    }, []);
+  useEffect(() => {
+    const id = setInterval(() => {
+      setMetrics({
+        liveUsers:   pulse(50, 250),
+        activeConvs: pulse(20, 140),
+        msgPerMin:   pulse(100, 600),
+        health:      ["Healthy", "Healthy", "Healthy", "Degraded", "Down"][
+          Math.floor(Math.random() * 5)
+        ],
+      });
+      setTick(t => t + 1);
+    }, 5000);
+    return () => clearInterval(id);
+  }, []);
 
-    return (
-        <div className="g-2 P-100">
-            <Row>
-                <Col md={12}>
-                    <Card className="rounded-4 shadow-sm analytics-card">
-                        <Card.Body className="analytics-card-body">
-                            <h5 className="mb-2">Real-time Metrics</h5>
-                            <Row className="g-2">
+  const hc = HEALTH_CONFIG[metrics.health];
 
-                                {/* Live Users */}
-                                <Col lg={3} md={6}>
-                                    <Card className="h-100 border-0 bg-light">
-                                        <Card.Body className="analytics-card-body d-flex flex-column justify-content-center align-items-center text-center h-100">
-                                            <div className="text-muted small">Live Users</div>
-                                            <h3 className="fw-bold mt-1">{liveUsers}</h3>
-                                            <div className="small text-muted">Updated every 5s</div>
-                                        </Card.Body>
-                                    </Card>
-                                </Col>
+  return (
+    <div className="an-realtime-root">
+      {/* Header */}
+      <div className="an-realtime-header">
+        <div className="an-realtime-dot" />
+        <span className="an-realtime-title">Live Dashboard</span>
+        <span className="an-realtime-badge">Auto-refreshes every 5s</span>
+        <span className="an-realtime-tick">Update #{tick + 1}</span>
+      </div>
 
-                                {/* Active Conversations */}
-                                <Col lg={3} md={6}>
-                                    <Card className="h-100 border-0 bg-light">
-                                        <Card.Body className="analytics-card-body d-flex flex-column justify-content-center align-items-center text-center h-100">
-                                            <div className="text-muted small">Active Conversations</div>
-                                            <h3 className="fw-bold mt-1">{activeConversations}</h3>
-                                        </Card.Body>
-                                    </Card>
-                                </Col>
+      {/* Cards */}
+      <div className="an-live-grid">
+        <LiveCard
+          icon={Users}
+          label="Live Users"
+          value={metrics.liveUsers.toLocaleString()}
+          sub="Active right now"
+          color="#3b82f6"
+          accent="#3b82f6"
+        />
+        <LiveCard
+          icon={MessageCircle}
+          label="Active Conversations"
+          value={metrics.activeConvs.toLocaleString()}
+          sub="Open sessions"
+          color="#e8710a"
+          accent="#e8710a"
+        />
+        <LiveCard
+          icon={Activity}
+          label="Messages / Minute"
+          value={metrics.msgPerMin.toLocaleString()}
+          sub="Throughput"
+          color="#a855f7"
+          accent="#a855f7"
+        />
+        <LiveCard
+          icon={hc.icon}
+          label="System Health"
+          value={metrics.health}
+          sub={hc.label}
+          color={hc.color}
+          accent={hc.color}
+        />
+      </div>
 
-                                {/* Messages per Minute */}
-                                <Col lg={3} md={6}>
-                                    <Card className="h-100 border-0 bg-light">
-                                        <Card.Body className="analytics-card-body d-flex flex-column justify-content-center align-items-center text-center h-100">
-                                            <div className="text-muted small">Messages / Minute</div>
-                                            <h3 className="fw-bold mt-1">{messagesPerMinute}</h3>
-                                        </Card.Body>
-                                    </Card>
-                                </Col>
-
-                                {/* System Health */}
-                                <Col lg={3} md={6}>
-                                    <Card className="h-100 border-0 bg-light">
-                                        <Card.Body className="analytics-card-body d-flex flex-column justify-content-center align-items-center text-center h-100">
-                                            <div className="text-muted small">System Health</div>
-                                            <h5
-                                                className={`fw-semibold mt-2 ${systemHealth === "Healthy"
-                                                    ? "text-success"
-                                                    : systemHealth === "Degraded"
-                                                        ? "text-warning"
-                                                        : "text-danger"
-                                                    }`}
-                                            >
-                                                {systemHealth}
-                                            </h5>
-                                        </Card.Body>
-                                    </Card>
-                                </Col>
-                            </Row>
-                        </Card.Body>
-                    </Card>
-                </Col>
-            </Row >
-        </div >
-    );
+      {/* Activity bar */}
+      <div className="an-activity-bar">
+        <div className="an-activity-label">
+          <Radio size={13} className="me-2" style={{ color: "#e8710a" }} />
+          Live Activity Feed
+        </div>
+        <div className="an-activity-stream">
+          {Array.from({ length: 24 }, (_, i) => {
+            const h = pulse(10, 100);
+            return (
+              <div
+                key={i}
+                className="an-bar-col"
+                style={{ height: `${h}%`, opacity: 0.4 + h / 200 }}
+                title={`${h} messages`}
+              />
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
 }
-
-
-export default AnalyticsMetrics

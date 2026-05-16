@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import { useMemo } from "react";
 import ArticleEditor from "../editor/ArticleEditor";
 import "./new-article-dialog.css";
@@ -22,7 +23,7 @@ const DuplicateArticleDialog = ({ onClose, article, onSave }) => {
                 {/* HEADER */}
                 <div className="kb-dialog-header">
                     <h3>Duplicate Article</h3>
-                    <button className="close-btn" onClick={onClose}>✕</button>
+                    <button className="close-btn" onClick={onClose}><X size={16} /></button>
                 </div>
 
                 {/* BODY */}
