@@ -85,7 +85,10 @@ const IntentGrid = ({ intents, selectedIds, onToggleOne, onEdit, onDelete, onDup
 
                                 <div className="d-flex gap-3 pt-3 border-top mb-3">
                                     <div className="d-flex flex-column">
-                                        <span className="fw-bold text-dark">
+                                        <span className={`badge ${
+                                            intent.trainingPhrases < 3 ? "bg-danger" :
+                                            intent.trainingPhrases < 10 ? "bg-warning text-dark" : "bg-success"
+                                        }`}>
                                             {intent.trainingPhrases}
                                         </span>
                                         <span className="small text-muted" style={{ fontSize: '11px' }}>

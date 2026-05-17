@@ -1,5 +1,6 @@
 import { Activity, CheckCircle, MessageCircle, Radio, Users, XCircle, AlertTriangle } from "lucide-react";
 import { useEffect, useState } from "react";
+import APICall from "../../../APICalls/APICall";
 import "../Analytics.css";
 
 const pulse = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -26,25 +27,33 @@ const LiveCard = ({ icon: Icon, label, value, sub, color, accent }) => (
 
 export default function AnalyticsMetrics() {
   const [metrics, setMetrics] = useState({
-    liveUsers:    pulse(50, 250),
-    activeConvs:  pulse(20, 140),
-    msgPerMin:    pulse(100, 600),
-    health:       "Healthy",
+    liveUsers:   0,
+    activeConvs: 0,
+    totalConvs:  0,
+    health:      "Healthy",
   });
   const [tick, setTick] = useState(0);
 
-  useEffect(() => {
-    const id = setInterval(() => {
+  const fetchMetrics = async () => {
+    try {
+      const kpi = await APICall.getT("/analytics/kpi");
+      const avgRt = kpi.avgResponseTime ?? 0;
+      const health = avgRt < 3 ? "Healthy" : avgRt < 8 ? "Degraded" : "Down";
       setMetrics({
-        liveUsers:   pulse(50, 250),
-        activeConvs: pulse(20, 140),
-        msgPerMin:   pulse(100, 600),
-        health:      ["Healthy", "Healthy", "Healthy", "Degraded", "Down"][
-          Math.floor(Math.random() * 5)
-        ],
+        liveUsers:   kpi.activeUsers        ?? 0,
+        activeConvs: kpi.totalConversations ?? 0,
+        totalConvs:  kpi.totalConversations ?? 0,
+        health,
       });
-      setTick(t => t + 1);
-    }, 5000);
+    } catch {
+      // Non-fatal — keep last known values
+    }
+    setTick(t => t + 1);
+  };
+
+  useEffect(() => {
+    fetchMetrics();
+    const id = setInterval(fetchMetrics, 5000);
     return () => clearInterval(id);
   }, []);
 
@@ -80,9 +89,9 @@ export default function AnalyticsMetrics() {
         />
         <LiveCard
           icon={Activity}
-          label="Messages / Minute"
-          value={metrics.msgPerMin.toLocaleString()}
-          sub="Throughput"
+          label="Total Conversations"
+          value={metrics.totalConvs.toLocaleString()}
+          sub="All time"
           color="#a855f7"
           accent="#a855f7"
         />
@@ -96,7 +105,7 @@ export default function AnalyticsMetrics() {
         />
       </div>
 
-      {/* Activity bar */}
+      {/* Activity bar — decorative only */}
       <div className="an-activity-bar">
         <div className="an-activity-label">
           <Radio size={13} className="me-2" style={{ color: "#e8710a" }} />

@@ -76,17 +76,18 @@ const AnalyticsExport = () => {
 
         <div className="d-flex flex-wrap gap-2">
           {[
-            { path: "/export/conversations", file: "conversations.csv",   label: "Conversations", variant: "outline-primary"   },
-            { path: "/export/escalations",   file: "escalations.csv",     label: "Escalations",   variant: "outline-success"   },
-            { path: "/export/analytics",     file: "analytics.csv",       label: "Analytics",     variant: "outline-secondary" },
-            { path: "/audit/logs/export",    file: "audit_logs.csv",      label: "Audit Logs",    variant: "outline-dark"      },
-          ].map(({ path, file, label, variant }) => (
-            <Button key={path} size="sm" variant={variant}
+            { path: "/export/conversations",     file: "conversations.csv",   label: "Conversations", variant: "outline-primary",   fmt: "CSV" },
+            { path: "/export/conversations/pdf", file: "conversations.pdf",   label: "Conversations", variant: "outline-info",      fmt: "PDF" },
+            { path: "/export/escalations",       file: "escalations.csv",     label: "Escalations",   variant: "outline-success",   fmt: "CSV" },
+            { path: "/export/analytics",         file: "analytics.csv",       label: "Analytics",     variant: "outline-secondary", fmt: "CSV" },
+            { path: "/audit/logs/export",        file: "audit_logs.csv",      label: "Audit Logs",    variant: "outline-dark",      fmt: "CSV" },
+          ].map(({ path, file, label, variant, fmt }) => (
+            <Button key={file} size="sm" variant={variant}
               onClick={() => dl(path, file)}
               disabled={loading === file}>
               {loading === file
                 ? <><Spinner size="sm" className="me-1" />Downloading…</>
-                : <><Download size={13} className="me-1" />{label} CSV</>}
+                : <><Download size={13} className="me-1" />{label} {fmt}</>}
             </Button>
           ))}
         </div>

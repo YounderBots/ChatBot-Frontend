@@ -121,7 +121,7 @@ const TopBar = ({ isMobile, toggleSidebar, activeMenu, setActiveMenu }) => {
   const [searchFocus,  setSearchFocus]  = useState(false);
   const [notifications, setNotifications] = useState(0);
   const navigate    = useNavigate();
-  const { logout }  = useAuth();
+  const { user, org, roleName, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const searchRef   = useRef(null);
 
@@ -137,7 +137,7 @@ const TopBar = ({ isMobile, toggleSidebar, activeMenu, setActiveMenu }) => {
       }
     };
     fetchCount();
-    const id = setInterval(fetchCount, 60_000);
+    const id = setInterval(fetchCount, 15_000);
     return () => clearInterval(id);
   }, []);
 
@@ -169,7 +169,7 @@ const TopBar = ({ isMobile, toggleSidebar, activeMenu, setActiveMenu }) => {
       ) : (
         <div className="topbar-left">
           <h4 className="topbar-page-title">{activeMenu}</h4>
-          <span className="topbar-breadcrumb">ChatViq Admin</span>
+          <span className="topbar-breadcrumb">{org?.name || "ChatViq Admin"}</span>
         </div>
       )}
 
@@ -229,15 +229,15 @@ const TopBar = ({ isMobile, toggleSidebar, activeMenu, setActiveMenu }) => {
             }
             <span className="online-dot" />
           </div>
-          {!isMobile && <span className="user-display-name">Admin</span>}
+          {!isMobile && <span className="user-display-name">{user?.fullname?.split(" ")[0] || "Admin"}</span>}
 
           {showMenu && (
             <div className="dp-menu">
               <div className="dp-menu-header">
                 {dpImage && <img src={dpImage} alt="User" className="dp-menu-avatar" />}
                 <div>
-                  <div className="dp-menu-name">Administrator</div>
-                  <div className="dp-menu-role">Super Admin</div>
+                  <div className="dp-menu-name">{user?.fullname || "Administrator"}</div>
+                  <div className="dp-menu-role">{roleName || "Admin"}</div>
                 </div>
               </div>
               <div className="dp-menu-divider" />

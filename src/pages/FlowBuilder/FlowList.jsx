@@ -1,9 +1,9 @@
 /**
  * FlowList.jsx — Table of all conversation flows with CRUD + publish actions.
  */
-import { GitBranch, Plus, ToggleLeft, ToggleRight, Trash2 } from "lucide-react";
+import { GitBranch, History, Plus, RotateCcw, ToggleLeft, ToggleRight, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { Alert, Badge, Button, Card, Spinner, Table } from "react-bootstrap";
+import { Alert, Badge, Button, Card, ListGroup, Modal, Offcanvas, Spinner, Table } from "react-bootstrap";
 import APICall from "../../APICalls/APICall";
 import { useConfirm } from "../../components/useConfirm";
 import { useToast } from "../../components/useToast";
@@ -11,9 +11,12 @@ import { useToast } from "../../components/useToast";
 const STATUS_VARIANT = { PUBLISHED: "success", DRAFT: "secondary", DELETED: "danger" };
 
 const FlowList = ({ onEdit, onCreateNew }) => {
-  const [flows, setFlows]     = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState("");
+  const [flows, setFlows]         = useState([]);
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState("");
+  const [versions, setVersions]   = useState([]);
+  const [historyFlow, setHistoryFlow] = useState(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const { showToast, ToastContainer } = useToast();
   const { confirm, ConfirmDialog } = useConfirm();
 
@@ -42,12 +45,46 @@ const FlowList = ({ onEdit, onCreateNew }) => {
     }
   };
 
+  const handleUnpublish = async (id) => {
+    try {
+      await APICall.postT(`/flows/${id}/unpublish`, {});
+      load();
+      showToast("Flow unpublished.", "warning");
+    } catch (e) {
+      showToast(e?.message || "Failed to unpublish flow.", "danger");
+    }
+  };
+
   const handleToggle = async (id) => {
     try {
       await APICall.postT(`/flows/${id}/toggle`, {});
       load();
     } catch (e) {
       showToast(e?.message || "Failed to toggle flow.", "danger");
+    }
+  };
+
+  const handleHistory = async (flow) => {
+    setHistoryFlow(flow);
+    setVersions([]);
+    setHistoryOpen(true);
+    try {
+      const data = await APICall.getT(`/flows/${flow.id}/versions`);
+      setVersions(Array.isArray(data) ? data : []);
+    } catch {
+      showToast("Failed to load version history.", "danger");
+    }
+  };
+
+  const handleRevert = async (flowId, versionId, versionNum) => {
+    if (!await confirm(`Revert to version ${versionNum}? The flow will be set to DRAFT.`)) return;
+    try {
+      await APICall.postT(`/flows/${flowId}/revert/${versionId}`, {});
+      setHistoryOpen(false);
+      load();
+      showToast(`Reverted to version ${versionNum}.`, "success");
+    } catch (e) {
+      showToast(e?.message || "Failed to revert flow.", "danger");
     }
   };
 
@@ -122,11 +159,18 @@ const FlowList = ({ onEdit, onCreateNew }) => {
                 <td>
                   <div className="d-flex gap-2">
                     <Button size="sm" variant="outline-primary" onClick={() => onEdit(f)}>Edit</Button>
-                    {f.status !== "PUBLISHED" && (
+                    {f.status === "PUBLISHED" ? (
+                      <Button size="sm" variant="outline-warning" onClick={() => handleUnpublish(f.id)}>
+                        Unpublish
+                      </Button>
+                    ) : (
                       <Button size="sm" variant="outline-success" onClick={() => handlePublish(f.id)}>
                         Publish
                       </Button>
                     )}
+                    <Button size="sm" variant="outline-secondary" title="Version history" onClick={() => handleHistory(f)}>
+                      <History size={13} />
+                    </Button>
                     <Button size="sm" variant="outline-danger" onClick={() => handleDelete(f.id)}>
                       <Trash2 size={13} />
                     </Button>
@@ -137,6 +181,41 @@ const FlowList = ({ onEdit, onCreateNew }) => {
           </tbody>
         </Table>
       </Card>
+
+      <Offcanvas show={historyOpen} onHide={() => setHistoryOpen(false)} placement="end">
+        <Offcanvas.Header closeButton>
+          <Offcanvas.Title>
+            <History size={16} className="me-2" />
+            Version History — {historyFlow?.name}
+          </Offcanvas.Title>
+        </Offcanvas.Header>
+        <Offcanvas.Body>
+          {versions.length === 0 ? (
+            <p className="text-muted">No published versions yet.</p>
+          ) : (
+            <ListGroup variant="flush">
+              {versions.map(v => (
+                <ListGroup.Item key={v.id} className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <strong>v{v.version}</strong>
+                    <div className="text-muted small">
+                      {v.created_at ? new Date(v.created_at).toLocaleString() : "—"}
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline-secondary"
+                    title="Revert to this version"
+                    onClick={() => handleRevert(historyFlow.id, v.id, v.version)}
+                  >
+                    <RotateCcw size={13} className="me-1" />Revert
+                  </Button>
+                </ListGroup.Item>
+              ))}
+            </ListGroup>
+          )}
+        </Offcanvas.Body>
+      </Offcanvas>
     </div>
   );
 };

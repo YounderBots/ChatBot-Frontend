@@ -85,11 +85,6 @@ const ChatWidget = ({
             type: 'action'
         });
 
-        // Call external callback if provided
-        if (onUserAction) {
-            onUserAction(actionObj);
-        }
-
         const socket = socketRef.current;
 
         if (!socket || socket.readyState !== WebSocket.OPEN) {
@@ -102,8 +97,8 @@ const ChatWidget = ({
         }
 
         socket.send(JSON.stringify({
-            type: "MESSAGE",
-            text: actionObj.value
+            session_id: sessionId,
+            message: actionObj.value
         }));
 
         // Simulate bot response
@@ -209,6 +204,8 @@ const ChatWidget = ({
 
             socket.onopen = () => {
                 reconnectAttemptsRef.current = 0;
+                const token = sessionStorage.getItem("token");
+                socket.send(JSON.stringify({ type: "AUTH", token }));
             };
 
             socket.onmessage = (event) => {
@@ -352,7 +349,7 @@ const ChatWidget = ({
                     ) : (
                         <div className="d-flex flex-column">
                             {messages.map((msg) => (
-                                <MessageBubble key={msg.id} message={msg} onAction={handleBotAction} />
+                                <MessageBubble key={msg._key || msg.id} message={msg} onAction={handleBotAction} />
                             ))}
                             {isTyping && <TypingIndicator />}
                             <div ref={messagesEndRef} />

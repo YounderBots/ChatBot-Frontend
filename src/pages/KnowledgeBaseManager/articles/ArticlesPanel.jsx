@@ -96,7 +96,7 @@ export default function ArticlesPanel({ activeCategory = "All", onCategoryRefres
         ),
         updatedAt: item.updated_at,
         author:    item.author,
-        views:     247,
+        views:     item.view_count ?? 0,
       })));
     } catch (err) {
       console.error("Failed to fetch articles:", err.message);

@@ -74,6 +74,11 @@ function EscalationQueueTab() {
 
   useEffect(() => { load(); }, [load]);
 
+  useEffect(() => {
+    const id = setInterval(() => { load(); }, 15_000);
+    return () => clearInterval(id);
+  }, [load]);
+
   const filtered = tickets.filter(t => {
     if (!statusFilter) return true;
     return (t.status || "").toLowerCase().includes(statusFilter.toLowerCase());

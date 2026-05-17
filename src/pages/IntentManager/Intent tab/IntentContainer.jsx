@@ -157,6 +157,46 @@ const IntentContainer = () => {
     setShowBulkMenu(false)
   }
 
+  /* ------------------ Import / Export ------------------ */
+
+  const handleExport = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const resp = await fetch(
+        `${import.meta.env.VITE_ADMIN_BASE_URL || ""}/intents/export`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!resp.ok) throw new Error("Export failed");
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "intents.json";
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("Intents exported.", "success");
+    } catch {
+      showToast("Export failed.", "danger");
+    }
+  };
+
+  const handleImport = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      const result = await APICall.postT("/intents/bulk", data);
+      const created = result?.created ?? 0;
+      const updated = result?.updated ?? 0;
+      showToast(`Imported ${created + updated} intents (${created} created, ${updated} updated).`, "success");
+      loadIntents();
+    } catch {
+      showToast("Import failed — check file format.", "danger");
+    }
+  };
+
   /* ------------------ Filtered / sorted list ------------------ */
 
   const displayedIntents = intents
@@ -331,6 +371,28 @@ const IntentContainer = () => {
               <i className="bi bi-layout-three-columns"></i>
             </button>
           </div>
+
+          {/* Import / Export */}
+          <button
+            className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center"
+            onClick={handleExport}
+            title="Export intents as JSON"
+          >
+            <i className="bi bi-download me-1"></i> Export
+          </button>
+          <label
+            className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center mb-0"
+            title="Import intents from JSON"
+            style={{ cursor: "pointer" }}
+          >
+            <i className="bi bi-upload me-1"></i> Import
+            <input
+              type="file"
+              accept=".json"
+              style={{ display: "none" }}
+              onChange={handleImport}
+            />
+          </label>
 
           {/* Add Button */}
           {canAdd && (

@@ -108,7 +108,14 @@ const IntentTable = ({
                   </span>
                 </td>
 
-                <td className="col-phrases">{intent.phrases_count}</td>
+                <td className="col-phrases">
+                  <span className={`badge ${
+                    intent.phrases_count < 3 ? "bg-danger" :
+                    intent.phrases_count < 10 ? "bg-warning text-dark" : "bg-success"
+                  }`}>
+                    {intent.phrases_count} phrases
+                  </span>
+                </td>
                 <td className="col-responses">{intent.responses_count}</td>
 
                 <td>{intent.usage}</td>

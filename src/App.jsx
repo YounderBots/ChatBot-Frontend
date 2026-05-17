@@ -5,6 +5,19 @@ import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-d
 import { useAuth, usePermission } from './Context/AuthContext'
 import Login from './BasePages/Login'
 import Register from './BasePages/Register'
+import SuperAdminLogin from './pages/Management/SuperAdminLogin'
+import ManagementLayout from './pages/Management/ManagementLayout'
+import ManagementDashboard from './pages/Management/ManagementDashboard'
+import OrgDetail from './pages/Management/OrgDetail'
+import AuditLogViewer from './pages/Management/AuditLogViewer'
+import AdminUsersPage from './pages/Management/AdminUsersPage'
+import AdminRolesPage from './pages/Management/AdminRolesPage'
+import PlatformAnalytics from './pages/Management/PlatformAnalytics'
+import PlatformBilling from './pages/Management/PlatformBilling'
+import PlatformChannels from './pages/Management/PlatformChannels'
+import PlatformIntents from './pages/Management/PlatformIntents'
+import PlatformKnowledgeBase from './pages/Management/PlatformKnowledgeBase'
+import PlatformUsers from './pages/Management/PlatformUsers'
 import Analytics from './pages/Analytics/Analytics'
 import Billing from './pages/Billing/Billing'
 import Channels from './pages/Channels/Channels'
@@ -43,6 +56,13 @@ const NotFound = () => {
   return <Navigate to={user || token ? '/Dashboard' : '/login'} replace />
 }
 
+/** Guard for super-admin management routes — checks sa_token, not the tenant token */
+const SuperAdminRoute = ({ children }) => {
+  const saToken = sessionStorage.getItem('sa_token')
+  if (!saToken) return <Navigate to="/management/login" replace />
+  return children
+}
+
 const App = () => {
   return (
     <Router basename='/admin'>
@@ -73,6 +93,24 @@ const App = () => {
           {/* ── Operations & Security ── */}
           <Route path="/Live-Agent" element={<PermissionRoute path="/Live-Agent"><LiveAgent /></PermissionRoute>} />
           <Route path="/Security" element={<PermissionRoute path="/Security"><Security /></PermissionRoute>} />
+        </Route>
+
+        {/* ── Platform management (super-admin only) ── */}
+        {/* Uses sa_token in sessionStorage — structurally separate from tenant auth */}
+        <Route path="/management/login" element={<SuperAdminLogin />} />
+        <Route path="/management" element={<Navigate to="/management/login" replace />} />
+        <Route element={<SuperAdminRoute><ManagementLayout /></SuperAdminRoute>}>
+          <Route path="/management/dashboard"      element={<ManagementDashboard />} />
+          <Route path="/management/org/:orgId"   element={<OrgDetail />} />
+          <Route path="/management/analytics"    element={<PlatformAnalytics />} />
+          <Route path="/management/intents"      element={<PlatformIntents />} />
+          <Route path="/management/knowledge-base" element={<PlatformKnowledgeBase />} />
+          <Route path="/management/users"        element={<PlatformUsers />} />
+          <Route path="/management/billing"      element={<PlatformBilling />} />
+          <Route path="/management/channels"     element={<PlatformChannels />} />
+          <Route path="/management/audit-logs"   element={<AuditLogViewer />} />
+          <Route path="/management/admins"       element={<AdminUsersPage />} />
+          <Route path="/management/admin-roles"  element={<AdminRolesPage />} />
         </Route>
 
         {/* 404 fallback */}

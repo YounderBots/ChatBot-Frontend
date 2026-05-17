@@ -190,14 +190,19 @@ const DashboardContent = () => {
   useEffect(() => {
     const id = setInterval(async () => {
       try {
-        const kpi = await apiGetKpiMetrics(trendRange);
+        const [kpi, recent] = await Promise.all([
+          apiGetKpiMetrics(trendRange),
+          apiGetRecentConversations(),
+        ]);
+        setTotalConversations(kpi.totalConversations);
         setActiveUsers(kpi.activeUsers);
+        setAvgResponseTime(kpi.avgResponseTime);
+        setResolutionRate(kpi.resolutionRate);
+        setRecentConversations(recent);
       } catch (err) {
-        // Polling failure is non-fatal; the last known value remains displayed.
-        // Avoid overwriting dashboardError — that is reserved for the initial load.
         console.warn("[Dashboard] Live poll failed:", err?.message);
       }
-    }, 30000); // 30s polling — avoid hammering the server
+    }, 30000);
     return () => clearInterval(id);
   }, [trendRange]);
 

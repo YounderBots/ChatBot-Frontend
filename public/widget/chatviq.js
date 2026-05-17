@@ -51,6 +51,7 @@
   let msgQueue     = [];
   let reconnectN   = 0;
   let config       = {};
+  let proactiveTriggered = false;
 
   // ── CSS ───────────────────────────────────────────────────────────────────
   const css = `
@@ -384,6 +385,51 @@
     if (typingEl) { typingEl.remove(); typingEl = null; }
   }
 
+  // ── Proactive triggers ────────────────────────────────────────────────────
+  function _getVisitCount() {
+    const key = `cvq_visits_${API_KEY}`;
+    const n = parseInt(localStorage.getItem(key) || "0", 10) + 1;
+    localStorage.setItem(key, String(n));
+    return n;
+  }
+
+  function _getScrollPct() {
+    const body = document.body;
+    const html = document.documentElement;
+    const docH = Math.max(body.scrollHeight, html.scrollHeight, body.offsetHeight, html.offsetHeight) - window.innerHeight;
+    return docH > 0 ? Math.round((window.scrollY / docH) * 100) : 0;
+  }
+
+  async function checkProactiveTrigger(scrollPct) {
+    if (isOpen || proactiveTriggered) return;
+    if (!config.organization_id) return;
+    try {
+      const params = new URLSearchParams({
+        page_url:    window.location.href,
+        scroll_pct:  scrollPct ?? _getScrollPct(),
+        visit_count: _getVisitCount(),
+        org_id:      config.organization_id,
+      });
+      const resp = await fetch(`${ADMIN_BASE}/proactive/match?${params}`, {
+        headers: { "X-Widget-Key": API_KEY },
+      });
+      if (!resp.ok) return;
+      const trigger = await resp.json();
+      if (!trigger || !trigger.is_active) return;
+
+      proactiveTriggered = true;
+      const delay = (trigger.delay_seconds || 0) * 1000;
+      setTimeout(() => {
+        if (!isOpen) toggleWidget();
+        if (trigger.message) {
+          setTimeout(() => appendMessage("bot", trigger.message), 300);
+        }
+      }, delay);
+    } catch (_) {
+      // Non-fatal: proactive triggers are best-effort
+    }
+  }
+
   // ── Bootstrap ─────────────────────────────────────────────────────────────
   async function init() {
     try {
@@ -400,6 +446,16 @@
 
     injectStyles();
     buildWidget();
+
+    // Evaluate proactive triggers on load (URL + time-on-page based)
+    checkProactiveTrigger(0);
+
+    // Re-evaluate on scroll (scroll-depth based triggers)
+    let _scrollTimer = null;
+    window.addEventListener("scroll", () => {
+      clearTimeout(_scrollTimer);
+      _scrollTimer = setTimeout(() => checkProactiveTrigger(_getScrollPct()), 500);
+    }, { passive: true });
   }
 
   if (document.readyState === "loading") {

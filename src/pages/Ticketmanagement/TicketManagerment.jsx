@@ -30,7 +30,7 @@ function SLABadge({ createdAt, priority }) {
 
 // ─── Status / priority helpers ─────────────────────────────────────────────────
 const statusClass = (s) => {
-    const m = { open: "tm-badge-open", assigned: "tm-badge-assigned", closed: "tm-badge-closed", "in progress": "tm-badge-inprogress" };
+    const m = { open: "tm-badge-open", assigned: "tm-badge-assigned", closed: "tm-badge-closed", "in progress": "tm-badge-inprogress", reopened: "tm-badge-reopened" };
     return m[(s || "").toLowerCase()] || "tm-badge-closed";
 };
 
@@ -200,6 +200,10 @@ const TicketManagementContent = () => {
     };
 
     useEffect(() => { fetchAgents(); fetchEscalations(); }, []);
+    useEffect(() => {
+        const id = setInterval(fetchEscalations, 15_000);
+        return () => clearInterval(id);
+    }, []);
     useEffect(() => { setCurrentPage(1); }, [filters, tickets.length]);
 
     const filteredTickets = tickets.filter((t) => {
@@ -264,6 +268,7 @@ const TicketManagementContent = () => {
                     <option value="">All statuses</option>
                     <option>OPEN</option>
                     <option>ASSIGNED</option>
+                    <option>REOPENED</option>
                     <option>CLOSED</option>
                 </select>
 

@@ -1,5 +1,5 @@
 import DOMPurify from "dompurify";
-import { ChevronDown, ChevronUp, Link, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Link, PlusCircle, Trash2 } from "lucide-react";
 
 const VARIABLES = [
   "{user_name}",
@@ -52,8 +52,39 @@ const ResponsesTab = ({
           preview: false,
           priority: prev.length + 1,
           quickReplies: [],
+          variants: [],
         },
       ])
+    );
+  };
+
+  const addVariant = (responseId) => {
+    setResponses(prev =>
+      prev.map(r =>
+        r.id === responseId
+          ? { ...r, variants: [...(r.variants || []), ""] }
+          : r
+      )
+    );
+  };
+
+  const updateVariant = (responseId, variantIndex, value) => {
+    setResponses(prev =>
+      prev.map(r =>
+        r.id === responseId
+          ? { ...r, variants: (r.variants || []).map((v, i) => i === variantIndex ? value : v) }
+          : r
+      )
+    );
+  };
+
+  const removeVariant = (responseId, variantIndex) => {
+    setResponses(prev =>
+      prev.map(r =>
+        r.id === responseId
+          ? { ...r, variants: (r.variants || []).filter((_, i) => i !== variantIndex) }
+          : r
+      )
     );
   };
 
@@ -236,6 +267,38 @@ const ResponsesTab = ({
                 value={res.priority}
                 disabled
               />
+            </div>
+
+            {/* RESPONSE VARIANTS */}
+            <div className="mt-3">
+              <div className="d-flex align-items-center justify-content-between mb-1">
+                <small className="text-muted fw-semibold">
+                  Response Variants
+                  <span className="ms-1 text-secondary fw-normal">(bot picks one randomly)</span>
+                </small>
+                <button
+                  className="btn btn-sm btn-outline-secondary py-0 px-2"
+                  onClick={() => addVariant(res.id)}
+                >
+                  <PlusCircle size={12} className="me-1" />Add Variant
+                </button>
+              </div>
+              {(res.variants || []).map((v, vi) => (
+                <div key={vi} className="d-flex gap-1 mb-1">
+                  <input
+                    className="form-control form-control-sm"
+                    placeholder={`Variant ${vi + 1}`}
+                    value={v}
+                    onChange={(e) => updateVariant(res.id, vi, e.target.value)}
+                  />
+                  <button
+                    className="btn btn-sm btn-outline-danger py-0 px-2"
+                    onClick={() => removeVariant(res.id, vi)}
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              ))}
             </div>
 
             {/* QUICK INFO */}

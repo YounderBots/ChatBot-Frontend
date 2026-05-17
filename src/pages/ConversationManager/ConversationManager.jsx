@@ -66,6 +66,8 @@ const ConversationManager = () => {
 
   useEffect(() => {
     fetchConversations();
+    const id = setInterval(fetchConversations, 30_000);
+    return () => clearInterval(id);
   }, []);
 
   const fetchConversations = async () => {
