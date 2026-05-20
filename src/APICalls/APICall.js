@@ -18,12 +18,32 @@ const handleResponse = async (response) => {
     const result = await response.json();
 
     if (!response.ok) {
+        if (response.status === 401) {
+            sessionStorage.removeItem("token");
+            localStorage.removeItem("user");
+            localStorage.removeItem("menus");
+            window.location.href = "/login";
+            throw new Error("Session expired. Please log in again.");
+        }
+
         if (Array.isArray(result.detail)) {
             throw new Error(result.detail.map((e) => e.msg).join(", "));
         }
 
+        if (response.status === 409) {
+            throw new Error(result.detail || "This item already exists.");
+        }
+
+        if (response.status === 404) {
+            throw new Error(result.detail || "The requested resource was not found.");
+        }
+
+        if (response.status === 502 || response.status === 503) {
+            throw new Error(result.detail || "Service temporarily unavailable. Please try again.");
+        }
+
         throw new Error(
-            result.detail || result.message || "API Error"
+            result.detail || result.message || "Something went wrong. Please try again."
         );
     }
 

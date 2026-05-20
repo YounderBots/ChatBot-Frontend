@@ -5,6 +5,8 @@ import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-d
 import { useAuth, usePermission } from './Context/AuthContext'
 import Login from './BasePages/Login'
 import Register from './BasePages/Register'
+import ForgotPassword from './BasePages/ForgotPassword'
+import ResetPassword from './BasePages/ResetPassword'
 import SuperAdminLogin from './pages/Management/SuperAdminLogin'
 import ManagementLayout from './pages/Management/ManagementLayout'
 import ManagementDashboard from './pages/Management/ManagementDashboard'
@@ -32,6 +34,7 @@ import UserProfile from './pages/Profile/UserProfile'
 import Security from './pages/Security/Security'
 import Settings from './pages/Settings/Settings'
 import TicketManagement from './pages/Ticketmanagement/TicketManagerment'
+import Notifications from './pages/Notifications/Notifications'
 import UserMgmt from './pages/UserManagement/UserMgmt'
 
 /** Redirect unauthenticated users to /login */
@@ -70,6 +73,8 @@ const App = () => {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* All authenticated routes share AppLayout */}
         <Route element={
@@ -82,6 +87,7 @@ const App = () => {
           <Route path="/Knowledge-Base" element={<PermissionRoute path="/Knowledge-Base"><KnowledgeBaseManager /></PermissionRoute>} />
           <Route path="/User-Management" element={<PermissionRoute path="/User-Management"><UserMgmt /></PermissionRoute>} />
           <Route path="/Settings" element={<PermissionRoute path="/Settings"><Settings /></PermissionRoute>} />
+          <Route path="/Notifications" element={<Notifications />} />
           <Route path="/Profile" element={<UserProfile />} />
           <Route path="/Ticket-Management" element={<PermissionRoute path="/Ticket-Management"><TicketManagement /></PermissionRoute>} />
           {/* ── Workspace ── */}

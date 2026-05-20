@@ -496,3 +496,8 @@
     .launcher-btn { display: none !important; }
     .chat-widget-wrapper.closed .launcher-btn { display: flex !important; }
 }
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}

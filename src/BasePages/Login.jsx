@@ -167,6 +167,17 @@ const Login = () => {
               </span>
             </div>
 
+            <div className="form-divider" style={{ marginTop: '0.5rem' }}>
+              <span>
+                <span
+                  style={{ color: '#fb923c', cursor: 'pointer', fontWeight: 600 }}
+                  onClick={() => navigate('/forgot-password')}
+                >
+                  Forgot Password?
+                </span>
+              </span>
+            </div>
+
             <div className="form-divider" style={{ marginTop: '1rem' }}>
               <span>
                 New to ChatViq?{' '}

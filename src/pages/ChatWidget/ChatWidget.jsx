@@ -1,15 +1,14 @@
 import {
-    Image as ImageIcon,
+    Loader2,
     MessageCircle,
-    Mic,
-    Paperclip,
     Send,
     X
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import './ChatWidget.css';
 
+import APICall from '../../APICalls/APICall';
 import MessageBubble from './components/MessageBubble';
 import TypingIndicator from './components/TypingIndicator';
 
@@ -26,21 +25,20 @@ const ChatWidget = ({
     // const [isOpen, setIsOpen] = useState(false);
     // const [view, setView] = useState('chat'); // 'onboarding' | 'chat'
     const [messages, setMessages] = useState([]);
+    const [loadingHistory, setLoadingHistory] = useState(true);
     const [inputText, setInputText] = useState('');
     const [isTyping, setIsTyping] = useState(false);
-    const [isRecording, setIsRecording] = useState(false);
-    const [attachment, setAttachment] = useState(null);
 
     const messagesEndRef = useRef(null);
-    const fileInputRef = useRef(null);
 
-    const mediaRecorderRef = useRef(null);
-    const audioChunksRef = useRef([]);
+    const [wsError, setWsError] = useState(null);
+    const [userOnline, setUserOnline] = useState(null);
 
     const socketRef = useRef(null);
     const reconnectTimerRef = useRef(null);
     const reconnectAttemptsRef = useRef(0);
     const isMountedRef = useRef(true);
+    const loadingTimeoutRef = useRef(null);
     const MAX_RECONNECT_ATTEMPTS = 8;
     const BASE_RECONNECT_DELAY_MS = 1000;
 
@@ -53,6 +51,48 @@ const ChatWidget = ({
             }
         ]);
     };
+
+    const loadHistory = useCallback(async () => {
+        if (!sessionId) return;
+        let found = false;
+        try {
+            const data = await APICall.getT(
+                `/conversation/conversations?session_id=${sessionId}&per_page=200`,
+            );
+            const sessions = data.sessions || [];
+            const convos = [];
+            for (const s of sessions) {
+                for (const c of (s.conversations || [])) {
+                    convos.push({
+                        id: c.id,
+                        sender: c.sender,
+                        text: c.message_text,
+                        timestamp: new Date(c.created_at),
+                    });
+                }
+            }
+            if (convos.length) {
+                found = true;
+                setMessages(prev => {
+                    const existingIds = new Set(prev.map(m => m.id));
+                    const fresh = convos.filter(c => !existingIds.has(c.id));
+                    return [...fresh, ...prev];
+                });
+            }
+        } catch (err) {
+            console.error("Failed to load conversation history:", err.message);
+        }
+        if (found) {
+            setLoadingHistory(false);
+        } else {
+            loadingTimeoutRef.current = setTimeout(() => setLoadingHistory(false), 5000);
+        }
+    }, [sessionId]);
+
+    useEffect(() => {
+        loadHistory();
+        return () => clearTimeout(loadingTimeoutRef.current);
+    }, [loadHistory]);
 
 
     const handleSend = (e) => {
@@ -105,70 +145,6 @@ const ChatWidget = ({
         // setIsTyping(true);
     };
 
-    const handleFileUpload = (e) => {
-        const file = e.target.files[0];
-        if (!file || !file.type.startsWith('image/')) return;
-
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            setAttachment({
-                type: 'image',
-                src: reader.result,
-                name: file.name,
-                size: file.size
-            });
-        };
-        reader.readAsDataURL(file);
-    };
-
-
-    const handleVoiceRecord = async () => {
-        if (isRecording) {
-            mediaRecorderRef.current.stop();
-            setIsRecording(false);
-            return;
-        }
-
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const mediaRecorder = new MediaRecorder(stream);
-
-            mediaRecorderRef.current = mediaRecorder;
-            audioChunksRef.current = [];
-
-            mediaRecorder.ondataavailable = (event) => {
-                audioChunksRef.current.push(event.data);
-            };
-
-            mediaRecorder.onstop = () => {
-                const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-                const audioUrl = URL.createObjectURL(audioBlob);
-
-                addMessage({
-                    sender: 'user',
-                    type: 'voice',
-                    audio: {
-                        src: audioUrl
-                    },
-                    timestamp: new Date()
-                });
-
-                // simulateBotResponse('[Voice message]');
-                socketRef.current?.send(JSON.stringify({
-                    type: "VOICE",
-                    message: "Voice message sent"
-                }));
-                stream.getTracks().forEach(track => track.stop());
-            };
-
-            mediaRecorder.start();
-            setIsRecording(true);
-        } catch (err) {
-            console.warn('Microphone access denied:', err.message);
-        }
-    };
-
-
     const handleClearChat = () => {
         if (window.confirm('Clear all messages?')) {
             setMessages([]);
@@ -182,6 +158,10 @@ const ChatWidget = ({
             isMountedRef.current = false;
         };
     }, []);
+
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
 
     useEffect(() => {
         if (!agentId || !sessionId) return;
@@ -206,13 +186,32 @@ const ChatWidget = ({
                 reconnectAttemptsRef.current = 0;
                 const token = sessionStorage.getItem("token");
                 socket.send(JSON.stringify({ type: "AUTH", token }));
+                setTimeout(() => {
+                    if (socket.readyState === WebSocket.OPEN) {
+                        socket.send(JSON.stringify({
+                            type: "LOAD_SESSION",
+                            session_id: parseInt(sessionId),
+                        }));
+                    }
+                }, 300);
             };
 
             socket.onmessage = (event) => {
                 const data = JSON.parse(event.data);
 
+                if (data.error) {
+                    console.error("Agent WS auth error:", data.error);
+                    setWsError(data.error);
+                    clearTimeout(loadingTimeoutRef.current);
+                    setLoadingHistory(false);
+                    reconnectAttemptsRef.current = MAX_RECONNECT_ATTEMPTS;
+                    return;
+                }
+
                 // HISTORY
                 if (data.type === "HISTORY" && data.session_id === parseInt(sessionId)) {
+                    clearTimeout(loadingTimeoutRef.current);
+                    setLoadingHistory(false);
                     setMessages(prev => {
                         const existingIds = new Set(prev.map(m => m.id));
                         const historyMessages = data.messages
@@ -225,6 +224,12 @@ const ChatWidget = ({
                             }));
                         return [...historyMessages, ...prev];
                     });
+                    return;
+                }
+
+                // User online/offline status
+                if (data.type === "USER_STATUS" && data.session_id === parseInt(sessionId)) {
+                    setUserOnline(data.is_online);
                     return;
                 }
 
@@ -243,16 +248,21 @@ const ChatWidget = ({
                 console.warn("Agent WS error", error);
             };
 
-            socket.onclose = () => {
+            socket.onclose = (event) => {
                 if (!isMountedRef.current) return;
+
+                if (event.code === 1008) {
+                    setWsError("Session expired. Please log in again.");
+                    clearTimeout(loadingTimeoutRef.current);
+                    setLoadingHistory(false);
+                    return;
+                }
 
                 const attempt = reconnectAttemptsRef.current;
                 if (attempt >= MAX_RECONNECT_ATTEMPTS) {
-                    addMessage({
-                        sender: 'bot',
-                        text: 'Connection lost. Please refresh the page.',
-                        timestamp: new Date()
-                    });
+                    setWsError("Connection lost. Please refresh the page.");
+                    clearTimeout(loadingTimeoutRef.current);
+                    setLoadingHistory(false);
                     return;
                 }
 
@@ -270,12 +280,12 @@ const ChatWidget = ({
         return () => {
             isMountedRef.current = false;
             clearTimeout(reconnectTimerRef.current);
+            clearTimeout(loadingTimeoutRef.current);
             if (socketRef.current) {
-                socketRef.current.onclose = null; // prevent reconnect on intentional close
+                socketRef.current.onclose = null;
                 socketRef.current.close();
                 socketRef.current = null;
             }
-            // re-enable reconnect for next mount
             isMountedRef.current = true;
         };
     }, [agentId, sessionId]);
@@ -313,6 +323,13 @@ const ChatWidget = ({
                         </div>
                         <div>
                             <h6 className="m-0 fw-bold">{title}</h6>
+                            <small className="d-flex align-items-center gap-1 opacity-75" style={{ fontSize: '0.7rem' }}>
+                                <span style={{
+                                    width: 8, height: 8, borderRadius: '50%', display: 'inline-block',
+                                    backgroundColor: userOnline ? '#22c55e' : '#9ca3af',
+                                }} />
+                                {userOnline === null ? 'Checking...' : userOnline ? 'User online' : 'User offline'}
+                            </small>
                             {/* {view === 'chat' && userInfo?.name && (
                                     <small className="opacity-75">Chatting as {userInfo?.name}</small>
                                 )} */}
@@ -340,7 +357,18 @@ const ChatWidget = ({
 
                 {/* Body */}
                 <div className="flex-grow-1 overflow-auto p-3 chat-body position-relative">
-                    {messages.length === 0 ? (
+                    {loadingHistory ? (
+                        <div className="d-flex flex-column align-items-center justify-content-center h-100 text-center text-muted">
+                            <Loader2 size={32} className="mb-2 opacity-50" style={{ animation: 'spin 1s linear infinite' }} />
+                            <p className="mb-0">Loading conversation...</p>
+                        </div>
+                    ) : wsError && messages.length === 0 ? (
+                        <div className="d-flex flex-column align-items-center justify-content-center h-100 text-center text-muted">
+                            <MessageCircle size={48} className="mb-3 opacity-50" />
+                            <h5>Unable to load conversation</h5>
+                            <p>{wsError}</p>
+                        </div>
+                    ) : messages.length === 0 ? (
                         <div className="d-flex flex-column align-items-center justify-content-center h-100 text-center text-muted">
                             <MessageCircle size={48} className="mb-3 opacity-50" />
                             <h5>No messages yet</h5>
@@ -358,43 +386,9 @@ const ChatWidget = ({
                 </div>
 
 
-                {/* Footer - Input Area (Only in chat view) */}
-                {/* {view === 'chat' && ( */}
                 <div className="chat-footer">
-                    {/* Attachment Preview */}
-                    {attachment && (
-                        <div className="mb-2 d-flex align-items-center justify-content-between chat-attachment-preview p-2 rounded">
-                            <div className="d-flex align-items-center gap-2">
-                                <ImageIcon size={16} />
-                                <span className="small">Image ready to send</span>
-                            </div>
-                            <button
-                                className="btn btn-sm btn-link text-danger p-0"
-                                onClick={() => setAttachment(null)}
-                            >
-                                <X size={16} />
-                            </button>
-                        </div>
-                    )}
-
                     <form onSubmit={handleSend} className="d-flex gap-2 align-items-center">
-                        <input
-                            type="file"
-                            ref={fileInputRef}
-                            onChange={handleFileUpload}
-                            accept="image/*"
-                            className="d-none"
-                        />
-                        <button
-                            type="button"
-                            className="btn chat-icon-btn p-2 rounded-circle"
-                            onClick={() => fileInputRef.current?.click()}
-                            title="Upload Image"
-                        >
-                            <ImageIcon size={20} />
-                        </button>
-
-                        <div className="flex-grow-1 position-relative">
+                        <div className="flex-grow-1">
                             <input
                                 type="text"
                                 className="chat-input rounded-pill"
@@ -404,40 +398,20 @@ const ChatWidget = ({
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') handleSend(e);
                                 }}
-                                style={{ padding: '10px 45px 10px 15px' }}
+                                style={{ padding: '10px 15px' }}
                             />
-                            <button
-                                type="button"
-                                className="btn btn-link position-absolute end-0 top-50 translate-middle-y chat-icon-muted p-0 pe-2"
-                                title="Attach file"
-                            >
-                                <Paperclip size={18} />
-                            </button>
                         </div>
-
-                        <div className="d-flex gap-1">
-                            <button
-                                type="button"
-                                className={`btn p-2 rounded-circle ${isRecording ? 'btn-danger voice-recording' : 'chat-icon-btn'}`}
-                                onClick={handleVoiceRecord}
-                                title={isRecording ? "Stop recording" : "Voice message"}
-                            >
-                                <Mic size={20} />
-                            </button>
-
-                            <button
-                                type="submit"
-                                className="btn p-2 rounded-circle d-flex justify-content-center align-items-center chat-send-btn"
-                                disabled={!inputText.trim() && !attachment}
-                                style={{ backgroundColor: primaryColor, border: 'none', width: '36px', height: '36px' }}
-                                title="Send message"
-                            >
-                                <Send size={16} />
-                            </button>
-                        </div>
+                        <button
+                            type="submit"
+                            className="btn p-2 rounded-circle d-flex justify-content-center align-items-center chat-send-btn"
+                            disabled={!inputText.trim()}
+                            style={{ backgroundColor: primaryColor, border: 'none', width: '36px', height: '36px' }}
+                            title="Send message"
+                        >
+                            <Send size={16} />
+                        </button>
                     </form>
                 </div>
-                {/* )} */}
             </div>
             {/* )} */}
         </div>

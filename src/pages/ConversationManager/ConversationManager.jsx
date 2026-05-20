@@ -1,5 +1,5 @@
 import DOMPurify from "dompurify";
-import { RefreshCcwIcon, Search, X } from "lucide-react";
+import { FileJson, FileText, RefreshCcwIcon, Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Alert, Button, Card, Col, Form, InputGroup, Modal, Row, Spinner } from "react-bootstrap";
 import Select from "react-select";
@@ -59,7 +59,6 @@ const ConversationManager = () => {
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [conversations, setConversations] = useState([]);
   const [filteredConversations, setFilteredConversations] = useState(conversations);
-  const [Value, setValue] = useState(null);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
 
@@ -259,8 +258,27 @@ const ConversationManager = () => {
 
   };
 
-  const exportPDF = () => {
-    setToast({ variant: "info", msg: "PDF export is not yet implemented." });
+  const exportPDF = async () => {
+    if (!selectedConversation) return;
+    try {
+      setToast({ variant: "info", msg: "Generating PDF…" });
+      const { baseURL } = await import("../../APICalls/APICall");
+      const res = await fetch(
+        `${baseURL}/export/conversations/pdf?session_id=${selectedConversation.sessionId}&limit=500`,
+        { headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` } }
+      );
+      if (!res.ok) throw new Error("PDF export failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `conversation-${selectedConversation.id}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+      setToast({ variant: "success", msg: "PDF downloaded." });
+    } catch {
+      setToast({ variant: "danger", msg: "Failed to export PDF. Please try again." });
+    }
   };
 
   const flagConversation = () => {
@@ -277,26 +295,6 @@ const ConversationManager = () => {
     setToast({ variant: "info", msg: "Conversation escalated to agent." });
   };
 
-
-  const handleAction = (selectedOption) => {
-    if (!selectedOption) return;
-
-    const action = selectedOption.value;
-
-    switch (action) {
-      case "pdf":
-        exportPDF();
-        break;
-
-      case "json":
-        exportJSON();
-        break;
-
-      default:
-        break;
-    }
-
-  };
 
   const handleEscalate = async (row) => {
     if (!window.confirm("Escalate this conversation to a human agent?")) return;
@@ -348,12 +346,13 @@ const ConversationManager = () => {
         )}
         <Row className="g-3 mb-3 ">
           <Col xs={4} md={6} lg={3}>
-            <div className="input-group bg-white border rounded-3 shadow-sm ">
+            <div className="cm-panel rounded-3 shadow-sm">
               <InputGroup>
-                <InputGroup.Text>
+                <InputGroup.Text className="border-0" style={{ background: "transparent", color: "var(--cvq-text-muted)" }}>
                   <Search size={12} />
                 </InputGroup.Text>
                 <Form.Control
+                  className="cm-filter-input border-0 shadow-none"
                   placeholder="Search by message or session ID"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -371,9 +370,9 @@ const ConversationManager = () => {
           </Col>
 
           <Col xs={4} md={6} lg={3}>
-            <div className=" bg-white border rounded-3 shadow-sm ">
+            <div className="cm-panel rounded-3 shadow-sm">
               <Form.Control
-                className="border-0 shadow-none text-cvq-text"
+                className="cm-filter-input border-0 shadow-none"
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
@@ -382,9 +381,9 @@ const ConversationManager = () => {
           </Col>
 
           <Col xs={4} md={6} lg={3}>
-            <div className=" bg-white border rounded-3 shadow-sm ">
+            <div className="cm-panel rounded-3 shadow-sm">
               <Form.Control
-                className="border-0 shadow-none border text-cvq-text"
+                className="cm-filter-input border-0 shadow-none"
                 type="date"
                 placeholder="End date"
                 value={endDate}
@@ -394,7 +393,7 @@ const ConversationManager = () => {
           </Col>
 
           <Col xs={4} md={6} lg={3}>
-            <div className="input-group bg-white rounded-3 border shadow-sm">
+            <div className="cm-panel rounded-3 shadow-sm">
               <Select
                 isMulti
                 className="w-100"
@@ -413,7 +412,7 @@ const ConversationManager = () => {
           </Col>
 
           <Col xs={4} md={6} lg={3}>
-            <div className="input-group bg-white rounded-3 border shadow-sm">
+            <div className="cm-panel rounded-3 shadow-sm">
               <Select
                 isMulti
                 className="w-100"
@@ -432,7 +431,7 @@ const ConversationManager = () => {
           </Col>
 
           <Col xs={4} md={6} lg={3}>
-            <div className="input-group bg-white rounded-3 border shadow-sm">
+            <div className="cm-panel rounded-3 shadow-sm">
               <Select
                 isMulti
                 className="w-100"
@@ -451,14 +450,11 @@ const ConversationManager = () => {
           </Col>
 
           <Col xs={12} md={12} lg={3}>
-            <div className=" rounded-3 shadow-sm text-center border "
-
-              style={{ cursor: "pointer", padding: "5px", textAlign: "center", backgroundColor: "#e2e8f0" }}
-
+            <div className="cm-panel rounded-3 shadow-sm text-center"
+              style={{ cursor: "pointer", padding: "5px" }}
               onClick={() => setShowConfidenceModal(true)}
             >
               Confidence Range
-
             </div>
           </Col>
 
@@ -484,28 +480,24 @@ const ConversationManager = () => {
           </Col>
 
           <div className="d-flex flex-column flex-lg-row gap-2 w-100 mt-3">
-            <Col xs={12} lg={4} className="bg-light border rounded mt-3 " style={{ overflowY: "auto" }}>
-              <div className="">
+            <Col xs={12} lg={4} className="cm-panel rounded mt-3" style={{ overflowY: "auto" }}>
+              <div className="p-2">
                 {loading ? (
                   <div className="d-flex justify-content-center align-items-center py-5">
                     <Spinner animation="border" variant="primary" />
                   </div>
                 ) : paginatedConversations.length === 0 ? (
-                  <div className="text-center text-muted py-5">No conversations found.</div>
+                  <div className="text-center cm-empty py-5">No conversations found.</div>
                 ) : paginatedConversations
                   .filter(conv =>
                     conv.user.toLowerCase().includes(search.toLowerCase()) ||
                     conv.id.toLowerCase().includes(search.toLowerCase()) ||
                     conv.firstMessage.toLowerCase().includes(search.toLowerCase())
-
                   )
                   .map(conv => (
-
                     <div
                       key={conv.id}
-                      className={`d-flex flex-md-row align-items-start align-items-md-center overflow-auto mb-2 rounded  p-2
-                       ${selectedConversation?.id === conv.id ? "bg-light" : ""} `}
-                      style={{ cursor: "pointer" }}
+                      className={`cm-conv-item d-flex flex-md-row align-items-start align-items-md-center ${selectedConversation?.id === conv.id ? "active" : ""}`}
                       onClick={() => setSelectedConversation(conv)}
                     >
                       <div
@@ -524,7 +516,6 @@ const ConversationManager = () => {
                       </div>
 
                       <div className="flex-grow-1 w-100">
-
                         <div className="d-flex justify-content-between align-items-start">
                           <span className="fw-bold text-truncate me-2">
                             {conv.firstMessage}
@@ -535,50 +526,40 @@ const ConversationManager = () => {
                         </div>
 
                         <div className="d-flex flex-wrap align-items-center gap-1 mt-1">
-
-                          <span className="badge bg-secondary">
+                          <span className="badge" style={{ backgroundColor: "rgba(232,113,10,0.18)", color: "var(--cvq-text)" }}>
                             {conv.intent}
                           </span>
 
-                          <div className="progress flex-grow-1" style={{ height: "5px", minWidth: "40px" }}>
+                          <div className="progress flex-grow-1" style={{ height: "5px", minWidth: "40px", backgroundColor: "var(--cvq-gray-200)" }}>
                             <div
                               className="progress-bar"
                               role="progressbar"
-                              style={{ width: `${conv.confidence}%` }}
+                              style={{ width: `${conv.confidence}%`, backgroundColor: "#e8710a" }}
                               aria-valuenow={conv.confidence}
                               aria-valuemin="0"
                               aria-valuemax="100"
                             />
                           </div>
 
-                          <div className="d-flex align-items-center gap-1 ms-md-auto">
-
-                            <span
-                              className={`badge ${conv.status === "Resolved"
-                                ? "text-dark"
-                                : conv.status === "Pending"
-                                  ? "text-dark"
-                                  : conv.status === "Escalated"
-                                    ? " text-dark"
-                                    : "text-dark"
-                                }`}
-                            >
-                              {conv.status}
-                            </span>
-                          </div>
-
+                          <span className="badge" style={{
+                            backgroundColor: conv.status === "Resolved" ? "rgba(34,197,94,0.15)" :
+                              conv.status === "Escalated" ? "rgba(239,68,68,0.15)" : "rgba(232,113,10,0.12)",
+                            color: conv.status === "Resolved" ? "#22c55e" :
+                              conv.status === "Escalated" ? "#ef4444" : "var(--cvq-text-muted)"
+                          }}>
+                            {conv.status}
+                          </span>
                         </div>
-                        <small className="text-muted d-block mt-1">
+
+                        <small className="text-muted d-block mt-1" style={{ fontSize: "11px" }}>
                           {conv.id}
                         </small>
-
                       </div>
                     </div>
                   ))}
               </div>
 
-              <div className="sticky-bottom bg-light">
-
+              <div className="sticky-bottom cm-pagination">
                 {totalPages > 1 && (
                   <div className="pagination-bar p-3">
                     <button
@@ -609,49 +590,48 @@ const ConversationManager = () => {
                   </div>
                 )}
               </div>
-
             </Col>
 
             <Col
               xs={12}
               lg={8}
-              className="bg-light rounded mt-3 d-flex flex-column"
+              className="cm-panel rounded mt-3 d-flex flex-column"
               style={{
                 height: window.innerWidth <= 576 ? "90vh" : "65vh",
               }}
             >
               {selectedConversation ? (
                 <>
-
-                  <div className="bg-light p-2 border-bottom d-flex justify-content-between flex-wrap gap-2 rounded-top-1">
+                  <div className="cm-chat-header p-2 d-flex justify-content-between flex-wrap gap-2 rounded-top-1">
                     <div>
                       <h6 className="mb-1">{selectedConversation.user}</h6>
-                      <small className="text-muted">
+                      <small>
                         Session: {selectedConversation.id} | Last Active:{" "}
                         {selectedConversation.lastTimestamp}
                       </small>
                       <div className="mt-1">
-                        <span className="badge bg-secondary">Web</span>
+                        <span className="badge" style={{ backgroundColor: "rgba(232,113,10,0.15)", color: "#e8710a" }}>Web</span>
                       </div>
                     </div>
 
                     <div className="d-flex gap-2 flex-wrap">
-                      <div style={{ minWidth: "140px" }}>
-                        <Select
-                          placeholder="Export"
-                          value={Value}
-                          options={[
-                            { value: "pdf", label: "Export PDF" },
-                            { value: "json", label: "Export JSON" },
-                          ]}
-                          onChange={(selected) => {
-                            handleAction(selected);
-                            setValue(null);
-                          }}
-                        />
-                      </div>
+                      <button
+                        className="cm-icon-btn"
+                        title="Export PDF"
+                        onClick={exportPDF}
+                      >
+                        <FileText size={18} />
+                      </button>
 
-                      <div style={{ minWidth: "140px" }}>
+                      <button
+                        className="cm-icon-btn"
+                        title="Export JSON"
+                        onClick={exportJSON}
+                      >
+                        <FileJson size={18} />
+                      </button>
+
+                      <div>
                         <Button
                           size="sm"
                           variant="warning"
@@ -662,9 +642,7 @@ const ConversationManager = () => {
                           }
                           onClick={async () => {
                             if (!window.confirm("Escalate this conversation to a human agent?")) return;
-                            {
-                              await handleEscalate(selectedConversation);
-                            }
+                            await handleEscalate(selectedConversation);
                           }}>
                           Escalate
                         </Button>
@@ -672,32 +650,17 @@ const ConversationManager = () => {
                     </div>
                   </div>
 
-                  <div className="flex-grow-1 overflow-auto px-2 py-3"
+                  <div className="cm-chat-body flex-grow-1 overflow-auto px-3 py-3"
                     style={{ height: "65vh" }}>
                     {selectedConversation.messages.map((msg, idx) => (
                       <div
                         key={`${msg.timestamp}-${msg.type}-${idx}`}
-                        className={`d-flex mb-2 ${msg.type === "user"
+                        className={`d-flex mb-3 ${msg.type === "user"
                           ? "justify-content-end"
                           : "justify-content-start"
                           }`}
                       >
-                        <div
-                          className="p-2 rounded"
-                          style={{
-                            backgroundColor:
-                              msg.type === "user"
-                                ? "#e8710a"
-                                : msg.type === "bot"
-                                  ? "#4A6FA5"
-                                  : "#94a3b8",
-                            color:
-                              msg.type === "user" || msg.type === "agent"
-                                ? "white"
-                                : "black",
-                            maxWidth: "85%",
-                          }}
-                        >
+                        <div className={`cm-bubble cm-bubble-${msg.type}`}>
                           <div
                             className="mb-1 chat-text"
                             dangerouslySetInnerHTML={{
@@ -705,8 +668,8 @@ const ConversationManager = () => {
                             }}
                           />
 
-                          {msg.type === "user" && (
-                            <small className="d-block text-light">
+                          {msg.type === "user" && msg.intent && (
+                            <small className="d-block cm-bubble-meta" style={{ opacity: 0.75 }}>
                               Intent: {msg.intent} | Confidence: {msg.confidence}%
                               {msg.entities?.length > 0 && (
                                 <details>
@@ -721,18 +684,15 @@ const ConversationManager = () => {
                             </small>
                           )}
 
-                          <small
-                            className={`d-block ${msg.type === "user" ? "text-light" : "text-muted"
-                              }`}
-                            style={{ fontSize: "10px" }}
-                          >
+                          <small className="d-block cm-bubble-meta">
                             {msg.timestamp}
                           </small>
                         </div>
                       </div>
                     ))}
                   </div>
-                  <div className="border-top bg-light p-2 small rounded-bottom-1">
+
+                  <div className="cm-analytics p-2 small rounded-bottom-1">
                     <h6 className="mb-1">Analytics</h6>
                     <div className="d-flex flex-wrap gap-3">
                       <span>Sentiment: {selectedConversation.sentiment}</span>
@@ -743,7 +703,7 @@ const ConversationManager = () => {
                   </div>
                 </>
               ) : (
-                <div className="flex-grow-1 d-flex align-items-center justify-content-center">
+                <div className="flex-grow-1 d-flex align-items-center justify-content-center cm-empty">
                   <p>Select a conversation to view details</p>
                 </div>
               )}

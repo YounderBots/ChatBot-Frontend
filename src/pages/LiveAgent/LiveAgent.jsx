@@ -5,7 +5,7 @@
  *   1. Escalation Queue   — live list of open/pending tickets with SLA timer
  *   2. Canned Responses   — search + manage quick-reply macros
  */
-import { CheckCircle, Clock, MessageSquare, Plus, Search, Trash2, Zap } from "lucide-react";
+import { CheckCircle, Circle, Clock, MessageSquare, Plus, Search, Trash2, Zap } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import {
   Alert, Badge, Button, Card, Col, Form,
@@ -45,6 +45,7 @@ function SLABadge({ createdAt, priority }) {
 function EscalationQueueTab() {
   const [tickets, setTickets]     = useState([]);
   const [agents, setAgents]       = useState([]);
+  const [onlineIds, setOnlineIds] = useState([]);
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState("");
   const [assignModal, setAssignModal] = useState(null);
@@ -58,13 +59,15 @@ function EscalationQueueTab() {
     setLoading(true);
     setError("");
     try {
-      const [escRes, agentsRes] = await Promise.all([
+      const [escRes, agentsRes, onlineRes] = await Promise.all([
         APICall.getT("/conversation/escalation"),
         APICall.getT("/hrms/users"),
+        APICall.getT("/conversation/agents/online"),
       ]);
       const list = Array.isArray(escRes) ? escRes : (escRes?.escalations || []);
       setTickets(list);
       setAgents(agentsRes || []);
+      setOnlineIds(onlineRes?.online_agent_ids || []);
     } catch (e) {
       setError("Failed to load escalations.");
     } finally {
@@ -121,6 +124,27 @@ function EscalationQueueTab() {
       <ToastContainer /><ConfirmDialog />
       {error && <Alert variant="danger">{error}</Alert>}
 
+      <Card className="border-0 shadow-sm mb-3 p-3">
+        <div className="d-flex align-items-center gap-3 flex-wrap">
+          <strong className="d-flex align-items-center gap-1" style={{ fontSize: 13 }}>
+            <Circle size={8} fill="#22c55e" stroke="none" /> Live Agents
+          </strong>
+          {agents.filter(a => onlineIds.includes(a.id)).length === 0 ? (
+            <span className="text-muted" style={{ fontSize: 13 }}>No agents online</span>
+          ) : (
+            agents.filter(a => onlineIds.includes(a.id)).map(a => (
+              <Badge key={a.id} bg="success" className="d-flex align-items-center gap-1" style={{ fontWeight: 500 }}>
+                <Circle size={5} fill="#fff" stroke="none" />
+                {a.fullname || a.email}
+              </Badge>
+            ))
+          )}
+          <span className="ms-auto text-muted" style={{ fontSize: 12 }}>
+            {agents.filter(a => onlineIds.includes(a.id)).length} / {agents.length} online
+          </span>
+        </div>
+      </Card>
+
       <Row className="g-2 mb-3 align-items-center">
         <Col md={4}>
           <Form.Select size="sm" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
@@ -163,7 +187,14 @@ function EscalationQueueTab() {
                 </td>
                 <td>{t.status}</td>
                 <td className="text-truncate" style={{ maxWidth: 160 }}>{t.reason}</td>
-                <td>{t.assigned_to_name || <span className="text-muted">Unassigned</span>}</td>
+                <td>
+                  {t.assigned_to_name ? (
+                    <span className="d-flex align-items-center gap-1">
+                      <Circle size={6} fill={onlineIds.includes(t.assigned_to) ? "#22c55e" : "#9ca3af"} stroke="none" />
+                      {t.assigned_to_name}
+                    </span>
+                  ) : <span className="text-muted">Unassigned</span>}
+                </td>
                 <td><SLABadge createdAt={t.created_at} priority={t.priority?.toLowerCase()} /></td>
                 <td>
                   <div className="d-flex gap-2">

@@ -1,4 +1,4 @@
-import { Edit2, LucideBotMessageSquare, MessageSquare, Trash2, X } from "lucide-react";
+import { Circle, Edit2, LucideBotMessageSquare, MessageSquare, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Modal, Spinner } from "react-bootstrap";
 import APICall from "../../APICalls/APICall";
@@ -194,14 +194,23 @@ const TicketManagementContent = () => {
         } catch (err) { showMainToast(err.message || "Failed to load tickets.", "danger"); }
     };
 
+    const [onlineAgentIds, setOnlineAgentIds] = useState([]);
+
     const fetchAgents = async () => {
         try { const res = await APICall.getT("/hrms/users"); setAgents(res || []); }
         catch { showMainToast("Failed to fetch agents.", "danger"); }
     };
 
-    useEffect(() => { fetchAgents(); fetchEscalations(); }, []);
+    const fetchOnlineAgents = async () => {
+        try {
+            const res = await APICall.getT("/conversation/agents/online");
+            setOnlineAgentIds(res?.online_agent_ids || []);
+        } catch { /* ignore */ }
+    };
+
+    useEffect(() => { fetchAgents(); fetchEscalations(); fetchOnlineAgents(); }, []);
     useEffect(() => {
-        const id = setInterval(fetchEscalations, 15_000);
+        const id = setInterval(() => { fetchEscalations(); fetchOnlineAgents(); }, 15_000);
         return () => clearInterval(id);
     }, []);
     useEffect(() => { setCurrentPage(1); }, [filters, tickets.length]);
@@ -286,6 +295,29 @@ const TicketManagementContent = () => {
                 )}
             </div>
 
+            {/* ── Live Agents Bar ──────────────────────────── */}
+            <div className="tm-live-bar">
+                <span className="tm-live-label">
+                    <Circle size={8} fill="#22c55e" stroke="none" />
+                    Live Agents
+                </span>
+                <div className="tm-live-agents">
+                    {agents.filter(a => onlineAgentIds.includes(a.id)).length === 0 ? (
+                        <span className="tm-live-none">No agents online</span>
+                    ) : (
+                        agents.filter(a => onlineAgentIds.includes(a.id)).map(a => (
+                            <span key={a.id} className="tm-live-chip">
+                                <Circle size={6} fill="#22c55e" stroke="none" />
+                                {a.fullname || a.email}
+                            </span>
+                        ))
+                    )}
+                </div>
+                <span className="tm-live-count">
+                    {agents.filter(a => onlineAgentIds.includes(a.id)).length} / {agents.length} online
+                </span>
+            </div>
+
             {/* ── Main card ─────────────────────────────────── */}
             <div className="tm-card">
                 {/* Table */}
@@ -296,6 +328,7 @@ const TicketManagementContent = () => {
                                 <th>Ticket</th>
                                 <th>Priority</th>
                                 <th>Status</th>
+                                <th>Assigned To</th>
                                 <th>Reason</th>
                                 <th>SLA</th>
                                 <th>Date</th>
@@ -304,7 +337,7 @@ const TicketManagementContent = () => {
                         </thead>
                         <tbody>
                             {paginatedTickets.length === 0 && (
-                                <tr><td colSpan={7}><div className="tm-empty">No tickets found.</div></td></tr>
+                                <tr><td colSpan={8}><div className="tm-empty">No tickets found.</div></td></tr>
                             )}
                             {paginatedTickets.map((t) => (
                                 <tr key={t.escalationId}
@@ -319,6 +352,16 @@ const TicketManagementContent = () => {
                                         <span className={`tm-badge ${statusClass(t.status)}`}>
                                             {t.status}
                                         </span>
+                                    </td>
+                                    <td>
+                                        {t.assignedToName && t.assignedToName !== "Unassigned" ? (
+                                            <span className="tm-assigned-agent">
+                                                <Circle size={6} fill={onlineAgentIds.includes(Number(t.assignedTo)) ? "#22c55e" : "#9ca3af"} stroke="none" />
+                                                {t.assignedToName}
+                                            </span>
+                                        ) : (
+                                            <span style={{ color: "var(--tm-text3)", fontSize: 12.5 }}>Unassigned</span>
+                                        )}
                                     </td>
                                     <td style={{ maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                                         {t.reason || <span style={{ color: "var(--tm-text3)" }}>—</span>}
@@ -398,7 +441,7 @@ const TicketManagementContent = () => {
                 {/* Chat widget */}
                 {activeSessionId && (
                     <div className="tm-chat-col">
-                        <ChatWidget agentId={user.id} sessionId={activeSessionId}
+                        <ChatWidget key={activeSessionId} agentId={user.id} sessionId={activeSessionId}
                             title={`Session ${activeSessionId}`}
                             setActiveSessionId={setActiveSessionId} />
                     </div>

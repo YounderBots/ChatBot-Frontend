@@ -203,7 +203,8 @@ const TopBar = ({ isMobile, toggleSidebar, activeMenu, setActiveMenu }) => {
       {/* RIGHT */}
       <div className="topbar-right">
         <button className="topbar-icon-btn notif-btn"
-          aria-label={notifications > 0 ? `${notifications} notifications` : "Notifications"}>
+          aria-label={notifications > 0 ? `${notifications} notifications` : "Notifications"}
+          onClick={() => { navigate("/Notifications"); setActiveMenu("Notifications"); }}>
           <Bell size={18} aria-hidden="true" />
           {notifications > 0 && (
             <span className="notif-badge" aria-hidden="true">{notifications}</span>

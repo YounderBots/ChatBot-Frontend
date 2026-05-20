@@ -340,3 +340,71 @@
   text-align: center; padding: 48px 24px;
   color: var(--tm-text3); font-family: var(--tm-font); font-size: 13.5px;
 }
+
+/* ─── live agents bar ────────────────────────────────────── */
+.tm-live-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 16px;
+  margin-bottom: 12px;
+  background: var(--tm-card);
+  border: 1px solid var(--tm-border);
+  border-radius: var(--tm-radius);
+  font-family: var(--tm-font);
+}
+
+.tm-live-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tm-text1);
+  white-space: nowrap;
+}
+
+.tm-live-agents {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.tm-live-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(34,197,94,0.1);
+  color: #16a34a;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+[data-theme="dark"] .tm-live-chip {
+  background: rgba(34,197,94,0.15);
+  color: #4ade80;
+}
+
+.tm-live-none {
+  font-size: 12.5px;
+  color: var(--tm-text3);
+}
+
+.tm-live-count {
+  font-size: 12px;
+  color: var(--tm-text2);
+  white-space: nowrap;
+}
+
+/* ─── assigned agent cell ─────────────────────────────────── */
+.tm-assigned-agent {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  color: var(--tm-text1);
+}
