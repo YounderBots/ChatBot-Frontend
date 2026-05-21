@@ -283,6 +283,11 @@
   right: 1rem;
   transform: translateY(-50%);
   color: rgba(255, 255, 255, 0.3);
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
   cursor: pointer;
   display: flex;
   align-items: center;

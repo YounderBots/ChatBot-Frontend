@@ -263,7 +263,8 @@
 
   // ── State ──────────────────────────────────────────────────────────────────
   let socket      = null;
-  let sessionKey  = localStorage.getItem('cv_session_' + orgId) || null;
+  localStorage.removeItem('cv_session_' + orgId);
+  let sessionKey  = null;
   let connected   = false;
   let userId      = 1;   // guest user — adjust if your chat_service requires real user auth
 
@@ -398,13 +399,29 @@
       let data;
       try { data = JSON.parse(event.data); } catch { return; }
 
+      // Skip typing/read control frames that don't carry a response object
+      if (data.type === 'TYPING' || data.type === 'READ') return;
+
       const resp = data.response || data;
       const msg  = resp.message || resp.text || '';
       const type = (resp.type || '').toUpperCase();
       const qrs  = resp.quick_replies || [];
 
+      // Domain selection
       if (type === 'SYSTEM' && resp.domains) {
         addDomainSelector(resp.domains);
+        return;
+      }
+
+      // Escalation confirmed — show "Connecting…" message, no quick replies
+      if (type === 'ESCALATED') {
+        if (msg) addMessage(msg, 'bot', []);
+        return;
+      }
+
+      // Agent has taken over — show connection notice silently (no quick replies)
+      if (type === 'AGENT') {
+        if (msg) addMessage(msg, 'bot', []);
         return;
       }
 
