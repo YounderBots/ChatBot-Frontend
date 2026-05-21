@@ -186,7 +186,7 @@ function PlansTab() {
           APICall.getWT(`/billing/plans`),
           APICall.getT(`/billing/subscription`),
         ]);
-        setPlans(plansData.plans || []);
+        setPlans((plansData.plans || []).filter(p => p.name !== 'free'));
         setCurrent(subData.plan?.name);
       } catch (e) {
         setAlert({ variant: 'danger', msg: e.message });
@@ -228,12 +228,12 @@ function PlansTab() {
     <div className="p-3">
       {alert && <Alert variant={alert.variant} dismissible onClose={() => setAlert(null)}>{alert.msg}</Alert>}
 
-      <Row className="g-3 justify-content-center">
+      <Row className="g-5 justify-content-center py-3">
         {plans.map(p => {
           const isCurrent = p.name === current;
           const isPopular = p.name === 'pro';
           return (
-            <Col md={4} key={p.id}>
+            <Col md={plans.length === 2 ? 5 : 4} key={p.id}>
               <Card className={`h-100 border-2 rounded-4 ${isCurrent ? 'border-primary' : isPopular ? 'border-primary border-opacity-25' : ''}`}
                 style={{ boxShadow: isPopular ? '0 4px 20px rgba(99,102,241,.15)' : undefined }}>
                 {isPopular && (

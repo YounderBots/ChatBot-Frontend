@@ -286,9 +286,10 @@
 
 /* ─── chat col ────────────────────────────────────────────── */
 .tm-chat-col {
-  width: 300px;
-  min-width: 300px;
+  width: 360px;
+  min-width: 360px;
   border-left: 1px solid var(--tm-border);
+  position: relative;
 }
 
 /* ─── modal ───────────────────────────────────────────────── */

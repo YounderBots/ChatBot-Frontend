@@ -48,11 +48,46 @@ function AuditLogsTab() {
   useEffect(() => { load(1); setPage(1); }, [filters]);
   useEffect(() => { load(page); }, [page]);
 
-  const exportCSV = () => {
-    const params = new URLSearchParams();
-    if (filters.from_date) params.append("from_date", filters.from_date);
-    if (filters.to_date)   params.append("to_date",   filters.to_date);
-    window.open(`${baseURL}/admin/audit/logs/export?${params}`, "_blank");
+  const [exporting, setExporting] = useState(false);
+
+  const exportCSV = async () => {
+    setExporting(true);
+    try {
+      const params = new URLSearchParams();
+      if (filters.action)        params.append("action",        filters.action);
+      if (filters.resource_type) params.append("resource_type", filters.resource_type);
+      if (filters.user_email)    params.append("user_email",    filters.user_email);
+      if (filters.from_date)     params.append("from_date",     filters.from_date);
+      if (filters.to_date)       params.append("to_date",       filters.to_date);
+
+      const response = await fetch(
+        `${baseURL}/admin/audit/logs/export?${params}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Export failed: ${response.status} ${response.statusText}`);
+      }
+
+      const blob = await response.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement("a");
+      a.href     = url;
+      a.download = `audit_logs_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(`CSV export failed: ${err.message}`);
+    } finally {
+      setExporting(false);
+    }
   };
 
   const STATUS_VARIANT = { SUCCESS: "success", FAILURE: "danger", WARNING: "warning" };
@@ -96,8 +131,11 @@ function AuditLogsTab() {
 
       <div className="d-flex justify-content-between align-items-center mb-2">
         <small className="text-muted">{total} records found</small>
-        <Button size="sm" variant="outline-secondary" onClick={exportCSV}>
-          <Download size={13} className="me-1" /> Export CSV
+        <Button size="sm" variant="outline-secondary" onClick={exportCSV} disabled={exporting}>
+          {exporting
+            ? <><Spinner size="sm" className="me-1" />Exporting…</>
+            : <><Download size={13} className="me-1" />Export CSV</>
+          }
         </Button>
       </div>
 
@@ -184,7 +222,20 @@ function GDPRTab() {
     setResult(null);
     try {
       const data = await APICall.getT(`/gdpr/export/${sessionKey.trim()}`);
-      setResult({ type: "success", message: "Data exported successfully.", data });
+      
+      // Trigger a browser file download of the exported JSON data
+      const jsonString = JSON.stringify(data, null, 2);
+      const blob = new Blob([jsonString], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `gdpr_export_${sessionKey.trim()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      setResult({ type: "success", message: "Data exported successfully. Check your browser downloads.", data });
     } catch {
       setResult({ type: "danger", message: "Export failed. Check the session key." });
     } finally {

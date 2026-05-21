@@ -1,4 +1,5 @@
 import {
+    Bot,
     Loader2,
     MessageCircle,
     Send,
@@ -13,6 +14,15 @@ import MessageBubble from './components/MessageBubble';
 import TypingIndicator from './components/TypingIndicator';
 
 const ChatViqIcon = '/assets/images/favIconChatViq.svg';
+
+const parseUTCDate = (dateStr) => {
+    if (!dateStr) return null;
+    if (dateStr instanceof Date) return dateStr;
+    if (!dateStr.endsWith("Z") && !/[+-]\d{2}:\d{2}$/.test(dateStr)) {
+        return new Date(dateStr + "Z");
+    }
+    return new Date(dateStr);
+};
 
 const ChatWidget = ({
     agentId,
@@ -30,6 +40,7 @@ const ChatWidget = ({
     const [isTyping, setIsTyping] = useState(false);
 
     const messagesEndRef = useRef(null);
+    const bodyRef = useRef(null);
 
     const [wsError, setWsError] = useState(null);
     const [userOnline, setUserOnline] = useState(null);
@@ -67,7 +78,7 @@ const ChatWidget = ({
                         id: c.id,
                         sender: c.sender,
                         text: c.message_text,
-                        timestamp: new Date(c.created_at),
+                        timestamp: parseUTCDate(c.created_at),
                     });
                 }
             }
@@ -114,6 +125,7 @@ const ChatWidget = ({
         }));
 
         setInputText("");
+        scrollToBottom(true);
     };
 
     const handleBotAction = (actionObj) => {
@@ -141,6 +153,7 @@ const ChatWidget = ({
             message: actionObj.value
         }));
 
+        scrollToBottom(true);
         // Simulate bot response
         // setIsTyping(true);
     };
@@ -159,9 +172,45 @@ const ChatWidget = ({
         };
     }, []);
 
+    const isInitialLoadRef = useRef(true);
+
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
+        isInitialLoadRef.current = true;
+    }, [sessionId]);
+
+    const scrollToBottom = useCallback((force = false) => {
+        setTimeout(() => {
+            const body = bodyRef.current;
+            if (!body) return;
+
+            const threshold = 120;
+            const isNearBottom = body.scrollHeight - body.scrollTop - body.clientHeight < threshold;
+
+            if (force || isNearBottom) {
+                body.scrollTo({
+                    top: body.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }
+        }, 50);
+    }, []);
+
+    useEffect(() => {
+        if (messages.length > 0) {
+            if (isInitialLoadRef.current) {
+                scrollToBottom(true);
+                isInitialLoadRef.current = false;
+            } else {
+                scrollToBottom(false);
+            }
+        }
+    }, [messages, scrollToBottom]);
+
+    useEffect(() => {
+        if (isTyping) {
+            scrollToBottom(false);
+        }
+    }, [isTyping, scrollToBottom]);
 
     useEffect(() => {
         if (!agentId || !sessionId) return;
@@ -220,7 +269,7 @@ const ChatWidget = ({
                                 id: m.id,
                                 sender: m.sender,
                                 text: m.message,
-                                timestamp: new Date(m.created_at),
+                                timestamp: parseUTCDate(m.created_at),
                             }));
                         return [...historyMessages, ...prev];
                     });
@@ -235,11 +284,29 @@ const ChatWidget = ({
 
                 // Normal agent/bot/system messages
                 const res = data?.response;
-                if (!res || res.session_id !== parseInt(sessionId)) return;
+                if (!res) return;
+
+                const incomingSessionId = data.session_id !== undefined ? data.session_id : res.session_id;
+                if (incomingSessionId !== undefined && incomingSessionId !== null && parseInt(incomingSessionId) !== parseInt(sessionId)) {
+                    return;
+                }
+
+                const rawReplies = res.quick_replies || [];
+                const domains = res.domains || [];
+                const quickReplies = [
+                    ...rawReplies,
+                    ...domains.map((d, idx) => ({
+                        id: `domain-${idx}`,
+                        button_text: d.charAt(0).toUpperCase() + d.slice(1),
+                        message_value: d.charAt(0).toUpperCase() + d.slice(1),
+                        action_type: "POSTBACK"
+                    }))
+                ];
 
                 addMessage({
-                    sender: res.sender,
+                    sender: res.sender || "bot",
                     text: res.message,
+                    quickReplies: quickReplies.length > 0 ? quickReplies : undefined,
                     timestamp: new Date()
                 });
             };
@@ -316,47 +383,50 @@ const ChatWidget = ({
             <div className="chat-window d-flex flex-column">
 
                 {/* Header */}
-                <div className="p-3 text-white d-flex justify-content-between align-items-center" style={{ backgroundColor: primaryColor }}>
-                    <div className="d-flex align-items-center gap-2">
-                        <div className="text-primary rounded-circle p-1 d-flex justify-content-center align-items-center" style={{ width: 36, height: 36, background: '#ffffff' }}>
-                            <img src={ChatViqIcon} alt="Chatviq" className='h-100' loading="lazy" decoding="async" />
+                <div className="chat-header text-white d-flex justify-content-between align-items-center">
+                    <div className="d-flex align-items-center gap-3">
+                        <div className="position-relative" style={{ width: 44, height: 44 }}>
+                            <div className="d-flex justify-content-center align-items-center h-100 w-100" 
+                                 style={{ 
+                                     background: 'rgba(255, 255, 255, 0.12)', 
+                                     border: '1px solid rgba(255, 255, 255, 0.2)', 
+                                     borderRadius: '12px',
+                                     color: '#ffffff'
+                                 }}>
+                                <Bot size={24} strokeWidth={2} />
+                            </div>
+                            <span style={{
+                                width: 12, 
+                                height: 12, 
+                                borderRadius: '50%', 
+                                display: 'inline-block',
+                                backgroundColor: userOnline ? '#10B981' : '#9ca3af',
+                                border: '2px solid #362e60', // dark border matching the gradient position
+                                position: 'absolute',
+                                bottom: -2,
+                                right: -2
+                            }} />
                         </div>
-                        <div>
-                            <h6 className="m-0 fw-bold">{title}</h6>
-                            <small className="d-flex align-items-center gap-1 opacity-75" style={{ fontSize: '0.7rem' }}>
-                                <span style={{
-                                    width: 8, height: 8, borderRadius: '50%', display: 'inline-block',
-                                    backgroundColor: userOnline ? '#22c55e' : '#9ca3af',
-                                }} />
-                                {userOnline === null ? 'Checking...' : userOnline ? 'User online' : 'User offline'}
+                        <div className="d-flex flex-column justify-content-center">
+                            <h6 className="m-0 fw-bold text-white" style={{ fontSize: '0.95rem', letterSpacing: '0.2px' }}>{title}</h6>
+                            <small className="opacity-90 text-white-50" style={{ fontSize: '0.72rem', marginTop: '1px' }}>
+                                {userOnline === null ? 'Checking status...' : userOnline ? 'Online · Replies instantly' : 'Offline · User offline'}
                             </small>
-                            {/* {view === 'chat' && userInfo?.name && (
-                                    <small className="opacity-75">Chatting as {userInfo?.name}</small>
-                                )} */}
                         </div>
                     </div>
                     <div className="d-flex gap-2 align-items-center">
-                        {/* {view === 'chat' && ( */}
                         <button
-                            className="btn btn-sm text-white"
+                            className="clear-chat-btn"
                             onClick={handleClearChat}
                             title="Clear chat"
                         >
                             Clear
                         </button>
-                        {/* )} */}
-                        {/* <button
-                            className="btn btn-sm text-white "
-                            onClick={() => setIsOpen(false)}
-                            aria-label="Close"
-                        >
-                            <X size={24} />
-                        </button> */}
                     </div>
                 </div>
 
                 {/* Body */}
-                <div className="flex-grow-1 overflow-auto p-3 chat-body position-relative">
+                <div className="flex-grow-1 overflow-auto p-3 chat-body position-relative" ref={bodyRef}>
                     {loadingHistory ? (
                         <div className="d-flex flex-column align-items-center justify-content-center h-100 text-center text-muted">
                             <Loader2 size={32} className="mb-2 opacity-50" style={{ animation: 'spin 1s linear infinite' }} />
@@ -386,8 +456,8 @@ const ChatWidget = ({
                 </div>
 
 
-                <div className="chat-footer">
-                    <form onSubmit={handleSend} className="d-flex gap-2 align-items-center">
+                <div className="chat-footer d-flex flex-column">
+                    <form onSubmit={handleSend} className="d-flex gap-2 align-items-center w-100">
                         <div className="flex-grow-1">
                             <input
                                 type="text"
@@ -398,19 +468,21 @@ const ChatWidget = ({
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') handleSend(e);
                                 }}
-                                style={{ padding: '10px 15px' }}
+                                style={{ padding: '10px 18px' }}
                             />
                         </div>
                         <button
                             type="submit"
-                            className="btn p-2 rounded-circle d-flex justify-content-center align-items-center chat-send-btn"
+                            className="chat-send-btn-square"
                             disabled={!inputText.trim()}
-                            style={{ backgroundColor: primaryColor, border: 'none', width: '36px', height: '36px' }}
                             title="Send message"
                         >
                             <Send size={16} />
                         </button>
                     </form>
+                    <div className="chat-powered-by">
+                        Powered by <span>Chatviq</span>
+                    </div>
                 </div>
             </div>
             {/* )} */}

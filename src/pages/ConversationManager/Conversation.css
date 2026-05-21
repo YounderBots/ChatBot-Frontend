@@ -180,6 +180,48 @@
   border-top: 1px solid var(--cvq-border, rgba(255,255,255,0.08));
 }
 
+.cm-pagination .pagination-bar {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  align-items: center;
+}
+
+.cm-pagination .pagination-bar button {
+  background: var(--cvq-surface-2, #0e1d38);
+  border: 1px solid var(--cvq-border, rgba(255,255,255,0.08));
+  color: var(--cvq-text, #ffffff);
+  border-radius: 6px;
+  padding: 6px 14px !important;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  min-width: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cm-pagination .pagination-bar button:hover:not(:disabled) {
+  background: rgba(232,113,10,0.1);
+  border-color: rgba(232,113,10,0.3);
+  color: #e8710a;
+}
+
+.cm-pagination .pagination-bar button.active {
+  background: #e8710a;
+  border-color: #e8710a;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.cm-pagination .pagination-bar button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: transparent;
+}
+
 /* ══ LIGHT THEME OVERRIDES ══ */
 [data-theme="light"] .cm-chat-header {
   background: rgba(232,113,10,0.05);
@@ -205,4 +247,22 @@
   background: rgba(232,113,10,0.08);
   border-color: rgba(232,113,10,0.2);
   color: #0f172a;
+}
+
+[data-theme="light"] .cm-pagination .pagination-bar button {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  color: #64748b;
+}
+
+[data-theme="light"] .cm-pagination .pagination-bar button:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme="light"] .cm-pagination .pagination-bar button.active {
+  background: #e8710a;
+  border-color: #e8710a;
+  color: #ffffff;
 }

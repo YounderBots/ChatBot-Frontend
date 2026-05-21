@@ -1,7 +1,17 @@
-const BotAvatar = () => (
+import { Bot } from "lucide-react";
 
-    <div className="text-primary rounded-circle p-1 d-flex justify-content-center align-items-center" style={{ width: 36, height: 36, background: '#ffffff' }}>
-        <img src='/assets/images/favIconChatViq.svg' alt="ChatViq" className='h-100' loading="lazy" decoding="async" />
+const BotAvatar = () => (
+    <div className="d-flex justify-content-center align-items-center" 
+         style={{ 
+             width: 36, 
+             height: 36, 
+             background: '#FFF5EE', 
+             border: '1px solid #FFE7D6', 
+             borderRadius: '10px',
+             color: '#e25608',
+             padding: '4px'
+         }}>
+        <Bot size={22} strokeWidth={2} />
     </div>
 );
 

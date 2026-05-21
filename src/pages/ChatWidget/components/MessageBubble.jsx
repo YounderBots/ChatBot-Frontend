@@ -108,15 +108,27 @@ const MessageBubble = ({ message, onAction }) => {
 
     return (
         <div
-            className={`d-flex mb-3 ${isUser ? 'justify-content-end' : 'justify-content-start align-items-start'
+            className={`d-flex mb-3 gap-2 ${isUser ? 'justify-content-end' : 'justify-content-start align-items-start'
                 }`}
         >
             {/* BOT AVATAR */}
             {!isUser && (
-                isBot ? <BotAvatar /> : <UserCircle2 size={20} strokeWidth={1.5} style={{ marginTop: "4px" }} />
+                isBot ? <BotAvatar /> : (
+                    <div className="d-flex justify-content-center align-items-center" 
+                         style={{ 
+                             width: 36, 
+                             height: 36, 
+                             background: '#F3F4F6', 
+                             border: '1px solid #E5E7EB', 
+                             borderRadius: '10px',
+                             color: '#6B7280'
+                         }}>
+                        <UserCircle2 size={20} strokeWidth={1.5} />
+                    </div>
+                )
             )}
             {/* MESSAGE COLUMN */}
-            <div className={`d-flex flex-column ${isUser ? 'align-items-end w-80' : 'align-items-start'}`}>
+            <div className={`d-flex flex-column ${isUser ? 'align-items-end' : 'align-items-start'}`} style={{ maxWidth: '80%' }}>
 
                 {/* IMAGE MODAL */}
                 {previewImage && (
@@ -146,10 +158,10 @@ const MessageBubble = ({ message, onAction }) => {
                 ${(message.type === 'voice' && message.audio) ? "voiceMessage" : ""}
                 ${isUser ? 'message-user' : 'message-bot'}`}>
 
-                    {/* {message.text && <div className="text-break  text-justify">{message.text}</div>} */}
+                    {/* {message.text && <div className="text-break">{message.text}</div>} */}
                     {message.text && (
                         <div
-                            className="text-break text-justify"
+                            className="text-break"
                             dangerouslySetInnerHTML={{
                                 __html: formatChatText(message.text),
                             }}

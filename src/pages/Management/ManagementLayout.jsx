@@ -245,12 +245,7 @@ const DesktopSidebar = ({ isExpanded, setIsExpanded, activePath, navigate }) => 
                 />
             </div>
 
-            {isExpanded && (
-                <div className="mg-sidebar-footer">
-                    <span className="mg-status-dot" />
-                    <span className="mg-status-text">All systems online</span>
-                </div>
-            )}
+
         </div>
     );
 };

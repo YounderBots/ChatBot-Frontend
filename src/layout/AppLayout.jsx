@@ -119,9 +119,11 @@ const TopBar = ({ isMobile, toggleSidebar, activeMenu, setActiveMenu }) => {
   const [dpImage,      setDpImage]      = useState(null);
   const [showMenu,     setShowMenu]     = useState(false);
   const [searchFocus,  setSearchFocus]  = useState(false);
+  const [searchQuery,  setSearchQuery]  = useState("");
+  const [activeIndex,  setActiveIndex]  = useState(0);
   const [notifications, setNotifications] = useState(0);
   const navigate    = useNavigate();
-  const { user, org, roleName, logout } = useAuth();
+  const { user, org, roleName, logout, menus = [] } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const searchRef   = useRef(null);
 
@@ -144,7 +146,7 @@ const TopBar = ({ isMobile, toggleSidebar, activeMenu, setActiveMenu }) => {
   useEffect(() => {
     const close = e => {
       if (!e.target?.closest?.(".user-section"))  setShowMenu(false);
-      if (!e.target?.closest?.(".topbar-search")) setSearchFocus(false);
+      if (!e.target?.closest?.(".topbar-search-container")) setSearchFocus(false);
     };
     window.addEventListener("click", close);
     return () => window.removeEventListener("click", close);
@@ -152,11 +154,114 @@ const TopBar = ({ isMobile, toggleSidebar, activeMenu, setActiveMenu }) => {
 
   useEffect(() => {
     const onKey = e => {
-      if (e.key === "Escape") { setSearchFocus(false); setShowMenu(false); }
+      if (e.key === "Escape") { setSearchFocus(false); setShowMenu(false); setSearchQuery(""); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
+  // Global Ctrl+K / Cmd+K listener to trigger search focus
+  useEffect(() => {
+    const handleGlobalKey = e => {
+      if ((e.ctrlKey || e.metaKey) && e.key?.toLowerCase() === "k") {
+        e.preventDefault();
+        setSearchFocus(true);
+        searchRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleGlobalKey);
+    return () => window.removeEventListener("keydown", handleGlobalKey);
+  }, []);
+
+  // Set of searchable actions & pages
+  const searchableItems = [
+    ...menus.map(m => {
+      let keywords = "";
+      if (m.name === "Dashboard") keywords = "metrics, statistics, overview, charts, graph, summary, home";
+      else if (m.name === "Conversations") keywords = "chat, messages, history, support, inbox, customer, dialogue";
+      else if (m.name === "Intent Library") keywords = "intent, training, nlp, bot, answers, rasa, intelligence, phrases";
+      else if (m.name === "Knowledge Base") keywords = "documents, files, sources, context, pdf, upload, learning";
+      else if (m.name === "Flow Builder") keywords = "visual, tree, logic, design, drag and drop, flow, designer";
+      else if (m.name === "Analytics") keywords = "reports, charts, insights, data, graphs, analytics, traffic";
+      else if (m.name === "User Management") keywords = "users, team, members, roles, permissions, staff, manage";
+      else if (m.name === "Settings") keywords = "preferences, config, advanced, settings, options, system";
+      else if (m.name === "Security" || m.name === "Security & GDPR") keywords = "gdpr, audit logs, compliance, privacy, secure, security";
+      else if (m.name === "Tickets") keywords = "tickets, support, issues, helpdesk, complaints, unresolved";
+      else if (m.name === "Channels") keywords = "widget, website, integration, installation, embed, js snippet";
+      else if (m.name === "Billing") keywords = "pricing, invoice, plan, subscription, upgrade, pay, payment";
+      else if (m.name === "Live Agent") keywords = "live chat, human handoff, agent takeover, active agents";
+      else if (m.name === "Organization") keywords = "company, tenant, profile, edit organization, org details";
+      
+      return {
+        type: "page",
+        name: m.name,
+        path: m.path,
+        keywords: keywords,
+        icon: m.icon,
+      };
+    }),
+    {
+      type: "action",
+      name: "View Profile Settings",
+      path: "/Profile",
+      keywords: "my account, user settings, edit profile, change password, credentials",
+      icon: "users",
+      action: () => { navigate("/Profile"); setActiveMenu("Profile"); }
+    },
+    {
+      type: "action",
+      name: "Toggle Dark / Light Theme",
+      keywords: "appearance, dark mode, light mode, black, white, style",
+      icon: "billing",
+      action: () => { toggleTheme(); }
+    },
+    {
+      type: "action",
+      name: "Sign Out",
+      keywords: "logout, logoff, exit, leave",
+      icon: "liveagent",
+      action: () => { navigate("/login"); logout(); }
+    }
+  ];
+
+  const filteredItems = searchQuery.trim() === ""
+    ? searchableItems.slice(0, 5) // Default suggestions
+    : searchableItems.filter(item => 
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.keywords.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
+  // Keep selected index in bound
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [searchQuery]);
+
+  const handleKeyDown = e => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIndex(prev => (prev + 1) % Math.max(1, filteredItems.length));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIndex(prev => (prev - 1 + filteredItems.length) % Math.max(1, filteredItems.length));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (filteredItems[activeIndex]) {
+        handleItemClick(filteredItems[activeIndex]);
+      }
+    }
+  };
+
+  const handleItemClick = (item) => {
+    if (item.action) {
+      item.action();
+    } else if (item.path) {
+      navigate(item.path);
+      setActiveMenu(item.name);
+    }
+    setSearchFocus(false);
+    setSearchQuery("");
+    searchRef.current?.blur();
+  };
 
   return (
     <nav className={`topbar ${isMobile ? "mobile-topbar" : ""}`}>
@@ -184,19 +289,69 @@ const TopBar = ({ isMobile, toggleSidebar, activeMenu, setActiveMenu }) => {
 
       {/* CENTER – search (desktop only) */}
       {!isMobile && (
-        <div
-          className={`topbar-search ${searchFocus ? "focused" : ""}`}
-          onClick={e => { e.stopPropagation(); setSearchFocus(true); searchRef.current?.focus(); }}
-        >
-          <Search size={15} className="search-icon" />
-          <input
-            ref={searchRef}
-            type="search"
-            placeholder="Search pages, data, settings…"
-            aria-label="Search"
-            onFocus={() => setSearchFocus(true)}
-          />
-          {searchFocus && <kbd className="search-kbd">ESC</kbd>}
+        <div className="topbar-search-container" style={{ position: "relative", flex: 1, maxWidth: "420px", margin: "0 auto" }}>
+          <div
+            className={`topbar-search ${searchFocus ? "focused" : ""}`}
+            onClick={e => { e.stopPropagation(); setSearchFocus(true); searchRef.current?.focus(); }}
+          >
+            <Search size={15} className="search-icon" />
+            <input
+              ref={searchRef}
+              type="search"
+              placeholder="Search pages, data, settings…"
+              aria-label="Search"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              onFocus={() => setSearchFocus(true)}
+              onKeyDown={handleKeyDown}
+            />
+            {searchFocus ? (
+              <kbd className="search-kbd" style={{ cursor: "pointer" }} onClick={(e) => { e.stopPropagation(); setSearchFocus(false); setSearchQuery(""); }}>ESC</kbd>
+            ) : (
+              <kbd className="search-kbd">Ctrl+K</kbd>
+            )}
+          </div>
+
+          {searchFocus && (
+            <div className="search-results-dropdown" onClick={e => e.stopPropagation()}>
+              <div className="search-results-header">
+                {searchQuery.trim() === "" ? "Suggestions" : `Search Results (${filteredItems.length})`}
+              </div>
+              <div className="search-results-list">
+                {filteredItems.length === 0 ? (
+                  <div className="search-no-results">No pages or settings match "{searchQuery}"</div>
+                ) : (
+                  filteredItems.map((item, idx) => {
+                    const ItemIcon = ICON_MAP[item.icon] || Cpu;
+                    return (
+                      <div
+                        key={idx}
+                        className={`search-result-item ${idx === activeIndex ? "active" : ""}`}
+                        onClick={() => handleItemClick(item)}
+                        onMouseEnter={() => setActiveIndex(idx)}
+                      >
+                        <div className="search-result-icon">
+                          <ItemIcon size={14} />
+                        </div>
+                        <div className="search-result-info">
+                          <div className="search-result-name">{item.name}</div>
+                          <div className="search-result-path">
+                            {item.type === "page" ? item.path : "Quick Action"}
+                          </div>
+                        </div>
+                        {idx === activeIndex && <span className="search-result-badge">Enter</span>}
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+              <div className="search-results-footer">
+                <span>↑↓ Navigate</span>
+                <span>↵ Select</span>
+                <span>ESC Close</span>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -319,12 +474,7 @@ const BigScreenSideBar = ({ isExpanded, setIsExpanded, activeMenu, setActiveMenu
         />
       </div>
 
-      {isExpanded && (
-        <div className="sidebar-footer">
-          <span className="status-dot pulse" />
-          <span className="status-text">All systems online</span>
-        </div>
-      )}
+
     </div>
   );
 };

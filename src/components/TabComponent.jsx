@@ -4,7 +4,18 @@ import { Card, Container, Nav } from 'react-bootstrap'
 import './assets/TabComponent.css'
 
 const TabComponent = ({ pageContent }) => {
-  const [activeTab, setActiveTab] = useState(pageContent.tabs[0].tabKey)
+  const [internalActiveTab, setInternalActiveTab] = useState(pageContent.tabs[0].tabKey)
+
+  // Use controlled state if provided by pageContent, otherwise use internal state
+  const isControlled = pageContent.activeTab !== undefined && pageContent.onTabChange !== undefined
+  const activeTab = isControlled ? pageContent.activeTab : internalActiveTab
+  const handleTabChange = (key) => {
+    if (isControlled) {
+      pageContent.onTabChange(key)
+    } else {
+      setInternalActiveTab(key)
+    }
+  }
 
   return (
     <Container fluid className="h-100 d-flex flex-column" style={{paddingLeft:'0', paddingRight:'0'}}>
@@ -15,7 +26,7 @@ const TabComponent = ({ pageContent }) => {
           <Nav
             variant="tabs"
             activeKey={activeTab}
-            onSelect={(k) => setActiveTab(k)}
+            onSelect={handleTabChange}
             className="tab-header"
           >
             {pageContent.tabs.map((tab) => (

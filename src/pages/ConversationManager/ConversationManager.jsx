@@ -7,6 +7,15 @@ import APICall from "../../APICalls/APICall";
 import { useTheme } from "../../Context/ThemeContext";
 import "./Conversation.css";
 
+const parseUTCDate = (dateStr) => {
+  if (!dateStr) return null;
+  if (dateStr instanceof Date) return dateStr;
+  if (!dateStr.endsWith("Z") && !/[+-]\d{2}:\d{2}$/.test(dateStr)) {
+    return new Date(dateStr + "Z");
+  }
+  return new Date(dateStr);
+};
+
 const ConversationManager = () => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -116,7 +125,7 @@ const ConversationManager = () => {
       endDate: session.ended_at?.split("T")[0] || null,
 
       lastTimestamp: lastMsg
-        ? new Date(lastMsg.created_at).toLocaleString()
+        ? parseUTCDate(lastMsg.created_at)?.toLocaleString()
         : "",
 
       intent: lastBotWithIntent?.intent_detected || "Unknown",
@@ -138,10 +147,10 @@ const ConversationManager = () => {
               : "agent",
 
         text: m.message_text,
-        timestamp: new Date(m.created_at).toLocaleTimeString([], {
+        timestamp: parseUTCDate(m.created_at)?.toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit"
-        }),
+        }) || "",
 
         intent: m.intent_detected,
         confidence: m.confidence_score
