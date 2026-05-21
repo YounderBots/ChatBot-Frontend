@@ -9,7 +9,11 @@ const ICON_MAP = {
 
 function timeAgo(iso) {
   if (!iso) return "";
-  const diff = Date.now() - new Date(iso).getTime();
+  const hasTimezone = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(iso);
+  const timestamp = new Date(hasTimezone ? iso : `${iso}Z`).getTime();
+  if (Number.isNaN(timestamp)) return "";
+
+  const diff = Math.max(0, Date.now() - timestamp);
   const mins = Math.floor(diff / 60000);
   if (mins < 1) return "Just now";
   if (mins < 60) return `${mins}m ago`;

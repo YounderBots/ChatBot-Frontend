@@ -51,7 +51,7 @@ function EscalationQueueTab() {
   const [assignModal, setAssignModal] = useState(null);
   const [assignTo, setAssignTo]   = useState("");
   const [saving, setSaving]       = useState(false);
-  const [statusFilter, setStatusFilter] = useState("open");
+  const [statusFilter, setStatusFilter] = useState("active");
   const { showToast, ToastContainer } = useToast();
   const { confirm, ConfirmDialog } = useConfirm();
 
@@ -84,7 +84,11 @@ function EscalationQueueTab() {
 
   const filtered = tickets.filter(t => {
     if (!statusFilter) return true;
-    return (t.status || "").toLowerCase().includes(statusFilter.toLowerCase());
+    const status = (t.status || "").toLowerCase();
+    if (statusFilter === "active") {
+      return ["open", "pending", "assigned", "reopened"].includes(status);
+    }
+    return status === statusFilter.toLowerCase();
   });
 
   const handleAssign = async () => {
@@ -148,6 +152,7 @@ function EscalationQueueTab() {
       <Row className="g-2 mb-3 align-items-center">
         <Col md={4}>
           <Form.Select size="sm" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+            <option value="active">Active Tickets</option>
             <option value="">All Statuses</option>
             <option value="open">Open</option>
             <option value="pending">Pending</option>
