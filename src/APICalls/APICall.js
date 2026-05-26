@@ -22,7 +22,7 @@ const handleResponse = async (response) => {
             sessionStorage.removeItem("token");
             localStorage.removeItem("user");
             localStorage.removeItem("menus");
-            window.location.href = "/login";
+            window.location.href = "/admin/login";
             throw new Error("Session expired. Please log in again.");
         }
 
