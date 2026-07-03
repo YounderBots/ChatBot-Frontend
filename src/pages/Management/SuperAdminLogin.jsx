@@ -49,7 +49,7 @@ export default function SuperAdminLogin() {
                         <img src={chatviq} alt="ChatVIQ" className="hero-logo" style={{ filter: "drop-shadow(0 0 18px rgba(59,130,246,0.45))" }} />
                         <h1 className="hero-headline">
                             Platform<br />
-                            <span style={{ background: "linear-gradient(135deg,#2563eb 0%,#60a5fa 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+                            <span style={{ background: "linear-gradient(135deg,#5b8cff 0%,#2f6bff 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
                                 Management Console
                             </span>
                         </h1>
@@ -136,8 +136,8 @@ export default function SuperAdminLogin() {
                                 disabled={loading}
                                 aria-busy={loading}
                                 style={{
-                                    background: "linear-gradient(135deg,#1d4ed8 0%,#2563eb 50%,#3b82f6 100%)",
-                                    boxShadow: "0 6px 24px -4px rgba(59,130,246,0.45), 0 0 0 1px rgba(59,130,246,0.2) inset",
+                                    background: "linear-gradient(135deg,#1e50d8 0%,#2f6bff 55%,#5b8cff 100%)",
+                                    boxShadow: "0 6px 24px -4px rgba(47,107,255,0.45), 0 0 0 1px rgba(47,107,255,0.2) inset",
                                 }}
                             >
                                 {loading && (

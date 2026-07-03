@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ManagementAPI from "./managementAPI";
+import { Alert } from "./crudkit";
 
 const RESOURCES = [
     { key: "organizations", label: "Organizations" },
@@ -38,7 +39,6 @@ export default function AdminRolesPage() {
     const [error, setError]     = useState("");
     const [msg, setMsg]         = useState("");
 
-    // Modal state
     const [modal, setModal]     = useState(null); // null | "create" | "edit"
     const [editRole, setEditRole] = useState(null);
     const [formName, setFormName] = useState("");
@@ -63,20 +63,14 @@ export default function AdminRolesPage() {
     useEffect(() => { load(); }, []);
 
     const openCreate = () => {
-        setEditRole(null);
-        setFormName("");
-        setFormDesc("");
-        setFormPerms(buildDefaultPerms());
-        setFormError("");
-        setModal("create");
+        setEditRole(null); setFormName(""); setFormDesc("");
+        setFormPerms(buildDefaultPerms()); setFormError(""); setModal("create");
     };
 
     const openEdit = async (role) => {
         try {
             const full = await ManagementAPI.getAdminRole(role.id);
-            setEditRole(full);
-            setFormName(full.name);
-            setFormDesc(full.description || "");
+            setEditRole(full); setFormName(full.name); setFormDesc(full.description || "");
             const permsMap = {};
             (full.permissions || []).forEach(p => { permsMap[p.resource] = p; });
             setFormPerms(RESOURCES.map(r => ({
@@ -88,23 +82,17 @@ export default function AdminRolesPage() {
                 can_suspend:  permsMap[r.key]?.can_suspend  ?? false,
                 can_activate: permsMap[r.key]?.can_activate ?? false,
             })));
-            setFormError("");
-            setModal("edit");
-        } catch (e) {
-            setError(e.message);
-        }
+            setFormError(""); setModal("edit");
+        } catch (e) { setError(e.message); }
     };
 
     const togglePerm = (resource, action) => {
-        setFormPerms(prev => prev.map(p =>
-            p.resource === resource ? { ...p, [action]: !p[action] } : p
-        ));
+        setFormPerms(prev => prev.map(p => p.resource === resource ? { ...p, [action]: !p[action] } : p));
     };
 
     const handleSave = async () => {
         if (!formName.trim()) { setFormError("Role name is required"); return; }
-        setSaving(true);
-        setFormError("");
+        setSaving(true); setFormError("");
         try {
             if (modal === "create") {
                 await ManagementAPI.createAdminRole(formName.trim(), formDesc.trim(), formPerms);
@@ -113,13 +101,8 @@ export default function AdminRolesPage() {
                 await ManagementAPI.updateAdminRole(editRole.id, formName.trim(), formDesc.trim(), formPerms);
                 setMsg("Role updated successfully.");
             }
-            setModal(null);
-            load();
-        } catch (e) {
-            setFormError(e.message);
-        } finally {
-            setSaving(false);
-        }
+            setModal(null); load();
+        } catch (e) { setFormError(e.message); } finally { setSaving(false); }
     };
 
     const handleDelete = async (role) => {
@@ -129,146 +112,106 @@ export default function AdminRolesPage() {
             await ManagementAPI.deleteAdminRole(role.id);
             setMsg(`Role "${role.name}" deleted.`);
             load();
-        } catch (e) {
-            setError(e.message);
-        }
+        } catch (e) { setError(e.message); }
     };
 
     return (
         <div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+            <div className="mg-page-head">
                 <div>
-                    <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Admin Roles</h2>
-                    <p style={{ margin: "4px 0 0", color: "#64748b", fontSize: 13 }}>
-                        Define roles for superadmin users with resource-level permissions.
-                    </p>
+                    <h1 className="mg-h1">Admin Roles</h1>
+                    <p className="mg-sub">Define superadmin roles with resource-level permissions.</p>
                 </div>
-                <button onClick={openCreate} style={primaryBtnStyle}>+ Create Role</button>
+                <div className="mg-head-actions">
+                    <button className="mg-btn mg-btn-primary" onClick={openCreate}>+ Create Role</button>
+                </div>
             </div>
 
             {msg   && <Alert type="success" msg={msg} onClose={() => setMsg("")} />}
             {error && <Alert type="error"   msg={error} onClose={() => setError("")} />}
 
             {loading ? (
-                <div style={{ color: "#64748b", textAlign: "center", padding: "3rem" }}>Loading…</div>
+                <div className="mg-loading">Loading…</div>
             ) : (
-                <div style={cardStyle}>
-                    <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                        <thead>
-                            <tr style={{ background: "#f8fafc" }}>
-                                {["Role", "Description", "System", "Permissions", "Actions"].map(h => (
-                                    <th key={h} style={thStyle}>{h}</th>
+                <div className="mg-card">
+                    <div className="mg-table-wrap">
+                        <table className="mg-table">
+                            <thead>
+                                <tr>{["Role", "Description", "Type", "Permissions", "Actions"].map(h => <th key={h}>{h}</th>)}</tr>
+                            </thead>
+                            <tbody>
+                                {roles.length === 0 && <tr><td colSpan={5} className="mg-empty">No admin roles found</td></tr>}
+                                {roles.map(role => (
+                                    <tr key={role.id}>
+                                        <td className="mg-td-strong">
+                                            {role.name}
+                                            {role.is_system && <span className="mg-tag" style={{ marginLeft: 8 }}>System</span>}
+                                        </td>
+                                        <td className="mg-td-muted">{role.description || "—"}</td>
+                                        <td>{role.is_system ? <span className="mg-badge info">System</span> : <span className="mg-badge neutral">Custom</span>}</td>
+                                        <td className="mg-td-muted mg-num">{role.permission_count} resources</td>
+                                        <td>
+                                            <div className="mg-actions">
+                                                <button className="mg-rowbtn" onClick={() => openEdit(role)}>Edit</button>
+                                                <button className="mg-rowbtn danger" disabled={role.is_system} onClick={() => handleDelete(role)}>Delete</button>
+                                            </div>
+                                        </td>
+                                    </tr>
                                 ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {roles.length === 0 && (
-                                <tr><td colSpan={5} style={{ ...tdStyle, color: "#64748b", textAlign: "center", padding: "2rem" }}>No admin roles found</td></tr>
-                            )}
-                            {roles.map(role => (
-                                <tr key={role.id} style={{ borderTop: "1px solid #e2e8f0" }}>
-                                    <td style={{ ...tdStyle, fontWeight: 600 }}>
-                                        {role.name}
-                                        {role.is_system && (
-                                            <span style={{ marginLeft: 8, fontSize: 10, color: "#60a5fa", background: "rgba(96,165,250,0.1)", padding: "1px 6px", borderRadius: 10 }}>
-                                                SYSTEM
-                                            </span>
-                                        )}
-                                    </td>
-                                    <td style={{ ...tdStyle, color: "#64748b" }}>{role.description || "—"}</td>
-                                    <td style={{ ...tdStyle, color: role.is_system ? "#22c55e" : "#64748b" }}>
-                                        {role.is_system ? "Yes" : "No"}
-                                    </td>
-                                    <td style={{ ...tdStyle, color: "#64748b" }}>{role.permission_count} resources</td>
-                                    <td style={tdStyle}>
-                                        <div style={{ display: "flex", gap: 6 }}>
-                                            <button onClick={() => openEdit(role)} style={editBtnStyle}>Edit</button>
-                                            <button
-                                                onClick={() => handleDelete(role)}
-                                                disabled={role.is_system}
-                                                style={{ ...deleteBtnStyle, opacity: role.is_system ? 0.4 : 1, cursor: role.is_system ? "not-allowed" : "pointer" }}
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
 
-            {/* Modal */}
             {modal && (
-                <div style={overlayStyle}>
-                    <div style={modalStyle}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-                            <h3 style={{ margin: 0, fontSize: 16 }}>
-                                {modal === "create" ? "Create Admin Role" : `Edit: ${editRole?.name}`}
-                            </h3>
-                            <button onClick={() => setModal(null)} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", fontSize: 18 }}>×</button>
+                <div className="mg-modal-overlay" onMouseDown={e => { if (e.target === e.currentTarget) setModal(null); }}>
+                    <div className="mg-modal" style={{ width: "min(760px, 96vw)" }}>
+                        <div className="mg-modal-head">
+                            <h3 className="mg-modal-title">{modal === "create" ? "Create Admin Role" : `Edit: ${editRole?.name}`}</h3>
+                            <button className="mg-modal-close" onClick={() => setModal(null)} aria-label="Close">×</button>
                         </div>
+                        <div className="mg-modal-body">
+                            {formError && <div className="mg-form-error">{formError}</div>}
 
-                        {formError && <div style={{ color: "#ef4444", marginBottom: 12, fontSize: 13 }}>{formError}</div>}
+                            <label className="mg-form-label">Role Name *</label>
+                            <input className="mg-input" value={formName} onChange={e => setFormName(e.target.value)} placeholder="e.g. Support Admin" />
 
-                        <label style={labelStyle}>Role Name *</label>
-                        <input
-                            value={formName}
-                            onChange={e => setFormName(e.target.value)}
-                            placeholder="e.g. Support Admin"
-                            style={inputStyle}
-                        />
+                            <label className="mg-form-label">Description</label>
+                            <textarea className="mg-textarea" rows={2} value={formDesc} onChange={e => setFormDesc(e.target.value)} placeholder="What can this admin role do?" />
 
-                        <label style={labelStyle}>Description</label>
-                        <textarea
-                            value={formDesc}
-                            onChange={e => setFormDesc(e.target.value)}
-                            placeholder="What can this admin role do?"
-                            rows={2}
-                            style={{ ...inputStyle, resize: "vertical" }}
-                        />
-
-                        <label style={{ ...labelStyle, marginTop: 16 }}>Permissions</label>
-                        <div style={{ overflowX: "auto" }}>
-                            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
-                                <thead>
-                                    <tr style={{ background: "#f8fafc" }}>
-                                        <th style={{ ...thStyle, minWidth: 120 }}>Resource</th>
-                                        {ACTIONS.map(a => (
-                                            <th key={a.key} style={{ ...thStyle, textAlign: "center", minWidth: 64 }}>{a.label}</th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {formPerms.map(perm => (
-                                        <tr key={perm.resource} style={{ borderTop: "1px solid #e2e8f0" }}>
-                                            <td style={{ ...tdStyle, fontWeight: 500 }}>
-                                                {RESOURCES.find(r => r.key === perm.resource)?.label}
-                                            </td>
-                                            {ACTIONS.map(a => {
-                                                const disabled = ORGS_ONLY_ACTIONS.has(a.key) && perm.resource !== "organizations";
-                                                return (
-                                                    <td key={a.key} style={{ ...tdStyle, textAlign: "center" }}>
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={perm[a.key]}
-                                                            disabled={disabled}
-                                                            onChange={() => !disabled && togglePerm(perm.resource, a.key)}
-                                                            style={{ cursor: disabled ? "not-allowed" : "pointer", accentColor: "#60a5fa" }}
-                                                        />
-                                                    </td>
-                                                );
-                                            })}
+                            <label className="mg-form-label">Permissions</label>
+                            <div className="mg-table-wrap" style={{ border: "1px solid var(--mg-line)", borderRadius: 10 }}>
+                                <table className="mg-table mg-perm-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Resource</th>
+                                            {ACTIONS.map(a => <th key={a.key} style={{ textAlign: "center" }}>{a.label}</th>)}
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {formPerms.map(perm => (
+                                            <tr key={perm.resource}>
+                                                <td className="mg-td-strong">{RESOURCES.find(r => r.key === perm.resource)?.label}</td>
+                                                {ACTIONS.map(a => {
+                                                    const disabled = ORGS_ONLY_ACTIONS.has(a.key) && perm.resource !== "organizations";
+                                                    return (
+                                                        <td key={a.key} style={{ textAlign: "center" }}>
+                                                            <input type="checkbox" checked={perm[a.key]} disabled={disabled}
+                                                                onChange={() => !disabled && togglePerm(perm.resource, a.key)}
+                                                                style={{ width: 15, height: 15, accentColor: "var(--mg-accent)", cursor: disabled ? "not-allowed" : "pointer" }} />
+                                                        </td>
+                                                    );
+                                                })}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-
-                        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 20 }}>
-                            <button onClick={() => setModal(null)} style={cancelBtnStyle} disabled={saving}>Cancel</button>
-                            <button onClick={handleSave} style={primaryBtnStyle} disabled={saving}>
+                        <div className="mg-modal-foot">
+                            <button className="mg-btn mg-btn-ghost" onClick={() => setModal(null)} disabled={saving}>Cancel</button>
+                            <button className="mg-btn mg-btn-primary" onClick={handleSave} disabled={saving}>
                                 {saving ? "Saving…" : modal === "create" ? "Create Role" : "Save Changes"}
                             </button>
                         </div>
@@ -278,33 +221,3 @@ export default function AdminRolesPage() {
         </div>
     );
 }
-
-const Alert = ({ type, msg, onClose }) => (
-    <div style={{
-        background: "#ffffff",
-        border: `1px solid ${type === "success" ? "#22c55e" : "#ef4444"}`,
-        borderRadius: 8,
-        padding: "10px 14px",
-        marginBottom: 14,
-        color: type === "success" ? "#22c55e" : "#ef4444",
-        fontSize: 13,
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-    }}>
-        {msg}
-        <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", fontSize: 16 }}>×</button>
-    </div>
-);
-
-const cardStyle      = { background: "#ffffff", borderRadius: 10, border: "1px solid #e2e8f0", overflow: "hidden" };
-const thStyle        = { padding: "9px 14px", textAlign: "left", color: "#64748b", fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" };
-const tdStyle        = { padding: "11px 14px", fontSize: 13 };
-const labelStyle     = { display: "block", color: "#64748b", fontSize: 12, marginBottom: 4, fontWeight: 500 };
-const inputStyle     = { width: "100%", padding: "8px 10px", borderRadius: 6, border: "1px solid #e2e8f0", background: "#f8fafc", color: "#0f172a", fontSize: 13, marginBottom: 12, boxSizing: "border-box" };
-const overlayStyle   = { position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999 };
-const modalStyle     = { background: "#ffffff", borderRadius: 12, border: "1px solid #e2e8f0", padding: "1.5rem", width: "min(720px,95vw)", maxHeight: "90vh", overflowY: "auto" };
-const primaryBtnStyle  = { padding: "8px 18px", borderRadius: 7, border: "none", background: "#3b82f6", color: "#fff", cursor: "pointer", fontWeight: 600, fontSize: 13 };
-const cancelBtnStyle   = { padding: "8px 18px", borderRadius: 7, border: "1px solid #e2e8f0", background: "transparent", color: "#64748b", cursor: "pointer", fontSize: 13 };
-const editBtnStyle     = { padding: "3px 10px", borderRadius: 5, border: "1px solid #e2e8f0", background: "transparent", color: "#64748b", cursor: "pointer", fontSize: 12 };
-const deleteBtnStyle   = { padding: "3px 10px", borderRadius: 5, border: "1px solid #ef4444", background: "transparent", color: "#ef4444", fontSize: 12 };

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ManagementAPI from "./managementAPI";
+import { Alert } from "./crudkit";
 
 export default function AdminUsersPage() {
     const navigate  = useNavigate();
@@ -12,7 +13,6 @@ export default function AdminUsersPage() {
     const [error, setError]     = useState("");
     const [msg, setMsg]         = useState("");
 
-    // Invite modal
     const [inviteModal, setInviteModal] = useState(false);
     const [invEmail, setInvEmail]       = useState("");
     const [invPassword, setInvPassword] = useState("");
@@ -49,9 +49,7 @@ export default function AdminUsersPage() {
                     ? { ...a, admin_role_id: newRoleId ? Number(newRoleId) : null, admin_role_name: roles.find(r => r.id === Number(newRoleId))?.name || null }
                     : a
             ));
-        } catch (e) {
-            setError(e.message);
-        }
+        } catch (e) { setError(e.message); }
     };
 
     const handleToggleStatus = async (admin) => {
@@ -62,146 +60,106 @@ export default function AdminUsersPage() {
             await ManagementAPI.toggleAdminStatus(admin.id, !admin.is_active);
             setMsg(`Admin ${action.toLowerCase()}d.`);
             setAdmins(prev => prev.map(a => a.id === admin.id ? { ...a, is_active: !a.is_active } : a));
-        } catch (e) {
-            setError(e.message);
-        }
+        } catch (e) { setError(e.message); }
     };
 
     const handleInvite = async () => {
         if (!invEmail.trim() || !invPassword.trim()) { setInvError("Email and password are required."); return; }
-        setInvSaving(true);
-        setInvError("");
+        setInvSaving(true); setInvError("");
         try {
             const created = await ManagementAPI.inviteSuperAdmin(invEmail.trim(), invPassword.trim(), invName.trim(), invRoleId ? Number(invRoleId) : undefined);
-            if (invRoleId && created.id) {
-                await ManagementAPI.assignAdminRole(created.id, Number(invRoleId));
-            }
+            if (invRoleId && created.id) await ManagementAPI.assignAdminRole(created.id, Number(invRoleId));
             setMsg(`Admin ${invEmail} invited.`);
             setInviteModal(false);
             setInvEmail(""); setInvPassword(""); setInvName(""); setInvRoleId("");
             load();
-        } catch (e) {
-            setInvError(e.message);
-        } finally {
-            setInvSaving(false);
-        }
+        } catch (e) { setInvError(e.message); } finally { setInvSaving(false); }
     };
 
     return (
         <div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+            <div className="mg-page-head">
                 <div>
-                    <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Admin Users</h2>
-                    <p style={{ margin: "4px 0 0", color: "#64748b", fontSize: 13 }}>
-                        Manage superadmin accounts and assign roles.
-                    </p>
+                    <h1 className="mg-h1">Admin Users</h1>
+                    <p className="mg-sub">Manage superadmin accounts and assign platform roles.</p>
                 </div>
-                <button onClick={() => { setInviteModal(true); setInvError(""); }} style={primaryBtnStyle}>
-                    + Invite Admin
-                </button>
+                <div className="mg-head-actions">
+                    <button className="mg-btn mg-btn-primary" onClick={() => { setInviteModal(true); setInvError(""); }}>+ Invite Admin</button>
+                </div>
             </div>
 
             {msg   && <Alert type="success" msg={msg} onClose={() => setMsg("")} />}
             {error && <Alert type="error"   msg={error} onClose={() => setError("")} />}
 
             {loading ? (
-                <div style={{ color: "#64748b", textAlign: "center", padding: "3rem" }}>Loading…</div>
+                <div className="mg-loading">Loading…</div>
             ) : (
-                <div style={cardStyle}>
-                    <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                        <thead>
-                            <tr style={{ background: "#f8fafc" }}>
-                                {["Email", "Full Name", "Role", "Status", "Last Login", "Actions"].map(h => (
-                                    <th key={h} style={thStyle}>{h}</th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {admins.length === 0 && (
-                                <tr><td colSpan={6} style={{ ...tdStyle, color: "#64748b", textAlign: "center", padding: "2rem" }}>No admins found</td></tr>
-                            )}
-                            {admins.map(admin => {
-                                const isSelf = admin.id === saUser.id;
-                                return (
-                                    <tr key={admin.id} style={{ borderTop: "1px solid #e2e8f0" }}>
-                                        <td style={{ ...tdStyle, fontWeight: 500 }}>
-                                            {admin.email}
-                                            {isSelf && <span style={{ marginLeft: 6, fontSize: 10, color: "#60a5fa" }}>(you)</span>}
-                                        </td>
-                                        <td style={{ ...tdStyle, color: "#64748b" }}>{admin.full_name || "—"}</td>
-                                        <td style={tdStyle}>
-                                            <select
-                                                value={admin.admin_role_id ?? ""}
-                                                onChange={e => handleRoleChange(admin.id, e.target.value || null)}
-                                                style={selectStyle}
-                                            >
-                                                <option value="">— No role —</option>
-                                                {roles.map(r => (
-                                                    <option key={r.id} value={r.id}>{r.name}</option>
-                                                ))}
-                                            </select>
-                                        </td>
-                                        <td style={tdStyle}>
-                                            <StatusBadge active={admin.is_active} />
-                                        </td>
-                                        <td style={{ ...tdStyle, color: "#64748b" }}>
-                                            {admin.last_login_at ? new Date(admin.last_login_at).toLocaleDateString() : "Never"}
-                                        </td>
-                                        <td style={tdStyle}>
-                                            <button
-                                                onClick={() => handleToggleStatus(admin)}
-                                                disabled={isSelf}
-                                                style={{
-                                                    ...toggleBtnStyle(admin.is_active),
-                                                    opacity: isSelf ? 0.4 : 1,
-                                                    cursor: isSelf ? "not-allowed" : "pointer",
-                                                }}
-                                            >
-                                                {admin.is_active ? "Deactivate" : "Activate"}
-                                            </button>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                <div className="mg-card">
+                    <div className="mg-table-wrap">
+                        <table className="mg-table">
+                            <thead>
+                                <tr>{["Email", "Full Name", "Role", "Status", "Last Login", "Actions"].map(h => <th key={h}>{h}</th>)}</tr>
+                            </thead>
+                            <tbody>
+                                {admins.length === 0 && <tr><td colSpan={6} className="mg-empty">No admins found</td></tr>}
+                                {admins.map(admin => {
+                                    const isSelf = admin.id === saUser.id;
+                                    return (
+                                        <tr key={admin.id}>
+                                            <td className="mg-td-strong">
+                                                {admin.email}
+                                                {isSelf && <span className="mg-tag" style={{ marginLeft: 6 }}>You</span>}
+                                            </td>
+                                            <td className="mg-td-muted">{admin.full_name || "—"}</td>
+                                            <td>
+                                                <select className="mg-select mg-inline" style={{ minWidth: 150, fontSize: 12.5, padding: "6px 28px 6px 9px" }}
+                                                    value={admin.admin_role_id ?? ""}
+                                                    onChange={e => handleRoleChange(admin.id, e.target.value || null)}>
+                                                    <option value="">— No role (full access) —</option>
+                                                    {roles.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+                                                </select>
+                                            </td>
+                                            <td><span className={`mg-badge ${admin.is_active ? "ok" : "danger"}`}>{admin.is_active ? "Active" : "Inactive"}</span></td>
+                                            <td className="mg-td-muted mg-num">{admin.last_login_at ? new Date(admin.last_login_at).toLocaleDateString() : "Never"}</td>
+                                            <td>
+                                                <button className={`mg-rowbtn ${admin.is_active ? "danger" : "ok"}`} disabled={isSelf} onClick={() => handleToggleStatus(admin)}>
+                                                    {admin.is_active ? "Deactivate" : "Activate"}
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
 
-            {/* Invite Modal */}
             {inviteModal && (
-                <div style={overlayStyle}>
-                    <div style={modalStyle}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-                            <h3 style={{ margin: 0, fontSize: 16 }}>Invite Superadmin</h3>
-                            <button onClick={() => setInviteModal(false)} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", fontSize: 18 }}>×</button>
+                <div className="mg-modal-overlay" onMouseDown={e => { if (e.target === e.currentTarget) setInviteModal(false); }}>
+                    <div className="mg-modal" style={{ width: "min(480px, 96vw)" }}>
+                        <div className="mg-modal-head">
+                            <h3 className="mg-modal-title">Invite Superadmin</h3>
+                            <button className="mg-modal-close" onClick={() => setInviteModal(false)} aria-label="Close">×</button>
                         </div>
-
-                        {invError && <div style={{ color: "#ef4444", marginBottom: 12, fontSize: 13 }}>{invError}</div>}
-
-                        <label style={labelStyle}>Email *</label>
-                        <input type="email" value={invEmail} onChange={e => setInvEmail(e.target.value)} placeholder="admin@example.com" style={inputStyle} />
-
-                        <label style={labelStyle}>Password *</label>
-                        <input type="password" value={invPassword} onChange={e => setInvPassword(e.target.value)} placeholder="Min. 8 characters" style={inputStyle} />
-
-                        <label style={labelStyle}>Full Name</label>
-                        <input value={invName} onChange={e => setInvName(e.target.value)} placeholder="Optional" style={inputStyle} />
-
-                        <label style={labelStyle}>Admin Role</label>
-                        <select value={invRoleId} onChange={e => setInvRoleId(e.target.value)} style={{ ...inputStyle, marginBottom: 0 }}>
-                            <option value="">— No role assigned —</option>
-                            {roles.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-                        </select>
-                        <p style={{ color: "#64748b", fontSize: 11, margin: "4px 0 16px" }}>
-                            Superadmins without a role have full platform access.
-                        </p>
-
-                        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-                            <button onClick={() => setInviteModal(false)} style={cancelBtnStyle} disabled={invSaving}>Cancel</button>
-                            <button onClick={handleInvite} style={primaryBtnStyle} disabled={invSaving}>
-                                {invSaving ? "Inviting…" : "Send Invite"}
-                            </button>
+                        <div className="mg-modal-body">
+                            {invError && <div className="mg-form-error">{invError}</div>}
+                            <label className="mg-form-label">Email *</label>
+                            <input className="mg-input" type="email" value={invEmail} onChange={e => setInvEmail(e.target.value)} placeholder="admin@example.com" />
+                            <label className="mg-form-label">Password *</label>
+                            <input className="mg-input" type="password" value={invPassword} onChange={e => setInvPassword(e.target.value)} placeholder="Min. 8 characters" />
+                            <label className="mg-form-label">Full Name</label>
+                            <input className="mg-input" value={invName} onChange={e => setInvName(e.target.value)} placeholder="Optional" />
+                            <label className="mg-form-label">Admin Role</label>
+                            <select className="mg-select" value={invRoleId} onChange={e => setInvRoleId(e.target.value)}>
+                                <option value="">— No role assigned —</option>
+                                {roles.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+                            </select>
+                            <p className="mg-note">Superadmins without a role have full platform access.</p>
+                        </div>
+                        <div className="mg-modal-foot">
+                            <button className="mg-btn mg-btn-ghost" onClick={() => setInviteModal(false)} disabled={invSaving}>Cancel</button>
+                            <button className="mg-btn mg-btn-primary" onClick={handleInvite} disabled={invSaving}>{invSaving ? "Inviting…" : "Send Invite"}</button>
                         </div>
                     </div>
                 </div>
@@ -209,54 +167,3 @@ export default function AdminUsersPage() {
         </div>
     );
 }
-
-const StatusBadge = ({ active }) => (
-    <span style={{
-        color: active ? "#22c55e" : "#ef4444",
-        background: active ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)",
-        padding: "2px 8px",
-        borderRadius: 20,
-        fontSize: 11,
-        fontWeight: 600,
-    }}>
-        {active ? "Active" : "Inactive"}
-    </span>
-);
-
-const Alert = ({ type, msg, onClose }) => (
-    <div style={{
-        background: "#ffffff",
-        border: `1px solid ${type === "success" ? "#22c55e" : "#ef4444"}`,
-        borderRadius: 8,
-        padding: "10px 14px",
-        marginBottom: 14,
-        color: type === "success" ? "#22c55e" : "#ef4444",
-        fontSize: 13,
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-    }}>
-        {msg}
-        <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", fontSize: 16 }}>×</button>
-    </div>
-);
-
-const toggleBtnStyle = (active) => ({
-    padding: "3px 10px",
-    borderRadius: 5,
-    border: `1px solid ${active ? "#ef4444" : "#22c55e"}`,
-    background: "transparent",
-    color: active ? "#ef4444" : "#22c55e",
-    fontSize: 12,
-});
-
-const cardStyle      = { background: "#ffffff", borderRadius: 10, border: "1px solid #e2e8f0", overflow: "hidden" };
-const thStyle        = { padding: "9px 14px", textAlign: "left", color: "#64748b", fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" };
-const tdStyle        = { padding: "11px 14px", fontSize: 13 };
-const labelStyle     = { display: "block", color: "#64748b", fontSize: 12, marginBottom: 4, fontWeight: 500 };
-const inputStyle     = { width: "100%", padding: "8px 10px", borderRadius: 6, border: "1px solid #e2e8f0", background: "#f8fafc", color: "#0f172a", fontSize: 13, marginBottom: 12, boxSizing: "border-box" };
-const selectStyle    = { padding: "5px 8px", borderRadius: 5, border: "1px solid #e2e8f0", background: "#f8fafc", color: "#0f172a", fontSize: 12 };
-const overlayStyle   = { position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999 };
-const modalStyle     = { background: "#ffffff", borderRadius: 12, border: "1px solid #e2e8f0", padding: "1.5rem", width: "min(480px,95vw)", maxHeight: "90vh", overflowY: "auto" };
-const primaryBtnStyle  = { padding: "8px 18px", borderRadius: 7, border: "none", background: "#3b82f6", color: "#fff", cursor: "pointer", fontWeight: 600, fontSize: 13 };
-const cancelBtnStyle   = { padding: "8px 18px", borderRadius: 7, border: "1px solid #e2e8f0", background: "transparent", color: "#64748b", cursor: "pointer", fontSize: 13 };

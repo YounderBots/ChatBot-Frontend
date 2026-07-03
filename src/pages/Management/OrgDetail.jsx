@@ -1,13 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ManagementAPI from "./managementAPI";
+import { Alert } from "./crudkit";
 
-const STATUS_COLORS = {
-    ACTIVE:    "#22c55e",
-    SUSPENDED: "#ef4444",
-    DELETED:   "#64748b",
-};
-
+const statusClass = (s) => (s === "ACTIVE" ? "ok" : s === "SUSPENDED" ? "danger" : "neutral");
 const TABS = ["Overview", "Users", "Roles", "Usage"];
 
 export default function OrgDetail() {
@@ -19,271 +15,183 @@ export default function OrgDetail() {
     const [error, setError]     = useState("");
     const [actionMsg, setActionMsg] = useState("");
 
-    // Tab-specific data
     const [users, setUsers]   = useState(null);
     const [roles, setRoles]   = useState(null);
     const [stats, setStats]   = useState(null);
     const [tabLoading, setTabLoading] = useState(false);
     const [usersPage, setUsersPage]   = useState(1);
 
+    const loadUsers = async () => { setTabLoading(true); try { setUsers(await ManagementAPI.getOrgUsers(orgId, usersPage)); } catch (e) { setError(e.message); } finally { setTabLoading(false); } };
+    const loadRoles = async () => { setTabLoading(true); try { setRoles(await ManagementAPI.getOrgRoles(orgId)); } catch (e) { setError(e.message); } finally { setTabLoading(false); } };
+    const loadStats = async () => { setTabLoading(true); try { setStats(await ManagementAPI.getOrgStats(orgId)); } catch (e) { setError(e.message); } finally { setTabLoading(false); } };
+
     useEffect(() => {
         ManagementAPI.getOrg(orgId)
             .then(data => { setOrg(data); setLoading(false); })
             .catch(err => {
                 if (err.message?.includes("401")) navigate("/management/login");
-                setError(err.message);
-                setLoading(false);
+                setError(err.message); setLoading(false);
             });
     }, [orgId]);
 
     useEffect(() => {
         if (!org) return;
-        if (tab === "Users")  loadUsers();
-        if (tab === "Roles")  loadRoles();
-        if (tab === "Usage")  loadStats();
+        if (tab === "Users") loadUsers();
+        if (tab === "Roles") loadRoles();
+        if (tab === "Usage") loadStats();
     }, [tab, org]);
 
-    useEffect(() => {
-        if (tab === "Users") loadUsers();
-    }, [usersPage]);
-
-    const loadUsers = async () => {
-        setTabLoading(true);
-        try { setUsers(await ManagementAPI.getOrgUsers(orgId, usersPage)); }
-        catch (e) { setError(e.message); }
-        finally { setTabLoading(false); }
-    };
-
-    const loadRoles = async () => {
-        setTabLoading(true);
-        try { setRoles(await ManagementAPI.getOrgRoles(orgId)); }
-        catch (e) { setError(e.message); }
-        finally { setTabLoading(false); }
-    };
-
-    const loadStats = async () => {
-        setTabLoading(true);
-        try { setStats(await ManagementAPI.getOrgStats(orgId)); }
-        catch (e) { setError(e.message); }
-        finally { setTabLoading(false); }
-    };
+    useEffect(() => { if (tab === "Users") loadUsers(); }, [usersPage]);
 
     const handleSuspend = async () => {
         if (!confirm("Suspend this organization? All logins will be blocked.")) return;
-        await ManagementAPI.suspendOrg(orgId);
-        setActionMsg("Organization suspended.");
-        setOrg(o => ({ ...o, status: "SUSPENDED" }));
+        await ManagementAPI.suspendOrg(orgId); setActionMsg("Organization suspended."); setOrg(o => ({ ...o, status: "SUSPENDED" }));
     };
-
     const handleActivate = async () => {
-        await ManagementAPI.activateOrg(orgId);
-        setActionMsg("Organization activated.");
-        setOrg(o => ({ ...o, status: "ACTIVE" }));
+        await ManagementAPI.activateOrg(orgId); setActionMsg("Organization activated."); setOrg(o => ({ ...o, status: "ACTIVE" }));
     };
 
-    if (loading) return <div style={{ color: "#64748b", padding: "2rem" }}>Loading…</div>;
-    if (error && !org) return <div style={{ color: "#ef4444", padding: "2rem" }}>{error}</div>;
+    if (loading) return <div className="mg-loading">Loading…</div>;
+    if (error && !org) return <div className="mg-alert error" style={{ justifyContent: "flex-start" }}>{error}</div>;
 
     return (
         <div>
-            {/* Org name heading */}
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-                <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>{org?.name}</h2>
-                <span style={{
-                    fontSize: 11, fontWeight: 600, padding: "2px 10px", borderRadius: 20,
-                    color: STATUS_COLORS[org?.status] || "#64748b",
-                    background: `${STATUS_COLORS[org?.status] || "#64748b"}18`,
-                }}>
-                    {org?.status}
-                </span>
+            <div className="mg-title-row">
+                <button className="mg-btn mg-btn-ghost mg-btn-sm" onClick={() => navigate("/management/dashboard")}>← Organizations</button>
+                <h1 className="mg-h1" style={{ marginLeft: 4 }}>{org?.name}</h1>
+                <span className={`mg-badge ${statusClass(org?.status)}`}>{org?.status}</span>
             </div>
 
-            {actionMsg && (
-                <div style={{ background: "#ffffff", border: "1px solid #22c55e", borderRadius: 8, padding: "10px 14px", marginBottom: 14, color: "#22c55e", fontSize: 13 }}>
-                    {actionMsg}
-                </div>
-            )}
+            {actionMsg && <Alert type="success" msg={actionMsg} onClose={() => setActionMsg("")} />}
 
-            {/* Tab bar */}
-            <div style={{ display: "flex", gap: 4, marginBottom: 20, borderBottom: "1px solid #e2e8f0" }}>
+            <div className="mg-tabs">
                 {TABS.map(t => (
-                    <button key={t} onClick={() => setTab(t)} style={{
-                        background: "none",
-                        border: "none",
-                        borderBottom: tab === t ? "2px solid #60a5fa" : "2px solid transparent",
-                        color: tab === t ? "#60a5fa" : "#64748b",
-                        cursor: "pointer",
-                        padding: "8px 16px",
-                        fontSize: 13,
-                        fontWeight: tab === t ? 600 : 400,
-                        marginBottom: -1,
-                    }}>
-                        {t}
-                    </button>
+                    <button key={t} className={`mg-tab ${tab === t ? "active" : ""}`} onClick={() => setTab(t)}>{t}</button>
                 ))}
             </div>
 
-            {/* ── Overview Tab ── */}
             {tab === "Overview" && (
                 <div>
-                    <div style={cardStyle}>
-                        <h3 style={cardTitleStyle}>Organization Details</h3>
-                        <FieldGrid>
-                            <Field label="ID"          value={org.id} />
-                            <Field label="Name"        value={org.name} />
-                            <Field label="Slug"        value={org.slug} />
-                            <Field label="Owner Email" value={org.owner_email} />
-                            <Field label="Status"      value={
-                                <span style={{ color: STATUS_COLORS[org.status] || "#64748b", fontWeight: 600 }}>
-                                    {org.status}
-                                </span>
-                            } />
-                            <Field label="Plan"        value={org.plan_id || "—"} />
-                            <Field label="Members"     value={org.member_count} />
-                            <Field label="Trial Ends"  value={org.trial_ends_at ? new Date(org.trial_ends_at).toLocaleDateString() : "—"} />
-                            <Field label="Created"     value={org.created_at ? new Date(org.created_at).toLocaleDateString() : "—"} />
-                            <Field label="Industry"    value={org.industry || "—"} />
-                            <Field label="Timezone"    value={org.timezone || "—"} />
-                            <Field label="Website"     value={org.website || "—"} />
-                        </FieldGrid>
+                    <div className="mg-card mg-card-pad" style={{ marginBottom: 16 }}>
+                        <h3 className="mg-card-title">Organization Details</h3>
+                        <div className="mg-fieldgrid">
+                            <Def label="ID" value={org.id} />
+                            <Def label="Name" value={org.name} />
+                            <Def label="Slug" value={<span className="mg-mono">{org.slug}</span>} />
+                            <Def label="Owner Email" value={org.owner_email} />
+                            <Def label="Status" value={<span className={`mg-badge ${statusClass(org.status)}`}>{org.status}</span>} />
+                            <Def label="Plan" value={org.plan_id || "—"} />
+                            <Def label="Members" value={org.member_count} />
+                            <Def label="Trial Ends" value={org.trial_ends_at ? new Date(org.trial_ends_at).toLocaleDateString() : "—"} />
+                            <Def label="Created" value={org.created_at ? new Date(org.created_at).toLocaleDateString() : "—"} />
+                            <Def label="Industry" value={org.industry || "—"} />
+                            <Def label="Timezone" value={org.timezone || "—"} />
+                            <Def label="Website" value={org.website || "—"} />
+                        </div>
                     </div>
 
                     {org.subscription && (
-                        <div style={cardStyle}>
-                            <h3 style={cardTitleStyle}>Subscription</h3>
-                            <FieldGrid>
-                                <Field label="Plan Status"    value={org.subscription.status} />
-                                <Field label="Billing Cycle"  value={org.subscription.billing_cycle} />
-                            </FieldGrid>
+                        <div className="mg-card mg-card-pad" style={{ marginBottom: 16 }}>
+                            <h3 className="mg-card-title">Subscription</h3>
+                            <div className="mg-fieldgrid">
+                                <Def label="Plan Status" value={org.subscription.status} />
+                                <Def label="Billing Cycle" value={org.subscription.billing_cycle} />
+                            </div>
                         </div>
                     )}
 
-                    <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
+                    <div className="mg-head-actions">
                         {org.status === "ACTIVE"
-                            ? <ActionBtn onClick={handleSuspend} variant="danger">Suspend Organization</ActionBtn>
-                            : <ActionBtn onClick={handleActivate} variant="success">Activate Organization</ActionBtn>
-                        }
-                        <ActionBtn onClick={() => navigate(`/management/audit-logs?org_id=${orgId}`)} variant="neutral">
-                            View Audit Logs
-                        </ActionBtn>
+                            ? <button className="mg-btn mg-btn-danger" onClick={handleSuspend}>Suspend Organization</button>
+                            : <button className="mg-btn mg-btn-ghost" style={{ borderColor: "rgba(23,178,106,.4)", color: "var(--mg-ok)" }} onClick={handleActivate}>Activate Organization</button>}
+                        <button className="mg-btn mg-btn-ghost" onClick={() => navigate(`/management/audit-logs?org_id=${orgId}`)}>View Audit Logs</button>
                     </div>
                 </div>
             )}
 
-            {/* ── Users Tab ── */}
             {tab === "Users" && (
-                <div style={cardStyle}>
-                    <h3 style={cardTitleStyle}>Org Users</h3>
-                    {tabLoading ? <Spinner /> : users && (
+                <div className="mg-card">
+                    {tabLoading ? <div className="mg-loading">Loading…</div> : users && (
                         <>
-                            <table style={tableStyle}>
-                                <thead>
-                                    <tr style={{ background: "#f8fafc" }}>
-                                        {["ID", "Name", "Email", "Role", "Status", "Joined"].map(h => (
-                                            <th key={h} style={thStyle}>{h}</th>
+                            <div className="mg-table-wrap">
+                                <table className="mg-table">
+                                    <thead><tr>{["ID", "Name", "Email", "Role", "Status", "Joined"].map(h => <th key={h}>{h}</th>)}</tr></thead>
+                                    <tbody>
+                                        {users.users.length === 0 && <tr><td colSpan={6} className="mg-empty">No users</td></tr>}
+                                        {users.users.map(u => (
+                                            <tr key={u.id}>
+                                                <td className="mg-mono mg-td-muted">{u.id}</td>
+                                                <td className="mg-td-strong">{u.fullname}</td>
+                                                <td className="mg-td-muted">{u.email}</td>
+                                                <td className="mg-td-muted">{u.role_name || u.role_id || "—"}</td>
+                                                <td><span className={`mg-badge ${statusClass(u.status)}`}>{u.status}</span></td>
+                                                <td className="mg-td-muted mg-num">{u.created_at ? new Date(u.created_at).toLocaleDateString() : "—"}</td>
+                                            </tr>
                                         ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {users.users.length === 0 && (
-                                        <tr><td colSpan={6} style={{ ...tdStyle, color: "#64748b", textAlign: "center" }}>No users</td></tr>
-                                    )}
-                                    {users.users.map(u => (
-                                        <tr key={u.id} style={{ borderTop: "1px solid #e2e8f0" }}>
-                                            <td style={tdStyle}>{u.id}</td>
-                                            <td style={tdStyle}>{u.fullname}</td>
-                                            <td style={{ ...tdStyle, color: "#64748b" }}>{u.email}</td>
-                                            <td style={{ ...tdStyle, color: "#64748b" }}>{u.role_name || u.role_id || "—"}</td>
-                                            <td style={tdStyle}>
-                                                <StatusBadge status={u.status} />
-                                            </td>
-                                            <td style={{ ...tdStyle, color: "#64748b" }}>
-                                                {u.created_at ? new Date(u.created_at).toLocaleDateString() : "—"}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                            <div style={{ display: "flex", gap: 8, marginTop: 12, justifyContent: "flex-end" }}>
-                                <button onClick={() => setUsersPage(p => Math.max(1, p - 1))} disabled={usersPage === 1} style={pageBtnStyle}>← Prev</button>
-                                <span style={{ color: "#64748b", fontSize: 13, lineHeight: "30px" }}>
-                                    Page {usersPage} · {users.total} total
-                                </span>
-                                <button onClick={() => setUsersPage(p => p + 1)} disabled={users.users.length < 20} style={pageBtnStyle}>Next →</button>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div className="mg-pagination" style={{ padding: "12px 16px" }}>
+                                <button className="mg-pagebtn" onClick={() => setUsersPage(p => Math.max(1, p - 1))} disabled={usersPage === 1}>← Prev</button>
+                                <span className="mg-pageinfo">Page {usersPage} · {users.total} total</span>
+                                <button className="mg-pagebtn" onClick={() => setUsersPage(p => p + 1)} disabled={users.users.length < 20}>Next →</button>
                             </div>
                         </>
                     )}
                 </div>
             )}
 
-            {/* ── Roles Tab ── */}
             {tab === "Roles" && (
-                <div style={cardStyle}>
-                    <h3 style={cardTitleStyle}>Org Roles</h3>
-                    {tabLoading ? <Spinner /> : roles && (
-                        <table style={tableStyle}>
-                            <thead>
-                                <tr style={{ background: "#f8fafc" }}>
-                                    {["ID", "Name", "Scope", "Permissions", "Status"].map(h => (
-                                        <th key={h} style={thStyle}>{h}</th>
+                <div className="mg-card">
+                    {tabLoading ? <div className="mg-loading">Loading…</div> : roles && (
+                        <div className="mg-table-wrap">
+                            <table className="mg-table">
+                                <thead><tr>{["ID", "Name", "Scope", "Permissions", "Status"].map(h => <th key={h}>{h}</th>)}</tr></thead>
+                                <tbody>
+                                    {roles.roles.length === 0 && <tr><td colSpan={5} className="mg-empty">No roles</td></tr>}
+                                    {roles.roles.map(r => (
+                                        <tr key={r.id}>
+                                            <td className="mg-mono mg-td-muted">{r.id}</td>
+                                            <td className="mg-td-strong">{r.name}</td>
+                                            <td className="mg-td-muted">{r.organization_id ? "Org-specific" : "System-wide"}</td>
+                                            <td className="mg-td-muted mg-num">{r.permission_count} menus</td>
+                                            <td><span className={`mg-badge ${statusClass((r.status || "").toUpperCase())}`}>{r.status}</span></td>
+                                        </tr>
                                     ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {roles.roles.length === 0 && (
-                                    <tr><td colSpan={5} style={{ ...tdStyle, color: "#64748b", textAlign: "center" }}>No roles</td></tr>
-                                )}
-                                {roles.roles.map(r => (
-                                    <tr key={r.id} style={{ borderTop: "1px solid #e2e8f0" }}>
-                                        <td style={tdStyle}>{r.id}</td>
-                                        <td style={{ ...tdStyle, fontWeight: 500 }}>{r.name}</td>
-                                        <td style={{ ...tdStyle, color: "#64748b" }}>
-                                            {r.organization_id ? "Org-specific" : "System-wide"}
-                                        </td>
-                                        <td style={{ ...tdStyle, color: "#64748b" }}>{r.permission_count} menus</td>
-                                        <td style={tdStyle}><StatusBadge status={r.status?.toUpperCase() === "ACTIVE" ? "ACTIVE" : r.status} /></td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
+                        </div>
                     )}
                 </div>
             )}
 
-            {/* ── Usage Tab ── */}
             {tab === "Usage" && (
                 <div>
-                    {tabLoading ? <Spinner /> : stats && (
+                    {tabLoading ? <div className="mg-loading">Loading…</div> : stats && (
                         <>
-                            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginBottom: 20 }}>
-                                <MiniStat label="Members"            value={stats.member_count} accent="#60a5fa" />
-                                <MiniStat label="Conversations (30d)" value={stats.total_conversations.toLocaleString()} accent="#a78bfa" />
-                                <MiniStat label="Messages (30d)"      value={stats.total_messages.toLocaleString()} accent="#34d399" />
+                            <div className="mg-stat-grid">
+                                <Stat label="Members" value={stats.member_count} />
+                                <Stat label="Conversations (30d)" value={stats.total_conversations.toLocaleString()} tone="violet" />
+                                <Stat label="Messages (30d)" value={stats.total_messages.toLocaleString()} tone="ok" />
                             </div>
-                            <div style={cardStyle}>
-                                <h3 style={cardTitleStyle}>Daily Usage — Last 30 Days</h3>
-                                <table style={tableStyle}>
-                                    <thead>
-                                        <tr style={{ background: "#f8fafc" }}>
-                                            {["Date", "Conversations", "Messages", "API Calls"].map(h => (
-                                                <th key={h} style={thStyle}>{h}</th>
+                            <div className="mg-card mg-card-pad">
+                                <h3 className="mg-card-title">Daily Usage — Last 30 Days</h3>
+                                <div className="mg-table-wrap">
+                                    <table className="mg-table">
+                                        <thead><tr>{["Date", "Conversations", "Messages", "API Calls"].map(h => <th key={h}>{h}</th>)}</tr></thead>
+                                        <tbody>
+                                            {stats.daily_records.length === 0 && <tr><td colSpan={4} className="mg-empty">No usage data</td></tr>}
+                                            {stats.daily_records.map((r, i) => (
+                                                <tr key={i}>
+                                                    <td className="mg-num" style={{ whiteSpace: "nowrap" }}>{r.date}</td>
+                                                    <td className="mg-num">{r.conversations.toLocaleString()}</td>
+                                                    <td className="mg-num">{r.messages.toLocaleString()}</td>
+                                                    <td className="mg-num mg-td-muted">{r.api_calls.toLocaleString()}</td>
+                                                </tr>
                                             ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {stats.daily_records.length === 0 && (
-                                            <tr><td colSpan={4} style={{ ...tdStyle, color: "#64748b", textAlign: "center" }}>No usage data</td></tr>
-                                        )}
-                                        {stats.daily_records.map((r, i) => (
-                                            <tr key={i} style={{ borderTop: "1px solid #e2e8f0" }}>
-                                                <td style={tdStyle}>{r.date}</td>
-                                                <td style={tdStyle}>{r.conversations.toLocaleString()}</td>
-                                                <td style={tdStyle}>{r.messages.toLocaleString()}</td>
-                                                <td style={{ ...tdStyle, color: "#64748b" }}>{r.api_calls.toLocaleString()}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </>
                     )}
@@ -293,65 +201,16 @@ export default function OrgDetail() {
     );
 }
 
-// ── Sub-components ────────────────────────────────────────────────────────────
-
-const FieldGrid = ({ children }) => (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 24px" }}>{children}</div>
-);
-
-const Field = ({ label, value }) => (
+const Def = ({ label, value }) => (
     <div>
-        <div style={{ color: "#64748b", fontSize: 11, marginBottom: 2, textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</div>
-        <div style={{ fontSize: 13 }}>{value}</div>
+        <div className="mg-def-label">{label}</div>
+        <div className="mg-def-value">{value}</div>
     </div>
 );
 
-const StatusBadge = ({ status }) => {
-    const color = STATUS_COLORS[status] || "#64748b";
-    return (
-        <span style={{ color, background: `${color}18`, padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 600 }}>
-            {status}
-        </span>
-    );
-};
-
-const ActionBtn = ({ onClick, variant, children }) => {
-    const variants = {
-        danger:  { border: "#ef4444", color: "#ef4444" },
-        success: { border: "#22c55e", color: "#22c55e" },
-        neutral: { border: "#e2e8f0", color: "#64748b" },
-    };
-    const v = variants[variant] || variants.neutral;
-    return (
-        <button onClick={onClick} style={{
-            padding: "8px 18px",
-            borderRadius: 8,
-            border: `1px solid ${v.border}`,
-            background: "transparent",
-            color: v.color,
-            cursor: "pointer",
-            fontWeight: 500,
-            fontSize: 13,
-        }}>
-            {children}
-        </button>
-    );
-};
-
-const MiniStat = ({ label, value, accent }) => (
-    <div style={{ background: "#ffffff", borderRadius: 10, border: "1px solid #e2e8f0", padding: "1rem 1.25rem", borderTop: `3px solid ${accent}` }}>
-        <div style={{ color: "#64748b", fontSize: 11, marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</div>
-        <div style={{ fontSize: 22, fontWeight: 700 }}>{value}</div>
+const Stat = ({ label, value, tone }) => (
+    <div className={`mg-stat ${tone || ""}`}>
+        <div className="mg-stat-label">{label}</div>
+        <div className="mg-stat-value">{value}</div>
     </div>
 );
-
-const Spinner = () => (
-    <div style={{ color: "#64748b", padding: "2rem", textAlign: "center" }}>Loading…</div>
-);
-
-const cardStyle      = { background: "#ffffff", borderRadius: 10, border: "1px solid #e2e8f0", padding: "1.25rem", marginBottom: 16 };
-const cardTitleStyle = { margin: "0 0 1rem", fontSize: 15, fontWeight: 600 };
-const tableStyle     = { width: "100%", borderCollapse: "collapse" };
-const thStyle        = { padding: "9px 14px", textAlign: "left", color: "#64748b", fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" };
-const tdStyle        = { padding: "10px 14px", fontSize: 13 };
-const pageBtnStyle   = { padding: "4px 12px", borderRadius: 6, border: "1px solid #e2e8f0", background: "#f8fafc", color: "#0f172a", cursor: "pointer", fontSize: 12 };

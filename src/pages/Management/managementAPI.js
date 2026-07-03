@@ -133,6 +133,11 @@ const ManagementAPI = {
             headers: saHeaders(),
         }).then(handleResponse),
 
+    seedOrgRoles: (orgId) =>
+        fetchSA(`${baseURL}/management/organizations/${orgId}/seed-roles`, {
+            method: "POST", headers: saHeaders(),
+        }).then(handleResponse),
+
     getOrgStats: (orgId) =>
         fetchSA(`${baseURL}/management/organizations/${orgId}/stats`, {
             headers: saHeaders(),
@@ -154,6 +159,44 @@ const ManagementAPI = {
         const q = new URLSearchParams({ page: 1, limit: 20, ...params }).toString();
         return fetchSA(`${baseURL}/management/channels?${q}`, { headers: saHeaders() }).then(handleResponse);
     },
+
+    // ── Platform CRUD (super-admin writes across tenants) ─────────────────────
+    // CREATE takes an explicit organization_id in the body; UPDATE/DELETE by id.
+
+    createOrg: (body) =>
+        fetchSA(`${baseURL}/management/organizations`, { method: "POST", headers: saHeaders(), body: JSON.stringify(body) }).then(handleResponse),
+    updateOrg: (id, body) =>
+        fetchSA(`${baseURL}/management/organizations/${id}`, { method: "PUT", headers: saHeaders(), body: JSON.stringify(body) }).then(handleResponse),
+    deleteOrg: (id) =>
+        fetchSA(`${baseURL}/management/organizations/${id}`, { method: "DELETE", headers: saHeaders() }).then(handleResponse),
+
+    createUser: (body) =>
+        fetchSA(`${baseURL}/management/users`, { method: "POST", headers: saHeaders(), body: JSON.stringify(body) }).then(handleResponse),
+    updateUser: (id, body) =>
+        fetchSA(`${baseURL}/management/users/${id}`, { method: "PUT", headers: saHeaders(), body: JSON.stringify(body) }).then(handleResponse),
+    deleteUser: (id) =>
+        fetchSA(`${baseURL}/management/users/${id}`, { method: "DELETE", headers: saHeaders() }).then(handleResponse),
+
+    createIntent: (body) =>
+        fetchSA(`${baseURL}/management/intents`, { method: "POST", headers: saHeaders(), body: JSON.stringify(body) }).then(handleResponse),
+    updateIntent: (id, body) =>
+        fetchSA(`${baseURL}/management/intents/${id}`, { method: "PUT", headers: saHeaders(), body: JSON.stringify(body) }).then(handleResponse),
+    deleteIntent: (id) =>
+        fetchSA(`${baseURL}/management/intents/${id}`, { method: "DELETE", headers: saHeaders() }).then(handleResponse),
+
+    createArticle: (body) =>
+        fetchSA(`${baseURL}/management/knowledge-base`, { method: "POST", headers: saHeaders(), body: JSON.stringify(body) }).then(handleResponse),
+    updateArticle: (id, body) =>
+        fetchSA(`${baseURL}/management/knowledge-base/${id}`, { method: "PUT", headers: saHeaders(), body: JSON.stringify(body) }).then(handleResponse),
+    deleteArticle: (id) =>
+        fetchSA(`${baseURL}/management/knowledge-base/${id}`, { method: "DELETE", headers: saHeaders() }).then(handleResponse),
+
+    createChannel: (body) =>
+        fetchSA(`${baseURL}/management/channels`, { method: "POST", headers: saHeaders(), body: JSON.stringify(body) }).then(handleResponse),
+    updateChannel: (id, body) =>
+        fetchSA(`${baseURL}/management/channels/${id}`, { method: "PUT", headers: saHeaders(), body: JSON.stringify(body) }).then(handleResponse),
+    deleteChannel: (id) =>
+        fetchSA(`${baseURL}/management/channels/${id}`, { method: "DELETE", headers: saHeaders() }).then(handleResponse),
 };
 
 export default ManagementAPI;

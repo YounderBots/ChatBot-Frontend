@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ManagementAPI from "./managementAPI";
+import { Alert, PageHeader, Modal, TextField, SelectField, RowActions } from "./crudkit";
+
+const STATUS_OPTIONS = ["ACTIVE", "INACTIVE"];
+const emptyForm = { organization_id: "", fullname: "", email: "", password: "", role: "", status: "ACTIVE" };
 
 export default function PlatformUsers() {
     const navigate = useNavigate();
@@ -11,6 +15,17 @@ export default function PlatformUsers() {
     const [orgId,   setOrgId]   = useState("");
     const [loading, setLoading] = useState(true);
     const [error,   setError]   = useState("");
+    const [msg,     setMsg]     = useState("");
+
+    const [modal, setModal]     = useState(null);   // null | "create" | "edit"
+    const [editId, setEditId]   = useState(null);
+    const [form, setForm]       = useState(emptyForm);
+    const [saving, setSaving]   = useState(false);
+    const [formError, setFormError] = useState("");
+    const [orgRoles, setOrgRoles]   = useState([]);
+    const [seedingRoles, setSeedingRoles] = useState(false);
+
+    const setF = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
     const load = async () => {
         setLoading(true);
@@ -32,101 +47,191 @@ export default function PlatformUsers() {
 
     useEffect(() => { load(); }, [page, search, orgId]);
 
+    // Load target org's roles whenever the modal is open with a valid org id.
+    useEffect(() => {
+        if (!modal) { setOrgRoles([]); return; }
+        const oid = Number(form.organization_id);
+        if (!oid) { setOrgRoles([]); return; }
+        let cancelled = false;
+        ManagementAPI.getOrgRoles(oid)
+            .then(d => { if (!cancelled) setOrgRoles(d.roles || []); })
+            .catch(() => { if (!cancelled) setOrgRoles([]); });
+        return () => { cancelled = true; };
+    }, [modal, form.organization_id]);
+
     const resetFilters = () => { setSearch(""); setOrgId(""); setPage(1); };
     const hasFilters = search || orgId;
 
+    const openCreate = () => {
+        setEditId(null);
+        setForm({ ...emptyForm, organization_id: orgId || "" });
+        setFormError("");
+        setModal("create");
+    };
+
+    const openEdit = (u) => {
+        setEditId(u.id);
+        setForm({
+            organization_id: u.organization_id ?? "",
+            fullname: u.fullname || "", email: u.email || "",
+            password: "", role: "", status: u.status || "ACTIVE",
+        });
+        setFormError("");
+        setModal("edit");
+    };
+
+    const handleSeedRoles = async () => {
+        const oid = Number(form.organization_id);
+        if (!oid) return;
+        setSeedingRoles(true);
+        setFormError("");
+        try {
+            await ManagementAPI.seedOrgRoles(oid);
+            const d = await ManagementAPI.getOrgRoles(oid);
+            setOrgRoles(d.roles || []);
+        } catch (e) {
+            setFormError(e.message);
+        } finally {
+            setSeedingRoles(false);
+        }
+    };
+
+    const handleSave = async () => {
+        setSaving(true);
+        setFormError("");
+        try {
+            if (modal === "create") {
+                await ManagementAPI.createUser({
+                    organization_id: Number(form.organization_id),
+                    fullname: form.fullname.trim(),
+                    email: form.email.trim(),
+                    password: form.password,
+                    role: Number(form.role),
+                    status: form.status,
+                });
+                setMsg("User created.");
+            } else {
+                const body = { fullname: form.fullname.trim(), email: form.email.trim(), status: form.status };
+                if (form.role) body.role = Number(form.role);
+                if (form.password) body.password = form.password;
+                await ManagementAPI.updateUser(editId, body);
+                setMsg("User updated.");
+            }
+            setModal(null);
+            load();
+        } catch (e) {
+            setFormError(e.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleDelete = async (u) => {
+        try {
+            await ManagementAPI.deleteUser(u.id);
+            setMsg(`User "${u.email}" deleted.`);
+            load();
+        } catch (e) {
+            setError(e.message);
+        }
+    };
+
     return (
         <div>
-            {/* Filters */}
-            <div style={{ display: "flex", gap: 10, marginBottom: 14, alignItems: "flex-end", flexWrap: "wrap" }}>
-                <div>
-                    <div style={labelStyle}>Email</div>
-                    <input
-                        placeholder="Search by email…"
-                        value={search}
-                        onChange={e => { setSearch(e.target.value); setPage(1); }}
-                        style={{ ...inputStyle, width: 220 }}
-                    />
+            <PageHeader title="Users" subtitle="All tenant users across every organization." addLabel="+ Add User" onAdd={openCreate} />
+
+            {msg   && <Alert type="success" msg={msg} onClose={() => setMsg("")} />}
+            {error && <Alert type="error"   msg={error} onClose={() => setError("")} />}
+
+            <div className="mg-toolbar">
+                <div className="mg-field">
+                    <span className="mg-field-label">Email</span>
+                    <input className="mg-input mg-inline" style={{ width: 240 }} placeholder="Search by email…" value={search}
+                        onChange={e => { setSearch(e.target.value); setPage(1); }} />
                 </div>
-                <div>
-                    <div style={labelStyle}>Org ID</div>
-                    <input
-                        placeholder="Filter by org…"
-                        value={orgId}
-                        onChange={e => { setOrgId(e.target.value); setPage(1); }}
-                        style={{ ...inputStyle, width: 120 }}
-                    />
+                <div className="mg-field">
+                    <span className="mg-field-label">Org ID</span>
+                    <input className="mg-input mg-inline" style={{ width: 130 }} placeholder="Filter by org…" value={orgId}
+                        onChange={e => { setOrgId(e.target.value); setPage(1); }} />
                 </div>
-                {hasFilters && (
-                    <button onClick={resetFilters} style={clearBtnStyle}>Clear</button>
-                )}
-                <span style={{ color: "#64748b", fontSize: 12, marginLeft: "auto", alignSelf: "flex-end", paddingBottom: 2 }}>
-                    {total} result{total !== 1 ? "s" : ""}
-                </span>
+                {hasFilters && <button className="mg-clear" onClick={resetFilters}>Clear</button>}
+                <span className="mg-count">{total} result{total !== 1 ? "s" : ""}</span>
             </div>
 
-            {error && <div style={{ color: "#ef4444", marginBottom: 16, fontSize: 13 }}>{error}</div>}
-
             {loading ? (
-                <div style={{ color: "#64748b", padding: "2rem", textAlign: "center" }}>Loading…</div>
+                <div className="mg-loading">Loading…</div>
             ) : (
-                <div style={{ background: "#ffffff", borderRadius: 10, border: "1px solid #e2e8f0", overflow: "auto" }}>
-                    <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                        <thead>
-                            <tr style={{ background: "#f8fafc" }}>
-                                {["ID", "Name", "Email", "Org ID", "Status", "Joined"].map(h => (
-                                    <th key={h} style={thStyle}>{h}</th>
+                <div className="mg-card">
+                    <div className="mg-table-wrap">
+                        <table className="mg-table">
+                            <thead>
+                                <tr>{["ID", "Name", "Email", "Org", "Status", "Joined", "Actions"].map(h => <th key={h}>{h}</th>)}</tr>
+                            </thead>
+                            <tbody>
+                                {users.length === 0 && (
+                                    <tr><td colSpan={7} className="mg-empty">No users found</td></tr>
+                                )}
+                                {users.map(u => (
+                                    <tr key={u.id}>
+                                        <td className="mg-mono mg-td-muted">{u.id}</td>
+                                        <td className="mg-td-strong">{u.fullname || "—"}</td>
+                                        <td className="mg-td-muted">{u.email}</td>
+                                        <td><button className="mg-link" onClick={() => navigate(`/management/org/${u.organization_id}`)}>{u.organization_id}</button></td>
+                                        <td><span className={`mg-badge ${u.status === "ACTIVE" ? "ok" : "neutral"}`}>{u.status}</span></td>
+                                        <td className="mg-td-muted mg-num" style={{ whiteSpace: "nowrap" }}>{u.created_at ? new Date(u.created_at).toLocaleDateString() : "—"}</td>
+                                        <td><RowActions onEdit={() => openEdit(u)} onDelete={() => handleDelete(u)} deleteLabel={`user "${u.email}"`} /></td>
+                                    </tr>
                                 ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {users.length === 0 && (
-                                <tr><td colSpan={6} style={{ ...tdStyle, color: "#64748b", textAlign: "center", padding: "2rem" }}>No users found</td></tr>
-                            )}
-                            {users.map(u => (
-                                <tr key={u.id} style={{ borderTop: "1px solid #e2e8f0" }}>
-                                    <td style={tdStyle}>{u.id}</td>
-                                    <td style={{ ...tdStyle, fontWeight: 500 }}>{u.fullname || "—"}</td>
-                                    <td style={{ ...tdStyle, color: "#64748b" }}>{u.email}</td>
-                                    <td style={tdStyle}>
-                                        <button
-                                            onClick={() => navigate(`/management/org/${u.organization_id}`)}
-                                            style={{ background: "none", border: "none", color: "#3b82f6", cursor: "pointer", padding: 0, fontSize: 13 }}
-                                        >
-                                            {u.organization_id}
-                                        </button>
-                                    </td>
-                                    <td style={tdStyle}>
-                                        <span style={{
-                                            color: u.status === "ACTIVE" ? "#22c55e" : "#64748b",
-                                            background: u.status === "ACTIVE" ? "rgba(34,197,94,0.1)" : "rgba(100,116,139,0.1)",
-                                            padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 600,
-                                        }}>
-                                            {u.status}
-                                        </span>
-                                    </td>
-                                    <td style={{ ...tdStyle, color: "#64748b", whiteSpace: "nowrap" }}>
-                                        {u.created_at ? new Date(u.created_at).toLocaleDateString() : "—"}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
 
-            <div style={{ display: "flex", gap: 8, marginTop: 14, justifyContent: "flex-end", alignItems: "center" }}>
-                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} style={pageBtnStyle}>← Prev</button>
-                <span style={{ color: "#64748b", fontSize: 13 }}>Page {page}</span>
-                <button onClick={() => setPage(p => p + 1)} disabled={users.length < 20} style={pageBtnStyle}>Next →</button>
+            <div className="mg-pagination">
+                <button className="mg-pagebtn" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>← Prev</button>
+                <span className="mg-pageinfo">Page {page}</span>
+                <button className="mg-pagebtn" onClick={() => setPage(p => p + 1)} disabled={users.length < 20}>Next →</button>
             </div>
+
+            {modal && (
+                <Modal
+                    title={modal === "create" ? "Add User" : `Edit User: ${form.email}`}
+                    onClose={() => setModal(null)} onSave={handleSave} saving={saving}
+                    error={formError} saveLabel={modal === "create" ? "Create User" : "Save Changes"}
+                >
+                    {modal === "create" && (
+                        <TextField label="Organization ID *" type="number" value={form.organization_id} onChange={v => setF("organization_id", v)} placeholder="e.g. 2" />
+                    )}
+                    <TextField label="Full Name *" value={form.fullname} onChange={v => setF("fullname", v)} placeholder="Jane Doe" />
+                    <TextField label="Email *" type="email" value={form.email} onChange={v => setF("email", v)} placeholder="jane@acme.com" />
+                    <TextField
+                        label={modal === "create" ? "Password *" : "Password (leave blank to keep)"}
+                        type="password" value={form.password} onChange={v => setF("password", v)}
+                        placeholder="Min 8 chars, letter + digit"
+                    />
+                    {orgRoles.length > 0 ? (
+                        <SelectField
+                            label={`Role ${modal === "create" ? "*" : "(leave to keep)"}`}
+                            value={form.role}
+                            onChange={v => setF("role", v)}
+                            options={[{ value: "", label: "— select a role —" },
+                                ...orgRoles.map(r => ({ value: String(r.id), label: `${r.name} (#${r.id})` }))]}
+                        />
+                    ) : Number(form.organization_id) ? (
+                        <div style={{ marginTop: 12 }}>
+                            <label className="mg-form-label">Role *</label>
+                            <div className="mg-note warn">This organization has no roles yet — a user can't be created without one.</div>
+                            <button type="button" className="mg-btn mg-btn-ghost mg-btn-sm" onClick={handleSeedRoles} disabled={seedingRoles}>
+                                {seedingRoles ? "Creating…" : "+ Create default roles (Administrator, Member)"}
+                            </button>
+                        </div>
+                    ) : (
+                        <p className="mg-note">Enter an Organization ID above to load its roles.</p>
+                    )}
+                    <SelectField label="Status" value={form.status} onChange={v => setF("status", v)} options={STATUS_OPTIONS} />
+                </Modal>
+            )}
         </div>
     );
 }
-
-const labelStyle    = { color: "#64748b", fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 };
-const inputStyle    = { padding: "7px 10px", borderRadius: 6, border: "1px solid #e2e8f0", background: "#ffffff", color: "#0f172a", fontSize: 13 };
-const clearBtnStyle = { padding: "7px 14px", borderRadius: 6, border: "1px solid #e2e8f0", background: "none", color: "#64748b", cursor: "pointer", fontSize: 13, alignSelf: "flex-end" };
-const thStyle       = { padding: "10px 14px", textAlign: "left", color: "#64748b", fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" };
-const tdStyle       = { padding: "11px 14px", fontSize: 13, color: "#0f172a" };
-const pageBtnStyle  = { padding: "5px 14px", borderRadius: 6, border: "1px solid #e2e8f0", background: "#ffffff", color: "#0f172a", cursor: "pointer", fontSize: 13 };

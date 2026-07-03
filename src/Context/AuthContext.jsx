@@ -1,5 +1,6 @@
 // src/context/AuthContext.jsx
 import { createContext, useContext, useState } from "react";
+import APICall, { setAuthTokens } from "../APICalls/APICall";
 
 const AuthContext = createContext();
 
@@ -19,8 +20,8 @@ export const AuthProvider = ({ children }) => {
     const [roleName, setRoleName] = useState(() => localStorage.getItem("role_name") || "");
 
     const login = (data) => {
-        // Token in sessionStorage (cleared on browser close)
-        sessionStorage.setItem("token", data.token);
+        // Access + rotating refresh token in sessionStorage (cleared on browser close)
+        setAuthTokens(data.token, data.refresh_token);
         localStorage.setItem("user",  JSON.stringify(data.user));
         localStorage.setItem("menus", JSON.stringify(data.menus));
 
@@ -37,8 +38,9 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const logout = () => {
-        sessionStorage.removeItem("token");
+    const logout = async () => {
+        // Revoke tokens server-side (best-effort) + clear access/refresh tokens.
+        await APICall.serverLogout();
         localStorage.removeItem("user");
         localStorage.removeItem("menus");
         localStorage.removeItem("org");

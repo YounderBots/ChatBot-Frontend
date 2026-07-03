@@ -9,7 +9,6 @@ import dpPlaceholder from "../../layout/assets/dpPlaceholder.png";
 import "./ManagementLayout.css";
 
 const ChatViq      = "/assets/images/chatviq.png";
-const favIconCV    = "/assets/images/favIconChatViq.svg";
 
 const NAV_SECTIONS = [
     {
@@ -228,12 +227,13 @@ const DesktopSidebar = ({ isExpanded, setIsExpanded, activePath, navigate }) => 
     return (
         <div className="mg-sidebar-inner">
             <div
-                className={`mg-sidebar-header ${!isExpanded ? "collapsed" : ""}`}
+                className="mg-sidebar-header"
                 onClick={() => navigate("/management/dashboard")}
             >
-                <div className="mg-logo-wrapper">
-                    <img src={ChatViq}   className="mg-logo-big"   alt="ChatVIQ" />
-                    <img src={favIconCV} className="mg-logo-small" alt="CV"      />
+                <div className="mg-brand-mark">C</div>
+                <div className="mg-brand-text">
+                    <span className="mg-brand-name">ChatViq</span>
+                    <span className="mg-brand-tag">PLATFORM</span>
                 </div>
             </div>
 
@@ -255,15 +255,20 @@ const MobileSidebar = ({ open, onClose, activePath, navigate }) => (
     <>
         <div className={`mg-offcanvas ${open ? "show" : ""}`}>
             <div className="mg-offcanvas-header">
-                <img
-                    src={ChatViq}
-                    alt="ChatVIQ"
-                    className="mg-mobile-logo"
+                <div
+                    className="mg-sidebar-header"
+                    style={{ margin: 0 }}
                     onClick={() => { navigate("/management/dashboard"); onClose(); }}
-                />
+                >
+                    <div className="mg-brand-mark">C</div>
+                    <div className="mg-brand-text">
+                        <span className="mg-brand-name">ChatViq</span>
+                        <span className="mg-brand-tag">PLATFORM</span>
+                    </div>
+                </div>
                 <button
                     onClick={onClose}
-                    style={{ background: "none", border: "none", color: "rgba(255,255,255,0.5)", cursor: "pointer", fontSize: 20, lineHeight: 1 }}
+                    style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", fontSize: 20, lineHeight: 1 }}
                     aria-label="Close menu"
                 >
                     ✕

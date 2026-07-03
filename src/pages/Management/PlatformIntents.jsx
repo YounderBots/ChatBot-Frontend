@@ -1,9 +1,18 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ManagementAPI from "./managementAPI";
+import { Alert, PageHeader, Modal, TextField, TextArea, SelectField, RowActions } from "./crudkit";
 
-const PRIORITY_COLORS = { HIGH: "#ef4444", MEDIUM: "#f59e0b", LOW: "#22c55e" };
-const APPROVAL_COLORS = { APPROVED: "#22c55e", PENDING: "#f59e0b", REJECTED: "#ef4444" };
+const PRIORITY_OPTIONS = ["LOW", "MEDIUM", "HIGH"];
+const STATUS_OPTIONS = ["ACTIVE", "INACTIVE"];
+const APPROVAL_OPTIONS = ["PENDING", "APPROVED", "REJECTED"];
+const priorityBadge = (p) => (p === "HIGH" ? "danger" : p === "MEDIUM" ? "warn" : "ok");
+const approvalBadge = (a) => (a === "APPROVED" ? "ok" : a === "REJECTED" ? "danger" : "warn");
+
+const emptyForm = {
+    organization_id: "", intent_name: "", name: "", description: "",
+    priority: "MEDIUM", confidence: "60", approval_status: "PENDING", status: "ACTIVE",
+};
 
 export default function PlatformIntents() {
     const navigate = useNavigate();
@@ -14,136 +23,153 @@ export default function PlatformIntents() {
     const [orgId,   setOrgId]   = useState("");
     const [loading, setLoading] = useState(true);
     const [error,   setError]   = useState("");
+    const [msg,     setMsg]     = useState("");
+
+    const [modal, setModal]     = useState(null);
+    const [editId, setEditId]   = useState(null);
+    const [form, setForm]       = useState(emptyForm);
+    const [saving, setSaving]   = useState(false);
+    const [formError, setFormError] = useState("");
+
+    const setF = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
     const load = async () => {
-        setLoading(true);
-        setError("");
+        setLoading(true); setError("");
         try {
             const params = { page };
             if (search) params.search = search;
             if (orgId)  params.org_id = orgId;
             const data = await ManagementAPI.listIntents(params);
-            setIntents(data.intents);
-            setTotal(data.total);
+            setIntents(data.intents); setTotal(data.total);
         } catch (err) {
             if (err.message?.includes("401")) navigate("/management/login");
             setError(err.message);
-        } finally {
-            setLoading(false);
-        }
+        } finally { setLoading(false); }
     };
 
     useEffect(() => { load(); }, [page, search, orgId]);
 
     const resetFilters = () => { setSearch(""); setOrgId(""); setPage(1); };
 
+    const openCreate = () => { setEditId(null); setForm({ ...emptyForm, organization_id: orgId || "" }); setFormError(""); setModal("create"); };
+    const openEdit = (i) => {
+        setEditId(i.id);
+        setForm({
+            organization_id: i.organization_id ?? "",
+            intent_name: i.intent_name || "", name: i.name || "", description: i.description || "",
+            priority: i.priority || "MEDIUM", confidence: String(i.confidence ?? 60),
+            approval_status: i.approval_status || "PENDING", status: i.status || "ACTIVE",
+        });
+        setFormError(""); setModal("edit");
+    };
+
+    const handleSave = async () => {
+        setSaving(true); setFormError("");
+        try {
+            if (modal === "create") {
+                await ManagementAPI.createIntent({
+                    organization_id: Number(form.organization_id),
+                    intent_name: form.intent_name.trim(),
+                    name: form.name.trim() || form.intent_name.trim(),
+                    description: form.description.trim(),
+                    priority: form.priority, confidence: Number(form.confidence), status: form.status,
+                });
+                setMsg("Intent created.");
+            } else {
+                await ManagementAPI.updateIntent(editId, {
+                    intent_name: form.intent_name.trim(), name: form.name.trim(), description: form.description.trim(),
+                    priority: form.priority, confidence: Number(form.confidence),
+                    approval_status: form.approval_status, status: form.status,
+                });
+                setMsg("Intent updated.");
+            }
+            setModal(null); load();
+        } catch (e) { setFormError(e.message); } finally { setSaving(false); }
+    };
+
+    const handleDelete = async (i) => {
+        try { await ManagementAPI.deleteIntent(i.id); setMsg(`Intent "${i.intent_name}" deleted.`); load(); }
+        catch (e) { setError(e.message); }
+    };
+
     return (
         <div>
-            <div style={{ display: "flex", gap: 10, marginBottom: 14, alignItems: "flex-end", flexWrap: "wrap" }}>
-                <div>
-                    <div style={labelStyle}>Search</div>
-                    <input
-                        placeholder="Intent name…"
-                        value={search}
-                        onChange={e => { setSearch(e.target.value); setPage(1); }}
-                        style={{ ...inputStyle, width: 220 }}
-                    />
+            <PageHeader title="Intents" subtitle="NLU intents across every organization." addLabel="+ Add Intent" onAdd={openCreate} />
+
+            {msg   && <Alert type="success" msg={msg} onClose={() => setMsg("")} />}
+            {error && <Alert type="error"   msg={error} onClose={() => setError("")} />}
+
+            <div className="mg-toolbar">
+                <div className="mg-field">
+                    <span className="mg-field-label">Search</span>
+                    <input className="mg-input mg-inline" style={{ width: 240 }} placeholder="Intent name…" value={search}
+                        onChange={e => { setSearch(e.target.value); setPage(1); }} />
                 </div>
-                <div>
-                    <div style={labelStyle}>Org ID</div>
-                    <input
-                        placeholder="All orgs"
-                        value={orgId}
-                        onChange={e => { setOrgId(e.target.value); setPage(1); }}
-                        style={{ ...inputStyle, width: 120 }}
-                    />
+                <div className="mg-field">
+                    <span className="mg-field-label">Org ID</span>
+                    <input className="mg-input mg-inline" style={{ width: 130 }} placeholder="All orgs" value={orgId}
+                        onChange={e => { setOrgId(e.target.value); setPage(1); }} />
                 </div>
-                {(search || orgId) && (
-                    <button onClick={resetFilters} style={clearBtnStyle}>Clear</button>
-                )}
-                <span style={{ color: "#64748b", fontSize: 12, marginLeft: "auto", alignSelf: "flex-end", paddingBottom: 2 }}>
-                    {total} result{total !== 1 ? "s" : ""}
-                </span>
+                {(search || orgId) && <button className="mg-clear" onClick={resetFilters}>Clear</button>}
+                <span className="mg-count">{total} result{total !== 1 ? "s" : ""}</span>
             </div>
 
-            {error && <div style={{ color: "#ef4444", marginBottom: 16, fontSize: 13 }}>{error}</div>}
-
             {loading ? (
-                <div style={{ color: "#64748b", padding: "2rem", textAlign: "center" }}>Loading…</div>
+                <div className="mg-loading">Loading…</div>
             ) : (
-                <div style={{ background: "#ffffff", borderRadius: 10, border: "1px solid #e2e8f0", overflow: "auto" }}>
-                    <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 900 }}>
-                        <thead>
-                            <tr style={{ background: "#f8fafc" }}>
-                                {["ID", "Org ID", "Name", "Intent Key", "Priority", "Confidence", "Approval", "Status"].map(h => (
-                                    <th key={h} style={thStyle}>{h}</th>
+                <div className="mg-card">
+                    <div className="mg-table-wrap">
+                        <table className="mg-table">
+                            <thead>
+                                <tr>{["ID", "Org", "Name", "Intent Key", "Priority", "Conf.", "Approval", "Status", "Actions"].map(h => <th key={h}>{h}</th>)}</tr>
+                            </thead>
+                            <tbody>
+                                {intents.length === 0 && <tr><td colSpan={9} className="mg-empty">No intents found</td></tr>}
+                                {intents.map(i => (
+                                    <tr key={i.id}>
+                                        <td className="mg-mono mg-td-muted">{i.id}</td>
+                                        <td><button className="mg-link" onClick={() => navigate(`/management/org/${i.organization_id}`)}>{i.organization_id || "—"}</button></td>
+                                        <td className="mg-td-strong mg-ellipsis">{i.name}</td>
+                                        <td className="mg-td-muted mg-mono mg-ellipsis" style={{ maxWidth: 150 }}>{i.intent_name}</td>
+                                        <td><span className={`mg-badge plain ${priorityBadge(i.priority)}`}>{i.priority || "—"}</span></td>
+                                        <td className="mg-td-muted mg-num">{i.confidence != null ? `${i.confidence}%` : "—"}</td>
+                                        <td><span className={`mg-badge ${approvalBadge(i.approval_status)}`}>{i.approval_status || "—"}</span></td>
+                                        <td><span className={`mg-badge ${i.status === "ACTIVE" ? "ok" : "neutral"}`}>{i.status}</span></td>
+                                        <td><RowActions onEdit={() => openEdit(i)} onDelete={() => handleDelete(i)} deleteLabel={`intent "${i.intent_name}"`} /></td>
+                                    </tr>
                                 ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {intents.length === 0 && (
-                                <tr><td colSpan={8} style={{ ...tdStyle, color: "#64748b", textAlign: "center", padding: "2rem" }}>No intents found</td></tr>
-                            )}
-                            {intents.map(i => (
-                                <tr key={i.id} style={{ borderTop: "1px solid #e2e8f0" }}>
-                                    <td style={tdStyle}>{i.id}</td>
-                                    <td style={tdStyle}>
-                                        <button
-                                            onClick={() => navigate(`/management/org/${i.organization_id}`)}
-                                            style={{ background: "none", border: "none", color: "#3b82f6", cursor: "pointer", padding: 0, fontSize: 13 }}
-                                        >
-                                            {i.organization_id || "—"}
-                                        </button>
-                                    </td>
-                                    <td style={{ ...tdStyle, fontWeight: 500, maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                        {i.name}
-                                    </td>
-                                    <td style={{ ...tdStyle, color: "#64748b", maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                        {i.intent_name}
-                                    </td>
-                                    <td style={tdStyle}>
-                                        <span style={{ color: PRIORITY_COLORS[i.priority] || "#64748b", fontSize: 11, fontWeight: 600 }}>
-                                            {i.priority || "—"}
-                                        </span>
-                                    </td>
-                                    <td style={{ ...tdStyle, color: "#64748b" }}>{i.confidence != null ? `${i.confidence}%` : "—"}</td>
-                                    <td style={tdStyle}>
-                                        <span style={{
-                                            color: APPROVAL_COLORS[i.approval_status] || "#64748b",
-                                            background: `${APPROVAL_COLORS[i.approval_status] || "#64748b"}18`,
-                                            padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 600,
-                                        }}>
-                                            {i.approval_status || "—"}
-                                        </span>
-                                    </td>
-                                    <td style={tdStyle}>
-                                        <span style={{
-                                            color: i.status === "ACTIVE" ? "#22c55e" : "#64748b",
-                                            background: i.status === "ACTIVE" ? "rgba(34,197,94,0.1)" : "rgba(100,116,139,0.1)",
-                                            padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 600,
-                                        }}>
-                                            {i.status}
-                                        </span>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
 
-            <div style={{ display: "flex", gap: 8, marginTop: 14, justifyContent: "flex-end", alignItems: "center" }}>
-                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} style={pageBtnStyle}>← Prev</button>
-                <span style={{ color: "#64748b", fontSize: 13 }}>Page {page}</span>
-                <button onClick={() => setPage(p => p + 1)} disabled={intents.length < 20} style={pageBtnStyle}>Next →</button>
+            <div className="mg-pagination">
+                <button className="mg-pagebtn" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>← Prev</button>
+                <span className="mg-pageinfo">Page {page}</span>
+                <button className="mg-pagebtn" onClick={() => setPage(p => p + 1)} disabled={intents.length < 20}>Next →</button>
             </div>
+
+            {modal && (
+                <Modal
+                    title={modal === "create" ? "Add Intent" : `Edit Intent: ${form.intent_name}`}
+                    onClose={() => setModal(null)} onSave={handleSave} saving={saving}
+                    error={formError} saveLabel={modal === "create" ? "Create Intent" : "Save Changes"}
+                >
+                    {modal === "create" && (
+                        <TextField label="Organization ID *" type="number" value={form.organization_id} onChange={v => setF("organization_id", v)} placeholder="e.g. 2" />
+                    )}
+                    <TextField label="Intent Key *" value={form.intent_name} onChange={v => setF("intent_name", v)} placeholder="e.g. greeting_hello" />
+                    <TextField label="Display Name" value={form.name} onChange={v => setF("name", v)} placeholder="Human-readable name" />
+                    <TextArea label="Description" value={form.description} onChange={v => setF("description", v)} />
+                    <SelectField label="Priority" value={form.priority} onChange={v => setF("priority", v)} options={PRIORITY_OPTIONS} />
+                    <TextField label="Confidence (%)" type="number" value={form.confidence} onChange={v => setF("confidence", v)} />
+                    {modal === "edit" && (
+                        <SelectField label="Approval" value={form.approval_status} onChange={v => setF("approval_status", v)} options={APPROVAL_OPTIONS} />
+                    )}
+                    <SelectField label="Status" value={form.status} onChange={v => setF("status", v)} options={STATUS_OPTIONS} />
+                </Modal>
+            )}
         </div>
     );
 }
-
-const labelStyle    = { color: "#64748b", fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 };
-const inputStyle    = { padding: "7px 10px", borderRadius: 6, border: "1px solid #e2e8f0", background: "#ffffff", color: "#0f172a", fontSize: 13 };
-const clearBtnStyle = { padding: "7px 14px", borderRadius: 6, border: "1px solid #e2e8f0", background: "none", color: "#64748b", cursor: "pointer", fontSize: 13, alignSelf: "flex-end" };
-const thStyle       = { padding: "10px 14px", textAlign: "left", color: "#64748b", fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" };
-const tdStyle       = { padding: "11px 14px", fontSize: 13, color: "#0f172a" };
-const pageBtnStyle  = { padding: "5px 14px", borderRadius: 6, border: "1px solid #e2e8f0", background: "#ffffff", color: "#0f172a", cursor: "pointer", fontSize: 13 };
