@@ -1,7 +1,7 @@
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../../BasePages/Login.css";
+import "./SuperAdminLogin.css";
 import ManagementAPI from "./managementAPI";
 
 const chatviq = "/assets/images/chatviq.png";
@@ -18,14 +18,8 @@ export default function SuperAdminLogin() {
         e.preventDefault();
         if (loading) return;
         setError("");
-        if (!email || !password) {
-            setError("Email and password are required.");
-            return;
-        }
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            setError("Please enter a valid email address.");
-            return;
-        }
+        if (!email || !password) { setError("Email and password are required."); return; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError("Please enter a valid email address."); return; }
         setLoading(true);
         try {
             const data = await ManagementAPI.login(email, password);
@@ -40,131 +34,66 @@ export default function SuperAdminLogin() {
     };
 
     return (
-        <div className="login-wrapper" style={{ background: "#060d1a" }}>
-            <div className="login-layout">
-
-                {/* ── Hero Panel ── */}
-                <div className="login-hero" style={{ background: "linear-gradient(145deg, #050c1a 0%, #071428 60%, #040a14 100%)", borderRight: "1px solid rgba(59,130,246,0.15)" }}>
-                    <div className="login-hero-content">
-                        <img src={chatviq} alt="ChatVIQ" className="hero-logo" style={{ filter: "drop-shadow(0 0 18px rgba(59,130,246,0.45))" }} />
-                        <h1 className="hero-headline">
-                            Platform<br />
-                            <span style={{ background: "linear-gradient(135deg,#5b8cff 0%,#2f6bff 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-                                Management Console
-                            </span>
-                        </h1>
-                        <p className="hero-tagline">
-                            Secure access to platform-wide controls, tenant management,
-                            and system configuration.
-                        </p>
-                        <div className="hero-features">
-                            <div className="hero-feature-item">
-                                <span className="feature-dot" style={{ background: "linear-gradient(135deg,#2563eb,#60a5fa)", boxShadow: "0 0 8px rgba(59,130,246,0.6)" }} />
-                                <span>Multi-tenant Organization Control</span>
-                            </div>
-                            <div className="hero-feature-item">
-                                <span className="feature-dot" style={{ background: "linear-gradient(135deg,#2563eb,#60a5fa)", boxShadow: "0 0 8px rgba(59,130,246,0.6)" }} />
-                                <span>Platform-wide Analytics &amp; Billing</span>
-                            </div>
-                            <div className="hero-feature-item">
-                                <span className="feature-dot" style={{ background: "linear-gradient(135deg,#2563eb,#60a5fa)", boxShadow: "0 0 8px rgba(59,130,246,0.6)" }} />
-                                <span>Admin Role-Based Access Control</span>
-                            </div>
-                        </div>
+        <div className="sa-login">
+            <div className="sa-card">
+                {/* Hero */}
+                <div className="sa-hero">
+                    <img className="sa-hero-logo" src={chatviq} alt="ChatViq" />
+                    <h1>Platform<br /><span className="grad">Management Console</span></h1>
+                    <p className="sa-tagline">
+                        Secure access to platform-wide controls, tenant management, and system configuration.
+                    </p>
+                    <div className="sa-features">
+                        <div className="sa-feat"><span className="sa-dot" /> Multi-tenant Organization Control</div>
+                        <div className="sa-feat"><span className="sa-dot" /> Platform-wide Analytics &amp; Billing</div>
+                        <div className="sa-feat"><span className="sa-dot" /> Admin Role-Based Access Control</div>
                     </div>
-                    <div className="hero-ring hero-ring-1" style={{ borderColor: "rgba(59,130,246,0.1)" }} />
-                    <div className="hero-ring hero-ring-2" style={{ borderColor: "rgba(59,130,246,0.16)" }} />
-                    <div className="hero-ring hero-ring-3" style={{ borderColor: "rgba(59,130,246,0.12)" }} />
+                    <div className="sa-ring r1" />
+                    <div className="sa-ring r2" />
                 </div>
 
-                {/* ── Form Panel ── */}
-                <div className="login-form-panel">
-                    <div className="login-card-glass">
-                        <div className="text-center mb-4">
-                            <div className="card-badge" style={{ background: "rgba(59,130,246,0.12)", border: "1px solid rgba(59,130,246,0.25)", color: "#60a5fa" }}>
-                                Platform Admin
-                            </div>
-                            <h2 className="card-title">Management Sign In</h2>
-                            <p className="card-subtitle">Restricted access — authorized personnel only</p>
+                {/* Form */}
+                <div className="sa-form-panel">
+                    <span className="sa-badge">Platform Admin</span>
+                    <h2 className="sa-title">Management Sign In</h2>
+                    <p className="sa-subtitle">Restricted access — authorized personnel only</p>
+
+                    {error && <div className="sa-error" role="alert" aria-live="polite">{error}</div>}
+
+                    <form onSubmit={handleSubmit} noValidate>
+                        <div className="sa-group">
+                            <label htmlFor="sa-email" className="sa-label">Email Address</label>
+                            <input
+                                id="sa-email" type="email" placeholder="admin@chatviq.com"
+                                className="sa-input" required autoComplete="email"
+                                value={email} onChange={e => setEmail(e.target.value)}
+                            />
                         </div>
 
-                        {error && (
-                            <div className="login-error" role="alert" aria-live="polite">{error}</div>
-                        )}
-
-                        <form onSubmit={handleSubmit} noValidate>
-                            <div className="form-group-modern">
-                                <label htmlFor="sa-email" className="label-modern">Email Address</label>
-                                <input
-                                    id="sa-email"
-                                    type="email"
-                                    placeholder="admin@chatviq.com"
-                                    className="input-modern"
-                                    required
-                                    autoComplete="email"
-                                    value={email}
-                                    onChange={e => setEmail(e.target.value)}
-                                    style={{ "--focus-color": "rgba(59,130,246,0.5)", "--focus-bg": "rgba(59,130,246,0.06)", "--focus-shadow": "rgba(59,130,246,0.12)" }}
-                                />
-                            </div>
-
-                            <div className="form-group-modern position-relative">
-                                <label htmlFor="sa-password" className="label-modern">Password</label>
-                                <input
-                                    id="sa-password"
-                                    type={showPassword ? "text" : "password"}
-                                    placeholder="Enter your password"
-                                    className="input-modern has-toggle"
-                                    required
-                                    autoComplete="current-password"
-                                    value={password}
-                                    onChange={e => setPassword(e.target.value)}
-                                />
-                                <button
-                                    type="button"
-                                    className="password-toggle"
-                                    onClick={() => setShowPassword(s => !s)}
-                                    aria-label={showPassword ? "Hide password" : "Show password"}
-                                >
-                                    {showPassword ? <Eye aria-hidden="true" /> : <EyeOff aria-hidden="true" />}
-                                </button>
-                            </div>
-
-                            <button
-                                type="submit"
-                                className="btn-signin-modern"
-                                disabled={loading}
-                                aria-busy={loading}
-                                style={{
-                                    background: "linear-gradient(135deg,#1e50d8 0%,#2f6bff 55%,#5b8cff 100%)",
-                                    boxShadow: "0 6px 24px -4px rgba(47,107,255,0.45), 0 0 0 1px rgba(47,107,255,0.2) inset",
-                                }}
-                            >
-                                {loading && (
-                                    <span className="spinner-border spinner-border-sm me-2" aria-hidden="true" />
-                                )}
-                                {loading ? "Signing In…" : "Sign In"}
+                        <div className="sa-group">
+                            <label htmlFor="sa-password" className="sa-label">Password</label>
+                            <input
+                                id="sa-password" type={showPassword ? "text" : "password"}
+                                placeholder="Enter your password"
+                                className="sa-input has-toggle" required autoComplete="current-password"
+                                value={password} onChange={e => setPassword(e.target.value)}
+                            />
+                            <button type="button" className="sa-toggle"
+                                onClick={() => setShowPassword(s => !s)}
+                                aria-label={showPassword ? "Hide password" : "Show password"}>
+                                {showPassword ? <Eye aria-hidden="true" /> : <EyeOff aria-hidden="true" />}
                             </button>
-                        </form>
-
-                        <div className="form-divider">
-                            <span>Secured by ChatVIQ Platform</span>
                         </div>
 
-                        <div className="form-divider" style={{ marginTop: "1rem" }}>
-                            <span>
-                                <button
-                                    type="button"
-                                    onClick={() => navigate("/login")}
-                                    style={{ background: "none", border: "none", color: "#60a5fa", cursor: "pointer", fontWeight: 600, padding: 0, fontSize: "inherit" }}
-                                >
-                                    ← Back to tenant login
-                                </button>
-                            </span>
-                        </div>
-                    </div>
+                        <button type="submit" className="sa-btn" disabled={loading} aria-busy={loading}>
+                            {loading && <span className="sa-spinner" aria-hidden="true" />}
+                            {loading ? "Signing In…" : "Sign In"}
+                        </button>
+                    </form>
+
+                    <div className="sa-divider">Secured by ChatViq Platform</div>
+                    <button type="button" className="sa-back" onClick={() => navigate("/login")}>← Back to tenant login</button>
                 </div>
-
             </div>
         </div>
     );

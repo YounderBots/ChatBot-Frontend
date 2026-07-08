@@ -3,6 +3,7 @@ import { Card, Row, Col, Form, Button, Table, Modal } from "react-bootstrap";
 import Select from "react-select";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { useToast } from "../../components/useToast";
+import APICall from "../../APICalls/APICall";
 const defaultSettings = {
   apiKey: "abcd-1234-xyz-9876",
   apiEndpoint: "https://api.yourbot.com/v1",
@@ -71,6 +72,24 @@ const SettingsIntegrations = () => {
   const [savedSettings, setSavedSettings] = useState(defaultSettings);
   const [hasChanges, setHasChanges] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  // Load persisted integration settings on mount.
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await APICall.getT("/settings/integrations");
+        if (data && Object.keys(data).length) {
+          const merged = { ...defaultSettings, ...data };
+          setSettings(merged);
+          setSavedSettings(merged);
+        }
+      } catch {
+        /* keep defaults if nothing saved yet */
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
 
   const regenerateApiKey = () => {
@@ -175,26 +194,27 @@ const SettingsIntegrations = () => {
 
 
   useEffect(() => {
-    const { webhooks, ...rest } = settings;
-    const { webhooks: _, ...savedRest } = savedSettings;
-
-    setHasChanges(
-      JSON.stringify(rest) !== JSON.stringify(savedRest)
-    );
+    setHasChanges(JSON.stringify(settings) !== JSON.stringify(savedSettings));
   }, [settings, savedSettings]);
 
 
-  const handleSave = () => {
-    setSavedSettings(settings);
-    setLastSavedAt(new Date());
-    setHasChanges(false);
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await APICall.postT("/settings/integrations", settings);
+      setSavedSettings(settings);
+      setLastSavedAt(new Date());
+      setHasChanges(false);
+      showToast("Integration settings saved.", "success");
+    } catch (err) {
+      showToast(err.message || "Failed to save integration settings", "error");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDiscard = () => {
-    setSettings({
-      ...savedSettings,
-      webhooks: settings.webhooks,
-    });
+    setSettings(savedSettings);
     setHasChanges(false);
   };
 
@@ -847,6 +867,17 @@ const SettingsIntegrations = () => {
 
 
 
+      {hasChanges && (
+        <div className="s-save-bar">
+          <span className="s-save-bar-left">
+            {lastSavedAt ? <>Last saved {lastSavedAt.toLocaleTimeString()}</> : "Unsaved changes"}
+          </span>
+          <div className="s-save-bar-right">
+            <button className="s-btn s-btn-ghost" onClick={handleDiscard} disabled={!hasChanges || saving}>Discard</button>
+            <button className="s-btn s-btn-primary" onClick={handleSave} disabled={!hasChanges || saving || isModalOpen}>{saving ? "Saving…" : "Save changes"}</button>
+          </div>
+        </div>
+      )}
     </>
   );
 };

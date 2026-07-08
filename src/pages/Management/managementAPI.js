@@ -79,6 +79,9 @@ const ManagementAPI = {
     listAdmins: () =>
         fetchSA(`${baseURL}/management/admins`, { headers: saHeaders() }).then(handleResponse),
 
+    createAdmin: (body) =>
+        fetchSA(`${baseURL}/management/admins`, { method: "POST", headers: saHeaders(), body: JSON.stringify(body) }).then(handleResponse),
+
     assignAdminRole: (adminId, adminRoleId) =>
         fetchSA(`${baseURL}/management/admins/${adminId}/role`, {
             method: "PUT",

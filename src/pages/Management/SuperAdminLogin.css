@@ -1,0 +1,84 @@
+/* Light login for the platform console — self-contained, matches ManagementLayout. */
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap');
+
+.sa-login {
+  --acc: #2f6bff; --acc-strong: #1e50d8; --acc2: #5b8cff;
+  --ink: #0d1526; --ink2: #5c6577; --faint: #98a1b3;
+  --line: #e6e9f1; --surface: #ffffff; --canvas: #eef1f7;
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  font-family: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--ink);
+  background: var(--canvas);
+  background-image:
+    radial-gradient(55% 45% at 12% 8%, rgba(47, 107, 255, 0.10), transparent 60%),
+    radial-gradient(50% 40% at 92% 92%, rgba(91, 140, 255, 0.09), transparent 60%);
+  -webkit-font-smoothing: antialiased;
+}
+
+.sa-card {
+  display: grid; grid-template-columns: 1.05fr 1fr;
+  width: min(940px, 100%);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  box-shadow: 0 24px 60px rgba(13, 21, 38, 0.12), 0 4px 12px rgba(13, 21, 38, 0.05);
+  overflow: hidden;
+  animation: saIn 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes saIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+/* ── Hero ── */
+.sa-hero {
+  position: relative; overflow: hidden;
+  padding: 48px 44px;
+  background: linear-gradient(158deg, #f6f8ff 0%, #eef2fe 55%, #e7ecfb 100%);
+  border-right: 1px solid var(--line);
+  display: flex; flex-direction: column; justify-content: center;
+}
+.sa-hero-logo { height: 46px; width: auto; align-self: flex-start; margin-bottom: 32px; }
+
+.sa-hero h1 { font-size: 33px; line-height: 1.1; font-weight: 800; letter-spacing: -1px; margin: 0 0 16px; }
+.sa-hero h1 .grad { background: linear-gradient(135deg, var(--acc2), var(--acc)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.sa-tagline { color: var(--ink2); font-size: 14.5px; line-height: 1.6; margin: 0 0 28px; max-width: 340px; }
+.sa-features { display: flex; flex-direction: column; gap: 15px; }
+.sa-feat { display: flex; align-items: center; gap: 12px; font-size: 13.5px; color: var(--ink); font-weight: 500; }
+.sa-dot { width: 8px; height: 8px; border-radius: 50%; background: linear-gradient(135deg, var(--acc2), var(--acc)); box-shadow: 0 0 0 4px rgba(47, 107, 255, 0.12); flex-shrink: 0; }
+.sa-ring { position: absolute; border: 1px solid rgba(47, 107, 255, 0.14); border-radius: 50%; pointer-events: none; }
+.sa-ring.r1 { width: 260px; height: 260px; right: -90px; top: -70px; }
+.sa-ring.r2 { width: 170px; height: 170px; right: -40px; bottom: -60px; border-color: rgba(47, 107, 255, 0.10); }
+
+/* ── Form ── */
+.sa-form-panel { padding: 48px 44px; display: flex; flex-direction: column; justify-content: center; }
+.sa-badge { display: inline-block; align-self: flex-start; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--acc); background: rgba(47, 107, 255, 0.10); border: 1px solid rgba(47, 107, 255, 0.22); padding: 5px 12px; border-radius: 999px; margin-bottom: 16px; }
+.sa-title { font-size: 24px; font-weight: 700; letter-spacing: -0.4px; margin: 0 0 6px; }
+.sa-subtitle { color: var(--ink2); font-size: 13.5px; margin: 0 0 24px; }
+.sa-group { margin-bottom: 16px; position: relative; }
+.sa-label { display: block; font-size: 12px; font-weight: 600; color: var(--ink2); margin-bottom: 6px; }
+.sa-input { width: 100%; padding: 11px 13px; border-radius: 10px; border: 1px solid var(--line); background: #f8f9fc; color: var(--ink); font-size: 14px; font-family: inherit; outline: none; box-sizing: border-box; transition: border-color 0.15s, box-shadow 0.15s, background 0.15s; }
+.sa-input::placeholder { color: var(--faint); }
+.sa-input:focus { border-color: var(--acc); background: #fff; box-shadow: 0 0 0 3px rgba(47, 107, 255, 0.14); }
+.sa-input.has-toggle { padding-right: 44px; }
+.sa-toggle { position: absolute; right: 8px; top: 32px; background: none; border: none; color: var(--faint); cursor: pointer; padding: 7px; display: flex; border-radius: 7px; }
+.sa-toggle:hover { color: var(--acc); }
+.sa-toggle svg { width: 18px; height: 18px; }
+.sa-error { background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); color: #d93a3a; font-size: 13px; padding: 10px 13px; border-radius: 10px; margin-bottom: 16px; }
+.sa-btn { width: 100%; padding: 12px; border-radius: 10px; border: none; background: linear-gradient(135deg, var(--acc), var(--acc-strong)); color: #fff; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; box-shadow: 0 8px 20px rgba(47, 107, 255, 0.32); transition: transform 0.06s, box-shadow 0.16s; display: flex; align-items: center; justify-content: center; gap: 9px; }
+.sa-btn:hover:not(:disabled) { box-shadow: 0 10px 26px rgba(47, 107, 255, 0.42); }
+.sa-btn:active { transform: translateY(1px); }
+.sa-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+.sa-divider { display: flex; align-items: center; gap: 12px; margin-top: 22px; color: var(--faint); font-size: 11.5px; }
+.sa-divider::before, .sa-divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.sa-back { display: block; margin: 16px auto 0; background: none; border: none; color: var(--acc); font-weight: 600; cursor: pointer; font-size: 13px; font-family: inherit; }
+.sa-back:hover { text-decoration: underline; }
+.sa-spinner { width: 15px; height: 15px; border: 2px solid rgba(255, 255, 255, 0.45); border-top-color: #fff; border-radius: 50%; animation: saSpin 0.7s linear infinite; }
+@keyframes saSpin { to { transform: rotate(360deg); } }
+
+@media (max-width: 780px) {
+  .sa-card { grid-template-columns: 1fr; max-width: 440px; }
+  .sa-hero { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sa-card, .sa-spinner { animation: none; }
+}

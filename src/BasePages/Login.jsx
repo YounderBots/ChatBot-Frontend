@@ -151,7 +151,7 @@ const Login = () => {
             </form>
 
             <div className="form-divider">
-              <span>Secured by ChatViq Enterprise</span>
+              <span>Secured by ChatViq</span>
             </div>
 
             <div className="form-divider" style={{ marginTop: '0.5rem' }}>
@@ -174,18 +174,6 @@ const Login = () => {
                   onClick={() => navigate('/forgot-password')}
                 >
                   Forgot Password?
-                </span>
-              </span>
-            </div>
-
-            <div className="form-divider" style={{ marginTop: '1rem' }}>
-              <span>
-                New to ChatViq?{' '}
-                <span
-                  style={{ color: '#fb923c', cursor: 'pointer', fontWeight: 600 }}
-                  onClick={() => navigate('/register')}
-                >
-                  Create a workspace
                 </span>
               </span>
             </div>

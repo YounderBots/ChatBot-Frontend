@@ -4,7 +4,6 @@ import AppLayout from './layout/AppLayout'
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom'
 import { useAuth, usePermission } from './Context/AuthContext'
 import Login from './BasePages/Login'
-import Register from './BasePages/Register'
 import ForgotPassword from './BasePages/ForgotPassword'
 import ResetPassword from './BasePages/ResetPassword'
 import SuperAdminLogin from './pages/Management/SuperAdminLogin'
@@ -72,7 +71,6 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
 

@@ -1,6 +1,7 @@
 import { User } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { Card, Row, Col, Form, Button } from "react-bootstrap";
+import APICall from "../../APICalls/APICall";
 
 const SettingsAppearance = () => {
 
@@ -34,15 +35,43 @@ const SettingsAppearance = () => {
   const [savedSettings, setSavedSettings] = useState(defaultSettings);
   const [hasChanges, setHasChanges] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  // Load persisted appearance settings on mount.
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await APICall.getT("/settings/appearance");
+        if (data && Object.keys(data).length) {
+          const merged = { ...defaultSettings, ...data };
+          setSettings(merged);
+          setSavedSettings(merged);
+        }
+      } catch {
+        /* keep defaults if nothing saved yet */
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     setHasChanges(
       JSON.stringify(settings) !== JSON.stringify(savedSettings)
     );
   }, [settings, savedSettings]);
-  const handleSave = () => {
-    setSavedSettings(settings);
-    setLastSavedAt(new Date());
-    setHasChanges(false);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await APICall.postT("/settings/appearance", settings);
+      setSavedSettings(settings);
+      setLastSavedAt(new Date());
+      setHasChanges(false);
+    } catch (err) {
+      alert(err.message || "Failed to save appearance settings");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDiscard = () => {
@@ -439,8 +468,8 @@ const SettingsAppearance = () => {
             {lastSavedAt ? <>Last saved {lastSavedAt.toLocaleTimeString()}</> : "Unsaved changes"}
           </span>
           <div className="s-save-bar-right">
-            <button className="s-btn s-btn-ghost" onClick={handleDiscard} disabled={!hasChanges}>Discard</button>
-            <button className="s-btn s-btn-primary" onClick={handleSave} disabled={!hasChanges}>Save changes</button>
+            <button className="s-btn s-btn-ghost" onClick={handleDiscard} disabled={!hasChanges || saving}>Discard</button>
+            <button className="s-btn s-btn-primary" onClick={handleSave} disabled={!hasChanges || saving}>{saving ? "Saving…" : "Save changes"}</button>
           </div>
         </div>
       )}

@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ManagementAPI from "./managementAPI";
-import { Alert } from "./crudkit";
+import { Alert, Modal, TextField, SelectField } from "./crudkit";
+
+const emptyForm = { email: "", password: "", full_name: "", role_id: "" };
 
 export default function AdminUsersPage() {
     const navigate  = useNavigate();
@@ -13,13 +15,12 @@ export default function AdminUsersPage() {
     const [error, setError]     = useState("");
     const [msg, setMsg]         = useState("");
 
-    const [inviteModal, setInviteModal] = useState(false);
-    const [invEmail, setInvEmail]       = useState("");
-    const [invPassword, setInvPassword] = useState("");
-    const [invName, setInvName]         = useState("");
-    const [invRoleId, setInvRoleId]     = useState("");
-    const [invSaving, setInvSaving]     = useState(false);
-    const [invError, setInvError]       = useState("");
+    const [modal, setModal]     = useState(null);   // null | "create" | "invite"
+    const [form, setForm]       = useState(emptyForm);
+    const [saving, setSaving]   = useState(false);
+    const [formError, setFormError] = useState("");
+
+    const setF = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
     const load = async () => {
         setLoading(true);
@@ -63,17 +64,27 @@ export default function AdminUsersPage() {
         } catch (e) { setError(e.message); }
     };
 
-    const handleInvite = async () => {
-        if (!invEmail.trim() || !invPassword.trim()) { setInvError("Email and password are required."); return; }
-        setInvSaving(true); setInvError("");
+    const openModal = (kind) => { setForm(emptyForm); setFormError(""); setModal(kind); };
+
+    const handleSubmit = async () => {
+        if (!form.email.trim()) { setFormError("Email is required."); return; }
+        if (modal === "create" && !form.password.trim()) { setFormError("Password is required."); return; }
+        setSaving(true); setFormError("");
         try {
-            const created = await ManagementAPI.inviteSuperAdmin(invEmail.trim(), invPassword.trim(), invName.trim(), invRoleId ? Number(invRoleId) : undefined);
-            if (invRoleId && created.id) await ManagementAPI.assignAdminRole(created.id, Number(invRoleId));
-            setMsg(`Admin ${invEmail} invited.`);
-            setInviteModal(false);
-            setInvEmail(""); setInvPassword(""); setInvName(""); setInvRoleId("");
+            const roleId = form.role_id ? Number(form.role_id) : null;
+            if (modal === "create") {
+                await ManagementAPI.createAdmin({
+                    email: form.email.trim(), password: form.password,
+                    full_name: form.full_name.trim(), admin_role_id: roleId,
+                });
+                setMsg(`Admin ${form.email} created.`);
+            } else {
+                await ManagementAPI.inviteSuperAdmin(form.email.trim(), "", form.full_name.trim(), roleId || undefined);
+                setMsg(`Invite sent to ${form.email}.`);
+            }
+            setModal(null);
             load();
-        } catch (e) { setInvError(e.message); } finally { setInvSaving(false); }
+        } catch (e) { setFormError(e.message); } finally { setSaving(false); }
     };
 
     return (
@@ -84,7 +95,8 @@ export default function AdminUsersPage() {
                     <p className="mg-sub">Manage superadmin accounts and assign platform roles.</p>
                 </div>
                 <div className="mg-head-actions">
-                    <button className="mg-btn mg-btn-primary" onClick={() => { setInviteModal(true); setInvError(""); }}>+ Invite Admin</button>
+                    <button className="mg-btn mg-btn-ghost" onClick={() => openModal("invite")}>Invite</button>
+                    <button className="mg-btn mg-btn-primary" onClick={() => openModal("create")}>+ Create Admin</button>
                 </div>
             </div>
 
@@ -135,34 +147,27 @@ export default function AdminUsersPage() {
                 </div>
             )}
 
-            {inviteModal && (
-                <div className="mg-modal-overlay" onMouseDown={e => { if (e.target === e.currentTarget) setInviteModal(false); }}>
-                    <div className="mg-modal" style={{ width: "min(480px, 96vw)" }}>
-                        <div className="mg-modal-head">
-                            <h3 className="mg-modal-title">Invite Superadmin</h3>
-                            <button className="mg-modal-close" onClick={() => setInviteModal(false)} aria-label="Close">×</button>
-                        </div>
-                        <div className="mg-modal-body">
-                            {invError && <div className="mg-form-error">{invError}</div>}
-                            <label className="mg-form-label">Email *</label>
-                            <input className="mg-input" type="email" value={invEmail} onChange={e => setInvEmail(e.target.value)} placeholder="admin@example.com" />
-                            <label className="mg-form-label">Password *</label>
-                            <input className="mg-input" type="password" value={invPassword} onChange={e => setInvPassword(e.target.value)} placeholder="Min. 8 characters" />
-                            <label className="mg-form-label">Full Name</label>
-                            <input className="mg-input" value={invName} onChange={e => setInvName(e.target.value)} placeholder="Optional" />
-                            <label className="mg-form-label">Admin Role</label>
-                            <select className="mg-select" value={invRoleId} onChange={e => setInvRoleId(e.target.value)}>
-                                <option value="">— No role assigned —</option>
-                                {roles.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-                            </select>
-                            <p className="mg-note">Superadmins without a role have full platform access.</p>
-                        </div>
-                        <div className="mg-modal-foot">
-                            <button className="mg-btn mg-btn-ghost" onClick={() => setInviteModal(false)} disabled={invSaving}>Cancel</button>
-                            <button className="mg-btn mg-btn-primary" onClick={handleInvite} disabled={invSaving}>{invSaving ? "Inviting…" : "Send Invite"}</button>
-                        </div>
-                    </div>
-                </div>
+            {modal && (
+                <Modal
+                    title={modal === "create" ? "Create Admin" : "Invite Admin"}
+                    onClose={() => setModal(null)} onSave={handleSubmit} saving={saving}
+                    error={formError} saveLabel={modal === "create" ? "Create Admin" : "Send Invite"}
+                >
+                    <TextField label="Email *" type="email" value={form.email} onChange={v => setF("email", v)} placeholder="admin@example.com" />
+                    {modal === "create" && (
+                        <TextField label="Password *" type="password" value={form.password} onChange={v => setF("password", v)} placeholder="Min 8 chars, letter + digit" />
+                    )}
+                    <TextField label="Full Name" value={form.full_name} onChange={v => setF("full_name", v)} placeholder="Optional" />
+                    <SelectField
+                        label="Admin Role"
+                        value={form.role_id}
+                        onChange={v => setF("role_id", v)}
+                        options={[{ value: "", label: "— No role (full access) —" }, ...roles.map(r => ({ value: String(r.id), label: r.name }))]}
+                    />
+                    {modal === "create"
+                        ? <p className="mg-note">Created active — the admin can sign in immediately.</p>
+                        : <p className="mg-note">An email link will be sent for them to set a password and activate. No role = full platform access.</p>}
+                </Modal>
             )}
         </div>
     );

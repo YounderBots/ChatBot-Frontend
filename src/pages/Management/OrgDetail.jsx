@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ManagementAPI from "./managementAPI";
-import { Alert } from "./crudkit";
+import { Alert, Modal, TextField, SelectField } from "./crudkit";
 
 const statusClass = (s) => (s === "ACTIVE" ? "ok" : s === "SUSPENDED" ? "danger" : "neutral");
 const TABS = ["Overview", "Users", "Roles", "Usage"];
@@ -20,6 +20,11 @@ export default function OrgDetail() {
     const [stats, setStats]   = useState(null);
     const [tabLoading, setTabLoading] = useState(false);
     const [usersPage, setUsersPage]   = useState(1);
+    const [editOpen, setEditOpen]     = useState(false);
+    const [oform, setOform]           = useState({});
+    const [osaving, setOsaving]       = useState(false);
+    const [oerr, setOerr]             = useState("");
+    const setOf = (k, v) => setOform(f => ({ ...f, [k]: v }));
 
     const loadUsers = async () => { setTabLoading(true); try { setUsers(await ManagementAPI.getOrgUsers(orgId, usersPage)); } catch (e) { setError(e.message); } finally { setTabLoading(false); } };
     const loadRoles = async () => { setTabLoading(true); try { setRoles(await ManagementAPI.getOrgRoles(orgId)); } catch (e) { setError(e.message); } finally { setTabLoading(false); } };
@@ -49,6 +54,25 @@ export default function OrgDetail() {
     };
     const handleActivate = async () => {
         await ManagementAPI.activateOrg(orgId); setActionMsg("Organization activated."); setOrg(o => ({ ...o, status: "ACTIVE" }));
+    };
+
+    const openOrgEdit = () => {
+        setOform({
+            name: org.name || "", slug: org.slug || "", owner_email: org.owner_email || "",
+            website: org.website || "", industry: org.industry || "", status: org.status || "ACTIVE",
+        });
+        setOerr(""); setEditOpen(true);
+    };
+    const saveOrgEdit = async () => {
+        setOsaving(true); setOerr("");
+        try {
+            await ManagementAPI.updateOrg(orgId, {
+                name: oform.name.trim(), slug: oform.slug.trim(), owner_email: oform.owner_email.trim(),
+                website: oform.website.trim(), industry: oform.industry.trim(), status: oform.status,
+            });
+            setOrg(await ManagementAPI.getOrg(orgId));
+            setEditOpen(false); setActionMsg("Organization updated.");
+        } catch (e) { setOerr(e.message); } finally { setOsaving(false); }
     };
 
     if (loading) return <div className="mg-loading">Loading…</div>;
@@ -101,6 +125,7 @@ export default function OrgDetail() {
                     )}
 
                     <div className="mg-head-actions">
+                        <button className="mg-btn mg-btn-primary" onClick={openOrgEdit}>Edit Details</button>
                         {org.status === "ACTIVE"
                             ? <button className="mg-btn mg-btn-danger" onClick={handleSuspend}>Suspend Organization</button>
                             : <button className="mg-btn mg-btn-ghost" style={{ borderColor: "rgba(23,178,106,.4)", color: "var(--mg-ok)" }} onClick={handleActivate}>Activate Organization</button>}
@@ -196,6 +221,21 @@ export default function OrgDetail() {
                         </>
                     )}
                 </div>
+            )}
+
+            {editOpen && (
+                <Modal
+                    title={`Edit Organization: ${org?.name}`}
+                    onClose={() => setEditOpen(false)} onSave={saveOrgEdit} saving={osaving}
+                    error={oerr} saveLabel="Save Changes"
+                >
+                    <TextField label="Name *" value={oform.name} onChange={v => setOf("name", v)} placeholder="Acme Inc." />
+                    <TextField label="Slug *" value={oform.slug} onChange={v => setOf("slug", v)} placeholder="acme-inc" />
+                    <TextField label="Owner Email *" type="email" value={oform.owner_email} onChange={v => setOf("owner_email", v)} placeholder="owner@acme.com" />
+                    <TextField label="Website" value={oform.website} onChange={v => setOf("website", v)} placeholder="https://acme.com" />
+                    <TextField label="Industry" value={oform.industry} onChange={v => setOf("industry", v)} placeholder="SaaS" />
+                    <SelectField label="Status" value={oform.status} onChange={v => setOf("status", v)} options={["ACTIVE", "SUSPENDED"]} />
+                </Modal>
             )}
         </div>
     );
