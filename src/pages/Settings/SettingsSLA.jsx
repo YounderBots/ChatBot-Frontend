@@ -35,19 +35,37 @@ const SettingsSLA = () => {
   const [editing, setEditing]   = useState(null);
   const [form, setForm]         = useState(defaultForm);
   const [saving, setSaving]     = useState(false);
+  const [autoResp, setAutoResp] = useState({ enabled: true, message: "" });
+  const [autoSaving, setAutoSaving] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
-      const res = await APICall.getT("/sla/policies");
+      const [res, auto] = await Promise.all([
+        APICall.getT("/sla/policies"),
+        APICall.getT("/settings/sla-autoresponse").catch(() => null),
+      ]);
       setPolicies(res?.policies || []);
+      if (auto) setAutoResp({ enabled: auto.enabled ?? true, message: auto.message || "" });
     } catch {
       setError("Failed to load SLA policies.");
     } finally {
       setLoading(false);
     }
   }, []);
+
+  const saveAutoResp = async () => {
+    setAutoSaving(true);
+    try {
+      await APICall.postT("/settings/sla-autoresponse", autoResp);
+      showToast("Auto-response settings saved.", "success");
+    } catch (e) {
+      showToast(e?.message || "Failed to save auto-response.", "danger");
+    } finally {
+      setAutoSaving(false);
+    }
+  };
 
   useEffect(() => { load(); }, [load]);
 
@@ -104,6 +122,45 @@ const SettingsSLA = () => {
     <div className="p-3">
       <ToastContainer /><ConfirmDialog />
       {error && <Alert variant="danger">{error}</Alert>}
+
+      {/* ── SLA auto-response ── */}
+      <Card className="border-0 shadow-sm mb-4">
+        <Card.Body>
+          <div className="d-flex justify-content-between align-items-start mb-2">
+            <div>
+              <h6 className="mb-0 fw-semibold">SLA Auto-Response</h6>
+              <small className="text-muted">
+                When a ticket breaches its first-response SLA and no agent has replied, the bot
+                sends this message to the visitor and marks the ticket <strong>Auto Responsed</strong>.
+              </small>
+            </div>
+            <Form.Check
+              type="switch"
+              label="Enabled"
+              checked={autoResp.enabled}
+              onChange={e => setAutoResp({ ...autoResp, enabled: e.target.checked })}
+            />
+          </div>
+          <Form.Group>
+            <Form.Control
+              as="textarea"
+              rows={3}
+              value={autoResp.message}
+              placeholder="Thanks for your patience! Our team is busy right now, but your request has been logged and an agent will follow up shortly."
+              disabled={!autoResp.enabled}
+              onChange={e => setAutoResp({ ...autoResp, message: e.target.value })}
+            />
+            <small className="text-muted">Leave blank to use the default message.</small>
+          </Form.Group>
+          <div className="d-flex justify-content-end mt-2">
+            {canEdit && (
+              <Button size="sm" className="primaryBtn" onClick={saveAutoResp} disabled={autoSaving}>
+                {autoSaving ? <Spinner size="sm" /> : "Save Auto-Response"}
+              </Button>
+            )}
+          </div>
+        </Card.Body>
+      </Card>
 
       <div className="d-flex justify-content-between align-items-center mb-3">
         <div>

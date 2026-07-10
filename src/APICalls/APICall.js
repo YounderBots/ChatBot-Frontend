@@ -38,7 +38,7 @@ const fetchWithTimeout = (url, options = {}) => {
 
 let refreshPromise = null;
 
-const refreshAccessToken = async () => {
+export const refreshAccessToken = async () => {
     if (!getRefreshToken()) return false;
     if (!refreshPromise) {
         refreshPromise = (async () => {

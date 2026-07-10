@@ -1,0 +1,87 @@
+/* Styling for the intent response TipTap editor. Without these rules an
+   inserted table has no borders and renders invisible on the white editor. */
+
+.tiptap-editor {
+  min-height: 120px;
+  max-height: 320px;
+  overflow-y: auto;
+  outline: none;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #1f2937;
+}
+
+.tiptap-editor:focus-within {
+  outline: none;
+}
+
+.tiptap-editor .ProseMirror {
+  outline: none;
+  min-height: 100px;
+}
+
+.tiptap-editor .ProseMirror > *:first-child { margin-top: 0; }
+.tiptap-editor p { margin: 0 0 0.5rem; }
+.tiptap-editor h2 { font-size: 1.25rem; font-weight: 700; margin: 0.6rem 0 0.4rem; }
+.tiptap-editor h3 { font-size: 1.1rem;  font-weight: 700; margin: 0.6rem 0 0.4rem; }
+.tiptap-editor h4 { font-size: 1rem;    font-weight: 700; margin: 0.6rem 0 0.4rem; }
+.tiptap-editor ul,
+.tiptap-editor ol { padding-left: 1.4rem; margin: 0 0 0.5rem; }
+.tiptap-editor blockquote {
+  border-left: 3px solid #cbd5e1;
+  padding-left: 0.75rem;
+  color: #475569;
+  margin: 0 0 0.5rem;
+}
+.tiptap-editor a { color: #6366f1; text-decoration: underline; }
+.tiptap-editor img { max-width: 100%; height: auto; border-radius: 6px; }
+
+/* ── Tables ── */
+.tiptap-editor table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  margin: 0.5rem 0;
+  overflow: hidden;
+}
+.tiptap-editor table td,
+.tiptap-editor table th {
+  border: 1px solid #cbd5e1;
+  padding: 6px 8px;
+  vertical-align: top;
+  min-width: 1em;
+  position: relative;
+}
+.tiptap-editor table th {
+  background: #f1f5f9;
+  font-weight: 600;
+  text-align: left;
+}
+/* Selected cells while editing */
+.tiptap-editor table .selectedCell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(99, 102, 241, 0.12);
+  pointer-events: none;
+}
+/* Column-resize handle from Table.configure({ resizable: true }) */
+.tiptap-editor table .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #6366f1;
+  pointer-events: none;
+}
+.tiptap-editor .tableWrapper { overflow-x: auto; }
+
+/* Placeholder when empty */
+.tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: #9ca3af;
+  float: left;
+  height: 0;
+  pointer-events: none;
+}

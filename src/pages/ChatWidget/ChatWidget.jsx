@@ -9,7 +9,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import './ChatWidget.css';
 
-import APICall from '../../APICalls/APICall';
+import APICall, { refreshAccessToken } from '../../APICalls/APICall';
 import MessageBubble from './components/MessageBubble';
 import TypingIndicator from './components/TypingIndicator';
 
@@ -50,8 +50,14 @@ const ChatWidget = ({
     const reconnectAttemptsRef = useRef(0);
     const isMountedRef = useRef(true);
     const loadingTimeoutRef = useRef(null);
+    const heartbeatRef = useRef(null);
+    const lastActivityRef = useRef(0);
     const MAX_RECONNECT_ATTEMPTS = 8;
     const BASE_RECONNECT_DELAY_MS = 1000;
+    // Heartbeat: ping the server periodically so proxies don't idle-kill the
+    // socket, and so a half-open (dead) connection is detected and reconnected.
+    const HEARTBEAT_MS = 25000;
+    const HEARTBEAT_TIMEOUT_MS = 60000;
 
     const addMessage = (msg) => {
         setMessages(prev => [
@@ -217,9 +223,33 @@ const ChatWidget = ({
 
         reconnectAttemptsRef.current = 0;
 
+        const stopHeartbeat = () => {
+            if (heartbeatRef.current) {
+                clearInterval(heartbeatRef.current);
+                heartbeatRef.current = null;
+            }
+        };
+
+        const startHeartbeat = (socket) => {
+            stopHeartbeat();
+            lastActivityRef.current = Date.now();
+            heartbeatRef.current = setInterval(() => {
+                if (socket.readyState !== WebSocket.OPEN) return;
+                // If we haven't heard anything back within the timeout, the
+                // connection is half-open — force-close it so onclose reconnects.
+                if (Date.now() - lastActivityRef.current > HEARTBEAT_TIMEOUT_MS) {
+                    stopHeartbeat();
+                    socket.close();
+                    return;
+                }
+                socket.send(JSON.stringify({ type: "PING" }));
+            }, HEARTBEAT_MS);
+        };
+
         const connect = () => {
             if (!isMountedRef.current) return;
 
+            stopHeartbeat();
             if (socketRef.current) {
                 socketRef.current.close();
                 socketRef.current = null;
@@ -235,6 +265,7 @@ const ChatWidget = ({
                 reconnectAttemptsRef.current = 0;
                 const token = sessionStorage.getItem("token");
                 socket.send(JSON.stringify({ type: "AUTH", token }));
+                startHeartbeat(socket);
                 setTimeout(() => {
                     if (socket.readyState === WebSocket.OPEN) {
                         socket.send(JSON.stringify({
@@ -246,7 +277,11 @@ const ChatWidget = ({
             };
 
             socket.onmessage = (event) => {
+                // Any inbound frame proves the link is alive (heartbeat liveness).
+                lastActivityRef.current = Date.now();
                 const data = JSON.parse(event.data);
+
+                if (data.type === "PONG") return;
 
                 if (data.error) {
                     console.error("Agent WS auth error:", data.error);
@@ -316,12 +351,24 @@ const ChatWidget = ({
             };
 
             socket.onclose = (event) => {
+                stopHeartbeat();
                 if (!isMountedRef.current) return;
 
+                // 1008 = auth rejected. Most often the short-lived access token
+                // expired during the outage — try a silent refresh and reconnect
+                // once before giving up, so a long drop doesn't log the agent out.
                 if (event.code === 1008) {
-                    setWsError("Session expired. Please log in again.");
-                    clearTimeout(loadingTimeoutRef.current);
-                    setLoadingHistory(false);
+                    refreshAccessToken().then((ok) => {
+                        if (!isMountedRef.current) return;
+                        if (ok) {
+                            reconnectAttemptsRef.current = 0;
+                            reconnectTimerRef.current = setTimeout(connect, 500);
+                        } else {
+                            setWsError("Session expired. Please log in again.");
+                            clearTimeout(loadingTimeoutRef.current);
+                            setLoadingHistory(false);
+                        }
+                    });
                     return;
                 }
 
@@ -348,6 +395,10 @@ const ChatWidget = ({
             isMountedRef.current = false;
             clearTimeout(reconnectTimerRef.current);
             clearTimeout(loadingTimeoutRef.current);
+            if (heartbeatRef.current) {
+                clearInterval(heartbeatRef.current);
+                heartbeatRef.current = null;
+            }
             if (socketRef.current) {
                 socketRef.current.onclose = null;
                 socketRef.current.close();

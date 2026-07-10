@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ManagementAPI from "./managementAPI";
+import OrgSelect from "./OrgSelect";
 import { Alert, PageHeader, Modal, TextField, SelectField, CheckboxField, RowActions } from "./crudkit";
 
 const CHANNEL_TYPES = ["", "whatsapp", "facebook", "slack", "sms", "email", "web"];
@@ -148,7 +149,7 @@ export default function PlatformChannels() {
                 >
                     {modal === "create" ? (
                         <>
-                            <TextField label="Organization ID *" type="number" value={form.organization_id} onChange={v => setF("organization_id", v)} placeholder="e.g. 2" />
+                            <OrgSelect value={form.organization_id} onChange={v => setF("organization_id", v)} />
                             <SelectField label="Channel Type *" value={form.channel_type} onChange={v => setF("channel_type", v)} options={CREATE_CHANNEL_TYPES} />
                         </>
                     ) : (

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Edit2, Trash2, Copy } from "lucide-react";
+import { Check, Edit2, Trash2, Copy } from "lucide-react";
 
 const ITEMS_PER_PAGE = 12;
 
-const IntentGrid = ({ intents, selectedIds, onToggleOne, onEdit, onDelete, onDuplicate }) => {
+const IntentGrid = ({ intents, selectedIds, onToggleOne, onEdit, onDelete, onDuplicate, onApprove, canEdit = true }) => {
     const [currentPage, setCurrentPage] = useState(1);
 
     const totalPages = Math.ceil(intents.length / ITEMS_PER_PAGE);
@@ -61,6 +61,14 @@ const IntentGrid = ({ intents, selectedIds, onToggleOne, onEdit, onDelete, onDup
                                     >
                                         {intent.status}
                                     </span>
+                                    {intent.approval_status && intent.approval_status !== "APPROVED" && (
+                                        <span
+                                            className="badge bg-warning text-dark"
+                                            title="Not yet included in training — approve to add it to the model"
+                                        >
+                                            Pending
+                                        </span>
+                                    )}
                                     <input
                                         type="checkbox"
                                         className="form-check-input"
@@ -122,6 +130,15 @@ const IntentGrid = ({ intents, selectedIds, onToggleOne, onEdit, onDelete, onDup
                                 </div>
 
                                 <div className="d-flex gap-5 mt-auto">
+                                    {canEdit && onApprove && intent.approval_status && intent.approval_status !== "APPROVED" && (
+                                        <Check
+                                            size={16}
+                                            className="cursorPointer text-success"
+                                            aria-label="Approve intent"
+                                            title="Approve this intent so it's included in the next training run"
+                                            onClick={() => onApprove(intent)}
+                                        />
+                                    )}
                                     <Edit2
                                         size={16}
                                         className="cursorPointer"

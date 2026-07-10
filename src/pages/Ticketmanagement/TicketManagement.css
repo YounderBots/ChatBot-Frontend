@@ -144,6 +144,7 @@
 .tm-badge-closed   { background: #f3f4f6; color: #6b7280; }
 .tm-badge-inprogress { background: #fef9c3; color: #a16207; }
 .tm-badge-reopened { background: #ffedd5; color: #c2410c; }
+.tm-badge-auto     { background: #ede9fe; color: #6d28d9; }
 
 .tm-priority-urgent { background: #fee2e2; color: #b91c1c; }
 .tm-priority-high   { background: #ffedd5; color: #c2410c; }

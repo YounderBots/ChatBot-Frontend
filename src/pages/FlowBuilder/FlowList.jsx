@@ -35,6 +35,20 @@ const FlowList = ({ onEdit, onCreateNew }) => {
 
   useEffect(() => { load(); }, [load]);
 
+  // The list endpoint (/flows) returns summaries WITHOUT flow_data, so opening
+  // the editor with a row object would drop the graph and show the default
+  // start/end scaffold. Fetch the full flow (GET /flows/{id} includes flow_data)
+  // before handing it to the editor.
+  const handleEdit = async (f) => {
+    try {
+      const full = await APICall.getT(`/flows/${f.id}`);
+      onEdit(full && full.id ? full : f);
+    } catch {
+      showToast("Couldn't load the flow's canvas — opening summary only.", "warning");
+      onEdit(f);
+    }
+  };
+
   const handlePublish = async (id) => {
     try {
       await APICall.postT(`/flows/${id}/publish`, {});
@@ -158,7 +172,7 @@ const FlowList = ({ onEdit, onCreateNew }) => {
                 </td>
                 <td>
                   <div className="d-flex gap-2">
-                    <Button size="sm" variant="outline-primary" onClick={() => onEdit(f)}>Edit</Button>
+                    <Button size="sm" variant="outline-primary" onClick={() => handleEdit(f)}>Edit</Button>
                     {f.status === "PUBLISHED" ? (
                       <Button size="sm" variant="outline-warning" onClick={() => handleUnpublish(f.id)}>
                         Unpublish

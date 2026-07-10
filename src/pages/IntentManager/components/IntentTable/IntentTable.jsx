@@ -1,4 +1,4 @@
-import { Copy, Edit2, Trash2 } from "lucide-react"
+import { Check, Copy, Edit2, Trash2 } from "lucide-react"
 import { useEffect, useMemo, useState } from 'react'
 
 const ITEMS_PER_PAGE = 10
@@ -12,6 +12,7 @@ const IntentTable = ({
   onEdit,
   onDelete,
   onDuplicate,
+  onApprove,
   canEdit = true,
   canDelete = true,
 }) => {
@@ -130,7 +131,14 @@ const IntentTable = ({
                   >
                     {intent.status}
                   </span>
-
+                  {intent.approval_status && intent.approval_status !== "APPROVED" && (
+                    <span
+                      className="badge bg-warning text-dark d-block mt-1"
+                      title="Not yet included in training — approve to add it to the model"
+                    >
+                      Pending approval
+                    </span>
+                  )}
                 </td>
 
                 <td className="col-lastModified">
@@ -139,6 +147,15 @@ const IntentTable = ({
 
                 <td className="text-end">
                   <div className="d-flex gap-3 justify-content-end">
+                    {canEdit && onApprove && intent.approval_status && intent.approval_status !== "APPROVED" && (
+                      <Check
+                        size={16}
+                        className="cursorPointer text-success"
+                        aria-label="Approve intent"
+                        title="Approve this intent so it's included in the next training run"
+                        onClick={() => onApprove(intent)}
+                      />
+                    )}
                     {canEdit && (
                       <Edit2
                         size={16}

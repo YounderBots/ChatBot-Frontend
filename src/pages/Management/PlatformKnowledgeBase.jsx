@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ManagementAPI from "./managementAPI";
+import OrgSelect from "./OrgSelect";
 import { Alert, PageHeader, Modal, TextField, TextArea, SelectField, CheckboxField, RowActions } from "./crudkit";
 
 const ARTICLE_STATUS_OPTIONS = ["", "PUBLISHED", "DRAFT", "ARCHIVED"];
@@ -157,7 +158,7 @@ export default function PlatformKnowledgeBase() {
                     error={formError} saveLabel={modal === "create" ? "Create Article" : "Save Changes"}
                 >
                     {modal === "create" && (
-                        <TextField label="Organization ID *" type="number" value={form.organization_id} onChange={v => setF("organization_id", v)} placeholder="e.g. 2" />
+                        <OrgSelect value={form.organization_id} onChange={v => setF("organization_id", v)} />
                     )}
                     <TextField label="Title *" value={form.title} onChange={v => setF("title", v)} placeholder="Article title" />
                     <TextField label="URL slug" value={form.url} onChange={v => setF("url", v)} placeholder="how-to-reset-password" />

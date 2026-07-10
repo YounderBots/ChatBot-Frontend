@@ -26,7 +26,7 @@ const IntentContainer = () => {
   const [intentMode, setIntentMode] = useState("add");
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("All")
-  const [sortBy, setSortBy] = useState("Name")
+  const [sortBy, setSortBy] = useState("Newest")
   const { canAdd, canEdit, canDelete } = usePermission('/Intents');
   const { showToast, ToastContainer } = useToast();
 
@@ -35,8 +35,22 @@ const IntentContainer = () => {
   const fetchIntents = async () => {
     try {
       const res = await APICall.getT("/intents/intents")
-      setIntents(res || [])
+      let list = res || []
 
+      // Merge real 30-day usage counts from analytics (grouped by
+      // Conversation.intent_detected). Best-effort — if the caller lacks
+      // analytics permission or the service is down, usage stays 0.
+      try {
+        const usage = await APICall.getT("/analytics/intents?range=30&limit=50")
+        if (Array.isArray(usage) && usage.length) {
+          const byName = new Map(usage.map(u => [u.name, u.value]))
+          list = list.map(i => ({ ...i, usage: byName.get(i.intent_name) ?? 0 }))
+        }
+      } catch (_) {
+        /* usage is optional; leave as-is */
+      }
+
+      setIntents(list)
     } catch (err) {
       showToast(err.message || "Failed to load intents.", "danger")
     } finally {
@@ -91,6 +105,36 @@ const IntentContainer = () => {
     setShowDeleteModal(false)
     setIntentToDelete(null)
   }
+
+  /* ------------------ Approval ------------------ */
+  // New/edited intents default to approval_status=PENDING and are excluded from
+  // model training (the NLP export only ships APPROVED intents). Approving flips
+  // them to APPROVED so the next domain retrain picks them up.
+
+  const handleApprove = async (intent) => {
+    if (!intent?.id) return
+    try {
+      await APICall.postT(`/intents/${intent.id}/approve`, {})
+      showToast(`Approved "${intent.intent_name}". Retrain the domain to include it in the model.`, "success")
+      fetchIntents()
+    } catch (err) {
+      showToast(err.message || "Failed to approve intent.", "danger")
+    }
+  }
+
+  const handleApproveAll = async () => {
+    try {
+      const res = await APICall.postT("/intents/approve-all", {})
+      showToast(res?.message || "Pending intents approved. Retrain to apply.", "success")
+      fetchIntents()
+    } catch (err) {
+      showToast(err.message || "Failed to approve intents.", "danger")
+    }
+  }
+
+  const pendingCount = intents.filter(
+    i => i.approval_status && i.approval_status !== "APPROVED" && i.status !== "DELETED"
+  ).length
 
   // UI-only duplicate
   const handleDuplicate = (intent) => {
@@ -211,9 +255,10 @@ const IntentContainer = () => {
     })
     .sort((a, b) => {
       if (sortBy === "Name")  return (a.name || "").localeCompare(b.name || "");
-      if (sortBy === "Usage") return (b.uses || 0) - (a.uses || 0);
-      if (sortBy === "Date")  return new Date(b.created_at || 0) - new Date(a.created_at || 0);
-      return 0;
+      if (sortBy === "Usage") return (b.usage || 0) - (a.usage || 0);
+      // Newest first: prefer created_at, fall back to id (higher id = later).
+      return (new Date(b.created_at || 0) - new Date(a.created_at || 0))
+        || ((b.id || 0) - (a.id || 0));
     });
 
   /* ------------------ UI ------------------ */
@@ -273,9 +318,9 @@ const IntentContainer = () => {
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
             >
+              <option value="Newest">Sort by Newest</option>
               <option value="Name">Sort by Name</option>
               <option value="Usage">Sort by Usage</option>
-              <option value="Date">Sort by Date</option>
             </select>
           </div>
 
@@ -394,6 +439,17 @@ const IntentContainer = () => {
             />
           </label>
 
+          {/* Approve all (visible only when intents await approval) */}
+          {canEdit && pendingCount > 0 && (
+            <button
+              className="btn btn-sm btn-warning d-inline-flex align-items-center fw-semibold"
+              onClick={handleApproveAll}
+              title="Approve all pending intents so they get included in the next training run"
+            >
+              <i className="bi bi-check2-all me-1"></i> Approve all ({pendingCount})
+            </button>
+          )}
+
           {/* Add Button */}
           {canAdd && (
             <button
@@ -417,6 +473,7 @@ const IntentContainer = () => {
             onEdit={handleEdit}
             onDuplicate={handleDuplicate}
             onDelete={handleDelete}
+            onApprove={handleApprove}
             canEdit={canEdit}
             canDelete={canDelete}
           />
@@ -428,6 +485,7 @@ const IntentContainer = () => {
             onEdit={handleEdit}
             onDuplicate={handleDuplicate}
             onDelete={handleDelete}
+            onApprove={handleApprove}
             canEdit={canEdit}
             canDelete={canDelete}
           />
@@ -470,6 +528,7 @@ const IntentContainer = () => {
       <IntentModal
         isOpen={isModalOpen}
         intent={selectedIntent}
+        intents={intents}
         mode={intentMode}
         onClose={() => setIsModalOpen(false)}
         fetchIntents={fetchIntents}

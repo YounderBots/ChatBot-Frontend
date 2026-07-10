@@ -19,6 +19,9 @@ function OrgDetailsTab() {
   const [form,    setForm]    = useState({
     name: '', website: '', industry: '', timezone: 'UTC',
   });
+  // Chat-widget appearance (shared with the Settings → Appearance tab).
+  const [appearance, setAppearance] = useState({ primaryColor: '#6366f1', position: 'bottom-right' });
+  const [appSaving,  setAppSaving]  = useState(false);
 
   const INDUSTRIES = [
     'Technology', 'Finance', 'Healthcare', 'Education', 'E-Commerce',
@@ -47,7 +50,33 @@ function OrgDetailsTab() {
         setLoading(false);
       }
     })();
+    (async () => {
+      try {
+        const a = await APICall.getT('/settings/appearance');
+        if (a && typeof a === 'object') {
+          setAppearance(p => ({
+            primaryColor: a.primaryColor || p.primaryColor,
+            position:     a.position     || p.position,
+          }));
+        }
+      } catch { /* keep defaults */ }
+    })();
   }, []);
+
+  const saveAppearance = async () => {
+    setAppSaving(true);
+    setAlert(null);
+    try {
+      // Merge so we don't clobber the richer fields the Appearance tab manages.
+      const current = await APICall.getT('/settings/appearance').catch(() => ({}));
+      await APICall.postT('/settings/appearance', { ...(current || {}), ...appearance });
+      setAlert({ variant: 'success', msg: 'Widget appearance saved.' });
+    } catch (e) {
+      setAlert({ variant: 'danger', msg: e.message });
+    } finally {
+      setAppSaving(false);
+    }
+  };
 
   const save = async () => {
     setSaving(true);
@@ -127,172 +156,45 @@ function OrgDetailsTab() {
           {saving ? <><Spinner size="sm" className="me-2" />Saving…</> : 'Save Changes'}
         </Button>
       </div>
+
+      {/* Chat widget appearance — quick controls (full set lives in Settings → Appearance) */}
+      <Card className="mt-4 border-0 shadow-sm">
+        <Card.Body>
+          <h6 className="fw-bold mb-1">Chat Widget Appearance</h6>
+          <small className="text-muted d-block mb-3">
+            Theme the embeddable chat widget. The full set of options lives in Settings → Appearance.
+          </small>
+          <Row className="g-3 align-items-end">
+            <Col md={4}>
+              <Form.Group>
+                <Form.Label className="fw-semibold small">Primary Color</Form.Label>
+                <Form.Control type="color" value={appearance.primaryColor}
+                  onChange={e => setAppearance(p => ({ ...p, primaryColor: e.target.value }))}
+                  title="Widget accent color" />
+              </Form.Group>
+            </Col>
+            <Col md={4}>
+              <Form.Group>
+                <Form.Label className="fw-semibold small">Launcher Position</Form.Label>
+                <Form.Select value={appearance.position}
+                  onChange={e => setAppearance(p => ({ ...p, position: e.target.value }))}>
+                  <option value="bottom-right">Bottom Right</option>
+                  <option value="bottom-left">Bottom Left</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col md={4} className="d-flex justify-content-end">
+              <Button className="primaryBtn" onClick={saveAppearance} disabled={appSaving}>
+                {appSaving ? <><Spinner size="sm" className="me-2" />Saving…</> : 'Save Appearance'}
+              </Button>
+            </Col>
+          </Row>
+        </Card.Body>
+      </Card>
     </div>
   );
 }
 
-/* ═══════════════════════════════════════════
-   TAB 2 — Team Members
-═══════════════════════════════════════════ */
-function MembersTab() {
-  const [members,  setMembers]  = useState([]);
-  const [loading,  setLoading]  = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [inviting, setInviting] = useState(false);
-  const [alert,    setAlert]    = useState(null);
-  const [invite,   setInvite]   = useState({ email: '', fullname: '', org_role: 'member' });
-  const { showToast, ToastContainer } = useToast();
-  const { confirm, ConfirmDialog } = useConfirm();
-
-  const fetchMembers = async () => {
-    setLoading(true);
-    try {
-      const data = await APICall.getT(`/org/members`);
-      setMembers(data.members || []);
-    } catch (e) {
-      showToast(e.message || 'Failed to load members.', 'danger');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { fetchMembers(); }, []);
-
-  const sendInvite = async () => {
-    if (!invite.email || !invite.fullname) return;
-    setInviting(true);
-    setAlert(null);
-    try {
-      await APICall.postT(`/org/members/invite`, invite);
-      setAlert({ variant: 'success', msg: `Invitation sent to ${invite.email}` });
-      setShowModal(false);
-      setInvite({ email: '', fullname: '', org_role: 'member' });
-      fetchMembers();
-    } catch (e) {
-      setAlert({ variant: 'danger', msg: e.message });
-    } finally {
-      setInviting(false);
-    }
-  };
-
-  const removeMember = async (uid) => {
-    if (!await confirm('Remove this member from your organization?', { confirmLabel: 'Remove', variant: 'danger' })) return;
-    try {
-      await APICall.postT(`/org/members/${uid}/remove`, {});
-      fetchMembers();
-      showToast('Member removed.', 'success');
-    } catch (e) {
-      showToast(e.message || 'Failed to remove member.', 'danger');
-    }
-  };
-
-  const roleVariant = { owner: 'primary', admin: 'info', member: 'secondary' };
-
-  return (
-    <div className="p-3">
-      <ToastContainer /><ConfirmDialog />
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <div>
-          <h6 className="mb-0 fw-bold">Team Members</h6>
-          <small className="text-muted">Manage who has access to this workspace</small>
-        </div>
-        <Button className="primaryBtn" size="sm" onClick={() => setShowModal(true)}>
-          <UserPlus size={14} className="me-1" /> Invite Member
-        </Button>
-      </div>
-
-      {alert && <Alert variant={alert.variant} dismissible onClose={() => setAlert(null)} className="py-2 px-3 mb-3">{alert.msg}</Alert>}
-
-      {loading ? (
-        <div className="d-flex justify-content-center py-4"><Spinner animation="border" variant="primary" /></div>
-      ) : (
-        <Table hover responsive className="align-middle mb-0">
-          <thead className="table-light">
-            <tr>
-              <th>Member</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th className="text-end">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {members.length === 0 && (
-              <tr><td colSpan={5} className="text-center text-muted py-4">No members found</td></tr>
-            )}
-            {members.map(m => (
-              <tr key={m.user_id}>
-                <td>
-                  <div className="d-flex align-items-center gap-2">
-                    <div className="rounded-circle bg-primary text-white d-flex align-items-center
-                      justify-content-center fw-bold" style={{ width: 34, height: 34, fontSize: 14 }}>
-                      {m.fullname?.charAt(0)?.toUpperCase()}
-                    </div>
-                    <span className="fw-semibold">{m.fullname}</span>
-                  </div>
-                </td>
-                <td className="text-muted small">{m.email}</td>
-                <td>
-                  <Badge bg={roleVariant[m.org_role] || 'secondary'} className="d-inline-flex align-items-center gap-1">
-                    {m.org_role === 'owner' && <Crown size={10} />}
-                    {m.org_role}
-                  </Badge>
-                </td>
-                <td>
-                  <Badge bg={m.status === 'ACTIVE' ? 'success' : 'warning'} className="text-capitalize">
-                    {m.status?.toLowerCase()}
-                  </Badge>
-                </td>
-                <td className="text-end">
-                  {m.org_role !== 'owner' && (
-                    <Button variant="outline-danger" size="sm" onClick={() => removeMember(m.user_id)}>
-                      <Trash2 size={13} />
-                    </Button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      )}
-
-      {/* Invite Modal */}
-      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title className="fs-6 fw-bold">Invite Team Member</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form.Group className="mb-3">
-            <Form.Label className="fw-semibold small">Full Name *</Form.Label>
-            <Form.Control placeholder="Jane Smith"
-              value={invite.fullname}
-              onChange={e => setInvite(p => ({ ...p, fullname: e.target.value }))} />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label className="fw-semibold small">Email Address *</Form.Label>
-            <Form.Control type="email" placeholder="jane@company.com"
-              value={invite.email}
-              onChange={e => setInvite(p => ({ ...p, email: e.target.value }))} />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label className="fw-semibold small">Role</Form.Label>
-            <Form.Select value={invite.org_role}
-              onChange={e => setInvite(p => ({ ...p, org_role: e.target.value }))}>
-              <option value="member">Member</option>
-              <option value="admin">Admin</option>
-            </Form.Select>
-          </Form.Group>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" size="sm" onClick={() => setShowModal(false)}>Cancel</Button>
-          <Button className="primaryBtn" size="sm" onClick={sendInvite} disabled={inviting}>
-            {inviting ? <><Spinner size="sm" className="me-1" />Inviting…</> : 'Send Invite'}
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </div>
-  );
-}
 
 /* ═══════════════════════════════════════════
    MAIN PAGE
@@ -302,10 +204,9 @@ export default function Organization() {
     <TabComponent
       pageContent={{
         title:    'Organization',
-        subTitle: 'Manage your workspace and team',
+        subTitle: 'Manage your workspace',
         tabs: [
           { tabTitle: 'Details',  tabKey: 'details',  tabContent: <OrgDetailsTab /> },
-          { tabTitle: 'Members',  tabKey: 'members',  tabContent: <MembersTab /> },
         ],
       }}
     />

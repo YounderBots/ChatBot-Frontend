@@ -1,7 +1,7 @@
 import {
     BarChart3, ChevronLeft, ChevronRight, ChevronsLeft,
     CreditCard, Cpu, Database, FileText, Globe,
-    LayoutDashboard, LogOut, Search, Shield, UserCog, Users,
+    LayoutDashboard, LogOut, Search, Shield, UserCog, Users, Workflow,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -23,6 +23,7 @@ const NAV_SECTIONS = [
         items: [
             { label: "Intents",        path: "/management/intents",        icon: Cpu },
             { label: "Knowledge Base", path: "/management/knowledge-base", icon: Database },
+            { label: "Flow Builder",   path: "/management/flows",          icon: Workflow },
         ],
     },
     {

@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 const MIN_PHRASES = 10;
 const MAX_CHARS = 10000;
@@ -9,9 +9,10 @@ const TrainingPhrasesTab = ({ phrases, setPhrases }) => {
   const [newLanguage, setNewLanguage] = useState("en");
   const [error, setError] = useState("");
   const [dragIndex, setDragIndex] = useState(null);
+  const listRef = useRef(null);
 
   // console.log("phrases", phrases);
-  
+
 
   const handleAddPhrase = () => {
     if (!newPhrase.trim()) return;
@@ -36,6 +37,13 @@ const TrainingPhrasesTab = ({ phrases, setPhrases }) => {
 
     setNewPhrase("");
     setError("");
+
+    // Scroll the list to the newly added phrase. Without this the warning/info
+    // alerts push the list down and the just-added phrase stays below the fold.
+    requestAnimationFrame(() => {
+      const el = listRef.current;
+      if (el) el.scrollTop = el.scrollHeight;
+    });
   };
 
   const handleDelete = (id) => {
@@ -111,7 +119,7 @@ const TrainingPhrasesTab = ({ phrases, setPhrases }) => {
       )}
 
       {/* PHRASE LIST */}
-      <div className="flex-fill overflow-auto">
+      <div className="flex-fill overflow-auto" ref={listRef} style={{ minHeight: 0 }}>
         {phrases.map((phrase, index) => (
           <div
             key={phrase.id}

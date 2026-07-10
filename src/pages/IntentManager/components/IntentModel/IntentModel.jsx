@@ -67,7 +67,12 @@ const DEMO_INTENTS = [
   },
 ];
 
-const IntentModal = ({ isOpen, onClose, fetchIntents, intent, onSaveAndTest, mode }) => {
+const IntentModal = ({ isOpen, onClose, fetchIntents, intent, intents = [], onSaveAndTest, mode }) => {
+  // POSTBACK targets for the quick-reply Message Value dropdown: every intent
+  // except the one being edited (avoids a self-referential loop).
+  const intentOptions = (Array.isArray(intents) ? intents : [])
+    .filter(i => i.intent_name && i.id !== intent?.id)
+    .map(i => ({ value: i.intent_name, label: i.name || i.intent_name }));
 
 
   // console.log("Rendering IntentModal with intent:", intent);
@@ -113,12 +118,15 @@ const IntentModal = ({ isOpen, onClose, fetchIntents, intent, onSaveAndTest, mod
       contextsRequired: intent.context_requirement || [],
       contextsSet: intent.context_output || [],
 
-      fallback:
-        intent.fallback === "YES"
-          ? "clarify"
-          : intent.fallback === "ESCALATE"
-            ? "escalate"
-            : "generic",
+      // Stored fallback is one of clarify/escalate/generic (AdvancedTab option
+      // values). Pass it through, tolerating legacy uppercase codes.
+      fallback: (() => {
+        const f = String(intent.fallback || "").toLowerCase();
+        if (f === "clarify" || f === "yes") return "clarify";
+        if (f === "escalate") return "escalate";
+        if (f === "generic" || f === "no") return "generic";
+        return "clarify";
+      })(),
 
       threshold: Number(intent.confidence ?? 60),
 
@@ -128,19 +136,27 @@ const IntentModal = ({ isOpen, onClose, fetchIntents, intent, onSaveAndTest, mod
 
   const normalizeResponses = (responses = []) => {
     if (!Array.isArray(responses)) return [];
-    return responses.map((r, index) => ({
-      id: r.id || `${Date.now()}-${index}`,
-      content: r.response_text || "",          // ✅ editor
-      type: r.response_type || "text",          // ✅ dropdown
-      preview: false,
-      priority: r.priority || index + 1,
-      quickReplies: (r.quick_reply || []).map(qr => ({
+    return responses.map((r, index) => {
+      const quickReplies = (r.quick_reply || []).map(qr => ({
         id: qr.id || `${Math.random()}`,
         text: qr.button_text || "",
         value: qr.message_value || "",
         actionType: qr.action_type || "POSTBACK",
-      })),
-    }));
+      }));
+      // Auto-populate the type on edit. Only "text" and "quick" are valid now
+      // (buttons/card were removed): a response that has quick replies is a
+      // "quick" type; a stored "quick" stays quick; everything else is "text".
+      let type = "text";
+      if (quickReplies.length || r.response_type === "quick") type = "quick";
+      return {
+        id: r.id || `${Date.now()}-${index}`,
+        content: r.response_text || "",          // ✅ editor
+        type,                                     // ✅ dropdown auto-populated
+        preview: false,
+        priority: r.priority || index + 1,
+        quickReplies,
+      };
+    });
   };
 
 
@@ -160,6 +176,7 @@ const IntentModal = ({ isOpen, onClose, fetchIntents, intent, onSaveAndTest, mod
       intent_name: intent.intent_name || "",
       displayName: intent.name || intent.displayName || "",
       description: intent.description || "",
+      intent_type: intent.intent_domain || intent.intent_type || "",
       category: intent.category?.id || intent.category || "",
       priority: intent.priority || "Medium",
       status: intent.status || intent.response_status || "ACTIVE",
@@ -191,6 +208,22 @@ const IntentModal = ({ isOpen, onClose, fetchIntents, intent, onSaveAndTest, mod
   }, [intent, mode]);
 
 
+  // Keep the Quick tab's active selection valid. On edit, responses load with
+  // type "quick" already set, but activeQuickResponseId stays null (it was only
+  // set when the user manually flipped the type dropdown), so the Quick tab
+  // showed its empty "No Quick Reply Response Selected" state even though quick
+  // replies existed. Auto-select the first quick response whenever the current
+  // selection is missing or stale (e.g. after a response is deleted).
+  useEffect(() => {
+    const quickResponses = responses.filter(r => r.type === "quick");
+    if (!quickResponses.length) {
+      if (activeQuickResponseId !== null) setActiveQuickResponseId(null);
+      return;
+    }
+    const stillValid = quickResponses.some(r => r.id === activeQuickResponseId);
+    if (!stillValid) setActiveQuickResponseId(quickResponses[0].id);
+  }, [responses, activeQuickResponseId]);
+
 
   // ✅ SAFE early return AFTER hooks
   if (!isOpen) return null;
@@ -201,6 +234,12 @@ const IntentModal = ({ isOpen, onClose, fetchIntents, intent, onSaveAndTest, mod
       name: intentDraft.displayName,
       intent_name: intentDraft.intent_name,
       description: intentDraft.description,
+
+      // DOMAIN (required, NOT NULL) — captured by the "Intent Types" dropdown.
+      // Omitting this made every create fail with 500 (intent_domain cannot be null).
+      intent_domain: intentDraft.intent_type
+        ? Number(intentDraft.intent_type)
+        : null,
 
       // CATEGORY → integer
       category: intentDraft.category
@@ -226,17 +265,25 @@ const IntentModal = ({ isOpen, onClose, fetchIntents, intent, onSaveAndTest, mod
       })),
 
       // RESPONSES + QUICK REPLIES
-      responses: responses.map((res, index) => ({
-        response_text: res.response_text || res.content,
-        response_type: res.response_type || "text",
-        priority: index + 1,
-
-        quick_reply: (res.quick_reply || res.quickReplies || []).map(qr => ({
+      responses: responses.map((res, index) => {
+        const quick_reply = (res.quick_reply || res.quickReplies || []).map(qr => ({
           button_text: qr.text || qr.label,
           action_type: qr.action_type || qr.actionType || "POSTBACK",
           message_value: qr.message_value || qr.value
-        }))
-      }))
+        }));
+        // Persist the selected type (res.type from the dropdown). Only "text"
+        // and "quick" are valid; a response with quick replies is always quick.
+        let response_type = res.type || res.response_type || "text";
+        if (quick_reply.length) response_type = "quick";
+        if (!["text", "quick"].includes(response_type)) response_type = "text";
+        return {
+          response_text: res.response_text || res.content,
+          response_type,
+          response_format: "html",   // rich TipTap content (bold, tables, images…)
+          priority: index + 1,
+          quick_reply,
+        };
+      })
     };
   };
 
@@ -245,10 +292,17 @@ const IntentModal = ({ isOpen, onClose, fetchIntents, intent, onSaveAndTest, mod
   const handleSave = async () => {
     // ── Validation ──────────────────────────────────────────
     const errs = [];
-    if (!intentDraft.intent_name?.trim())
+    const nameVal = intentDraft.intent_name?.trim();
+    if (!nameVal)
       errs.push("Intent name (snake_case) is required.");
+    else if (!/^[a-z0-9_]+$/.test(nameVal))
+      errs.push("Intent name may only contain lowercase letters, numbers, and underscores.");
     if (!intentDraft.displayName?.trim())
       errs.push("Display name is required.");
+    if (!intentDraft.intent_type)
+      errs.push("Intent Type (domain) is required.");
+    if (!intentDraft.category)
+      errs.push("Category is required.");
     if (trainingPhrases.length === 0)
       errs.push("Add at least one training phrase.");
 
@@ -264,7 +318,7 @@ const IntentModal = ({ isOpen, onClose, fetchIntents, intent, onSaveAndTest, mod
     setSaving(true);
     try {
       if (intent?.id) {
-        await APICall.postT(`/intents/intents/${intent.id}`, payload);
+        await APICall.postT(`/intents/updateintent/${intent.id}`, payload);
       } else {
         await APICall.postT("/intents/intents", payload);
       }
@@ -405,6 +459,7 @@ const IntentModal = ({ isOpen, onClose, fetchIntents, intent, onSaveAndTest, mod
                   setResponses={setResponses}
                   activeResponseId={activeQuickResponseId}
                   onSelectQuickResponse={setActiveQuickResponseId} // ✅ needed
+                  intentOptions={intentOptions}
                 />
               )}
               {activeTab === "advanced" && (

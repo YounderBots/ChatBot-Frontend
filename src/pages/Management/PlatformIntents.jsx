@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ManagementAPI from "./managementAPI";
+import OrgSelect from "./OrgSelect";
 import { Alert, PageHeader, Modal, TextField, TextArea, SelectField, RowActions } from "./crudkit";
 
 const PRIORITY_OPTIONS = ["LOW", "MEDIUM", "HIGH"];
@@ -157,7 +158,7 @@ export default function PlatformIntents() {
                     error={formError} saveLabel={modal === "create" ? "Create Intent" : "Save Changes"}
                 >
                     {modal === "create" && (
-                        <TextField label="Organization ID *" type="number" value={form.organization_id} onChange={v => setF("organization_id", v)} placeholder="e.g. 2" />
+                        <OrgSelect value={form.organization_id} onChange={v => setF("organization_id", v)} />
                     )}
                     <TextField label="Intent Key *" value={form.intent_name} onChange={v => setF("intent_name", v)} placeholder="e.g. greeting_hello" />
                     <TextField label="Display Name" value={form.name} onChange={v => setF("name", v)} placeholder="Human-readable name" />

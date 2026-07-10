@@ -16,6 +16,7 @@ import AdminRolesPage from './pages/Management/AdminRolesPage'
 import PlatformAnalytics from './pages/Management/PlatformAnalytics'
 import PlatformBilling from './pages/Management/PlatformBilling'
 import PlatformChannels from './pages/Management/PlatformChannels'
+import PlatformFlows from './pages/Management/PlatformFlows'
 import PlatformIntents from './pages/Management/PlatformIntents'
 import PlatformKnowledgeBase from './pages/Management/PlatformKnowledgeBase'
 import PlatformUsers from './pages/Management/PlatformUsers'
@@ -112,6 +113,7 @@ const App = () => {
           <Route path="/management/users"        element={<PlatformUsers />} />
           <Route path="/management/billing"      element={<PlatformBilling />} />
           <Route path="/management/channels"     element={<PlatformChannels />} />
+          <Route path="/management/flows"        element={<PlatformFlows />} />
           <Route path="/management/audit-logs"   element={<AuditLogViewer />} />
           <Route path="/management/admins"       element={<AdminUsersPage />} />
           <Route path="/management/admin-roles"  element={<AdminRolesPage />} />

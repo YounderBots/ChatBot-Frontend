@@ -17,17 +17,19 @@ const BasicInfoTab = ({ intent, onChange }) => {
   };
 
   const validateName = (name) => {
+    // Always reflect what the user typed — previously the value was only written
+    // to state when it passed the regex, so typing anything invalid (e.g. an
+    // uppercase letter or space) silently did nothing and the field felt frozen.
+    update("intent_name", name);
+
     const regex = /^[a-z0-9_]+$/;
     if (!name) {
       setNameError("Intent name is required");
-      return;
-    }
-    if (!regex.test(name)) {
+    } else if (!regex.test(name)) {
       setNameError("Only lowercase letters, numbers, and underscores allowed");
-      return;
+    } else {
+      setNameError("");
     }
-    setNameError("");
-    update("intent_name", name);
   };
 
   /* ---------- Fetch categories ---------- */

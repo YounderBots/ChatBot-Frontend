@@ -6,6 +6,7 @@ const QuickRepliesTab = ({
   setResponses,
   activeResponseId,
   onSelectQuickResponse, // 🔹 OPTIONAL (safe)
+  intentOptions = [],    // [{ value: intent_name, label }] for POSTBACK targets
 }) => {
 
   // 🔹 NEW: all quick reply responses
@@ -39,7 +40,7 @@ const QuickRepliesTab = ({
       {
         id: Date.now() + "-" + Math.random().toString(36).slice(2),
         text: "",
-        actionType: "message",
+        actionType: "POSTBACK",
         value: "",
       },
     ]);
@@ -49,6 +50,23 @@ const QuickRepliesTab = ({
     updateButtons(
       buttons.map(btn =>
         btn.id === id ? { ...btn, [field]: value } : btn
+      )
+    );
+  };
+
+  // Changing the action type also adjusts the message value so it always stays
+  // valid: ESCALATE hard-codes the escalate_support sentinel; switching back to
+  // POSTBACK clears that sentinel so the user picks a real intent.
+  const updateActionType = (btn, nextType) => {
+    let nextValue = btn.value;
+    if (nextType === "ESCALATE") {
+      nextValue = "escalate_support";
+    } else if (btn.value === "escalate_support") {
+      nextValue = "";
+    }
+    updateButtons(
+      buttons.map(b =>
+        b.id === btn.id ? { ...b, actionType: nextType, value: nextValue } : b
       )
     );
   };
@@ -161,26 +179,56 @@ const QuickRepliesTab = ({
                     className="form-select"
                     value={btn.actionType}
                     onChange={(e) =>
-                      updateButton(btn.id, "actionType", e.target.value)
+                      updateActionType(btn, e.target.value)
                     }
                   >
-                    <option value="message">Send Message</option>
-                    <option value="url">Open URL</option>
+                    <option value="POSTBACK">Trigger intent (POSTBACK)</option>
+                    <option value="ESCALATE">Talk to an agent (ESCALATE)</option>
                   </select>
                 </div>
 
                 <div className="col-md-4">
-                  <label className="form-label">
-                    {btn.actionType === "url" ? "URL" : "Message Value"}
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={btn.value}
-                    onChange={(e) =>
-                      updateButton(btn.id, "value", e.target.value)
-                    }
-                  />
+                  <label className="form-label">Message Value</label>
+                  {btn.actionType === "ESCALATE" ? (
+                    <>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value="escalate_support"
+                        readOnly
+                        disabled
+                      />
+                      <small className="text-muted">
+                        Hands the conversation off to a human agent.
+                      </small>
+                    </>
+                  ) : (
+                    <>
+                      <select
+                        className="form-select"
+                        value={btn.value || ""}
+                        onChange={(e) =>
+                          updateButton(btn.id, "value", e.target.value)
+                        }
+                      >
+                        <option value="">— Select target intent —</option>
+                        {/* Preserve a value not in the current list (e.g. a
+                            renamed/deleted intent) so it still displays. */}
+                        {btn.value &&
+                          !intentOptions.some(o => o.value === btn.value) && (
+                            <option value={btn.value}>{btn.value} (unlisted)</option>
+                          )}
+                        {intentOptions.map(o => (
+                          <option key={o.value} value={o.value}>
+                            {o.label} ({o.value})
+                          </option>
+                        ))}
+                      </select>
+                      <small className="text-muted">
+                        The intent triggered when this button is clicked.
+                      </small>
+                    </>
+                  )}
                 </div>
               </div>
 

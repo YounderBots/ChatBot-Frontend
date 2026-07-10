@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ManagementAPI from "./managementAPI";
+import OrgSelect from "./OrgSelect";
 import { Alert, PageHeader, Modal, TextField, SelectField, RowActions } from "./crudkit";
 
 const STATUS_OPTIONS = ["ACTIVE", "INACTIVE"];
@@ -201,7 +202,7 @@ export default function PlatformUsers() {
                     error={formError} saveLabel={modal === "create" ? "Create User" : "Save Changes"}
                 >
                     {modal === "create" && (
-                        <TextField label="Organization ID *" type="number" value={form.organization_id} onChange={v => setF("organization_id", v)} placeholder="e.g. 2" />
+                        <OrgSelect value={form.organization_id} onChange={v => setF("organization_id", v)} />
                     )}
                     <TextField label="Full Name *" value={form.fullname} onChange={v => setF("fullname", v)} placeholder="Jane Doe" />
                     <TextField label="Email *" type="email" value={form.email} onChange={v => setF("email", v)} placeholder="jane@acme.com" />

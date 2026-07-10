@@ -1,4 +1,4 @@
-import { CheckCircle, Copy, Key, Mail, MessageCircle, MessageSquare, RefreshCw, Smartphone, Slack, Trash2, XCircle } from 'lucide-react';
+import { CheckCircle, Copy, Download, Key, Mail, MessageCircle, MessageSquare, RefreshCw, Smartphone, Slack, Trash2, XCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import {
   Alert, Badge, Button, Card, Col, Form, InputGroup,
@@ -317,7 +317,8 @@ function WidgetTab() {
   const [creating, setCreating]  = useState(false);
   const [alert,   setAlert]   = useState(null);
   const [newKey,  setNewKey]  = useState(null);
-  const [form,    setForm]    = useState({ key_name: 'Website Widget', allowed_origins: '*' });
+  const [domains, setDomains] = useState([]);
+  const [form,    setForm]    = useState({ key_name: 'Website Widget', allowed_origins: '*', intent_domain: '' });
 
   const fetchKeys = async () => {
     setLoading(true);
@@ -331,7 +332,18 @@ function WidgetTab() {
     }
   };
 
-  useEffect(() => { fetchKeys(); }, []);
+  // Intent domains populate the "Scope to domain" dropdown. A key bound to a
+  // domain opens sessions pre-scoped to it, so visitors skip the domain menu.
+  const fetchDomains = async () => {
+    try {
+      const data = await APICall.getT(`/intents/intent_domain`);
+      setDomains(Array.isArray(data) ? data : (data?.domains || []));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => { fetchKeys(); fetchDomains(); }, []);
 
   const createKey = async () => {
     setCreating(true);
@@ -340,11 +352,44 @@ function WidgetTab() {
       const data = await APICall.postT(`/widget/keys`, form);
       setNewKey(data);
       setShowModal(false);
+      setForm({ key_name: 'Website Widget', allowed_origins: '*', intent_domain: '' });
       fetchKeys();
     } catch (e) {
       setAlert({ variant: 'danger', msg: e.message });
     } finally {
       setCreating(false);
+    }
+  };
+
+  // Download a ready-to-use SDK starter file for this key. The widget's
+  // first-run setup lets a site owner (re)enter the key inside the widget too,
+  // so the key is not hard-required in the snippet.
+  const downloadSDK = async (k) => {
+    try {
+      const data = await APICall.getT(`/widget/keys/${k.id}`);
+      const snippet = data.embed_snippet || '';
+      const html =
+        '<!doctype html>\n<html lang="en">\n<head>\n  <meta charset="utf-8" />\n' +
+        '  <meta name="viewport" content="width=device-width, initial-scale=1" />\n' +
+        '  <title>ChatViq Chat Widget — ' + (k.key_name || 'Widget') + '</title>\n</head>\n<body>\n' +
+        '  <!--\n    ChatViq Chat Widget SDK\n    1. Host this file (or copy the <script> tag) on your website.\n' +
+        '    2. The widget key below activates chat for your organization.\n' +
+        '    3. To let end-users configure the key on first run instead, remove the\n' +
+        '       data-api-key attribute — the widget will prompt for it once and\n' +
+        '       remember it in the browser.\n  -->\n' +
+        '  ' + snippet + '\n</body>\n</html>\n';
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'chatviq-widget-' + String(k.key_name || 'widget').replace(/\s+/g, '-').toLowerCase() + '.html';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast('SDK downloaded.', 'success');
+    } catch (e) {
+      showToast(e.message || 'Failed to download SDK.', 'danger');
     }
   };
 
@@ -412,6 +457,7 @@ function WidgetTab() {
             <tr>
               <th>Name</th>
               <th>API Key</th>
+              <th>Domain</th>
               <th>Allowed Origins</th>
               <th>Last Used</th>
               <th className="text-end">Actions</th>
@@ -422,15 +468,19 @@ function WidgetTab() {
               <tr key={k.id}>
                 <td className="fw-semibold">{k.key_name}</td>
                 <td><code className="small">{k.api_key}</code></td>
+                <td className="small text-muted">{k.intent_domain || <span className="text-secondary">All</span>}</td>
                 <td className="small text-muted">{k.allowed_origins || '*'}</td>
                 <td className="small text-muted">
                   {k.last_used_at ? new Date(k.last_used_at).toLocaleDateString() : 'Never'}
                 </td>
                 <td className="text-end">
-                  <Button variant="outline-secondary" size="sm" className="me-1" onClick={() => rotateKey(k.id)}>
+                  <Button variant="outline-primary" size="sm" className="me-1" onClick={() => downloadSDK(k)} title="Download widget SDK">
+                    <Download size={13} />
+                  </Button>
+                  <Button variant="outline-secondary" size="sm" className="me-1" onClick={() => rotateKey(k.id)} title="Rotate key">
                     <RefreshCw size={13} />
                   </Button>
-                  <Button variant="outline-danger" size="sm" onClick={() => deleteKey(k.id)}>
+                  <Button variant="outline-danger" size="sm" onClick={() => deleteKey(k.id)} title="Delete key">
                     <Trash2 size={13} />
                   </Button>
                 </td>
@@ -452,6 +502,20 @@ function WidgetTab() {
             <Form.Control placeholder="e.g. Website Widget"
               value={form.key_name}
               onChange={e => setForm(p => ({ ...p, key_name: e.target.value }))} />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label className="fw-semibold small">Intent Domain</Form.Label>
+            <Form.Select
+              value={form.intent_domain}
+              onChange={e => setForm(p => ({ ...p, intent_domain: e.target.value }))}>
+              <option value="">All domains — let the visitor choose</option>
+              {domains.map(d => (
+                <option key={d.id ?? d.name} value={d.name}>{d.name}</option>
+              ))}
+            </Form.Select>
+            <Form.Text className="text-muted">
+              Pin this widget to one domain so visitors skip the “which area?” menu, or leave as All domains.
+            </Form.Text>
           </Form.Group>
           <Form.Group>
             <Form.Label className="fw-semibold small">Allowed Origins</Form.Label>

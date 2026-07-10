@@ -163,6 +163,14 @@ const ManagementAPI = {
         return fetchSA(`${baseURL}/management/channels?${q}`, { headers: saHeaders() }).then(handleResponse);
     },
 
+    listFlows: (params = {}) => {
+        const q = new URLSearchParams({ page: 1, limit: 20, ...params }).toString();
+        return fetchSA(`${baseURL}/management/flows?${q}`, { headers: saHeaders() }).then(handleResponse);
+    },
+
+    deleteFlow: (id) =>
+        fetchSA(`${baseURL}/management/flows/${id}`, { method: "DELETE", headers: saHeaders() }).then(handleResponse),
+
     // ── Platform CRUD (super-admin writes across tenants) ─────────────────────
     // CREATE takes an explicit organization_id in the body; UPDATE/DELETE by id.
 

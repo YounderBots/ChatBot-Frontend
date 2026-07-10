@@ -30,7 +30,7 @@ function SLABadge({ createdAt, priority }) {
 
 // ─── Status / priority helpers ─────────────────────────────────────────────────
 const statusClass = (s) => {
-    const m = { open: "tm-badge-open", assigned: "tm-badge-assigned", closed: "tm-badge-closed", "in progress": "tm-badge-inprogress", reopened: "tm-badge-reopened" };
+    const m = { open: "tm-badge-open", assigned: "tm-badge-assigned", closed: "tm-badge-closed", "in progress": "tm-badge-inprogress", reopened: "tm-badge-reopened", "auto responsed": "tm-badge-auto" };
     return m[(s || "").toLowerCase()] || "tm-badge-closed";
 };
 
@@ -278,6 +278,7 @@ const TicketManagementContent = () => {
                     <option>OPEN</option>
                     <option>ASSIGNED</option>
                     <option>REOPENED</option>
+                    <option value="Auto Responsed">AUTO RESPONSED</option>
                     <option>CLOSED</option>
                 </select>
 

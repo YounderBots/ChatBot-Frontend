@@ -1,18 +1,10 @@
 import DOMPurify from "dompurify";
-import { ChevronDown, ChevronUp, Link, PlusCircle, Trash2 } from "lucide-react";
-
-const VARIABLES = [
-  "{user_name}",
-  "{product_name}",
-  "{current_time}",
-  "{balance}",
-];
+import { ChevronDown, ChevronUp, PlusCircle, Trash2 } from "lucide-react";
+import RichResponseEditor from "./RichResponseEditor";
 
 const RESPONSE_TYPES = [
   { value: "text", label: "Text Only" },
   { value: "quick", label: "Quick Replies" },
-  { value: "buttons", label: "Buttons" },
-  { value: "card", label: "Card" },
 ];
 
 
@@ -105,14 +97,6 @@ const ResponsesTab = ({
     });
   };
 
-  const insertVariable = (variable) => {
-    document.execCommand("insertText", false, variable);
-  };
-
-  const formatText = (command, value = null) => {
-    document.execCommand(command, false, value);
-  };
-
   /* ---------- RENDER ---------- */
   return (
     <div className="d-flex gap-4">
@@ -160,46 +144,9 @@ const ResponsesTab = ({
               </div>
             </div>
 
-            {/* TOOLBAR */}
-            <div className="d-flex flex-wrap gap-2 mb-2">
-
-              <div className="btn-group btn-group-sm">
-                <button
-                  className="btn btn-light fw-bold"
-                  onMouseDown={e => e.preventDefault()}
-                  onClick={() => formatText("bold")}
-                >
-                  B
-                </button>
-                <button
-                  className="btn btn-light fst-italic"
-                  onMouseDown={e => e.preventDefault()}
-                  onClick={() => formatText("italic")}
-                >
-                  I
-                </button>
-                <button
-                  className="btn btn-light"
-                  onMouseDown={e => e.preventDefault()}
-                  onClick={() => {
-                    const url = prompt("Enter URL");
-                    if (url) formatText("createLink", url);
-                  }}
-                >
-                  <Link size={14} />
-                </button>
-              </div>
-
-              <select
-                className="form-select form-select-sm w-auto"
-                onChange={(e) => insertVariable(e.target.value)}
-              >
-                <option value="">Insert Variable</option>
-                {VARIABLES.map(v => (
-                  <option key={v} value={v}>{v}</option>
-                ))}
-              </select>
-
+            {/* TOOLBAR: response type + preview toggle (rich formatting lives
+                inside RichResponseEditor) */}
+            <div className="d-flex flex-wrap gap-2 mb-2 align-items-center">
               <select
                 className="form-select form-select-sm w-auto"
                 value={res.type}
@@ -240,14 +187,9 @@ const ResponsesTab = ({
 
             {/* EDITOR / PREVIEW */}
             {!res.preview ? (
-              <div
-                contentEditable
-                className="form-control mb-2"
-                style={{ minHeight: "90px" }}
-                suppressContentEditableWarning
-                onInput={(e) =>
-                  updateResponse(res.id, "content", e.currentTarget.innerHTML)
-                }
+              <RichResponseEditor
+                value={res.content}
+                onChange={(html) => updateResponse(res.id, "content", html)}
               />
             ) : (
               <div className="border rounded p-2 bg-light mb-2">
